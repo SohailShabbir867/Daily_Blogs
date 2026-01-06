@@ -1,0 +1,477 @@
+import BlogCard from "../components/BlogCard";
+import NewsletterSubscription from "../components/NewsletterSubscription";
+import { useBlog } from "../context/BlogContext";
+import { useState, useEffect } from "react";
+
+const Home = () => {
+  const { blogs, loading, error } = useBlog();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [openFaq, setOpenFaq] = useState(null);
+
+  // Typewriter effect state
+  const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
+  const [currentText, setCurrentText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    const typewriterPhrases = [
+      "Government Schemes",
+      "New Technologies",
+      "Earning Opportunities",
+      "Cybersecurity Articles",
+      "New Phones and Gadgets",
+      "Mobile Apps",
+      "University Admissions",
+      "Data Science",
+    ];
+
+    const currentPhrase = typewriterPhrases[currentPhraseIndex];
+    const typingSpeed = isDeleting ? 50 : 100;
+    const pauseTime = 2000;
+
+    const timeout = setTimeout(() => {
+      if (!isDeleting) {
+        // Typing
+        if (currentText.length < currentPhrase.length) {
+          setCurrentText(currentPhrase.slice(0, currentText.length + 1));
+        } else {
+          // Pause before deleting
+          setTimeout(() => setIsDeleting(true), pauseTime);
+        }
+      } else {
+        // Deleting
+        if (currentText.length > 0) {
+          setCurrentText(currentText.slice(0, -1));
+        } else {
+          setIsDeleting(false);
+          setCurrentPhraseIndex(
+            (prev) => (prev + 1) % typewriterPhrases.length
+          );
+        }
+      }
+    }, typingSpeed);
+
+    return () => clearTimeout(timeout);
+  }, [currentText, isDeleting, currentPhraseIndex]);
+
+  const faqs = [
+    {
+      question: "What is Daily Blogs?",
+      answer:
+        "Daily Blogs is a platform dedicated to sharing knowledge, insights, and stories about web development, programming, design, and technology. We publish high-quality articles to help developers learn and grow.",
+    },
+    {
+      question: "How often is new content published?",
+      answer:
+        "We publish new articles regularly, typically several times a week. Subscribe to our newsletter to get notified when new content is available.",
+    },
+    {
+      question: "Can I contribute to Daily Blogs?",
+      answer:
+        "Yes! We welcome guest contributors. If you're passionate about technology and want to share your knowledge, contact us through our Contact page to discuss collaboration opportunities.",
+    },
+    {
+      question: "Is the content free to read?",
+      answer:
+        "Most of our content is free and accessible to everyone. Some premium articles may require registration to access the full content.",
+    },
+    {
+      question: "How can I save articles for later?",
+      answer:
+        "Once you create an account and log in, you can save any article by clicking the bookmark icon. Access your saved articles anytime from your profile.",
+    },
+    {
+      question: "How do I subscribe to the newsletter?",
+      answer:
+        "Simply scroll down to the newsletter section on this page, enter your email address, and click subscribe. You'll receive updates about new articles and exclusive content.",
+    },
+  ];
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const categories = [
+    "All",
+    ...new Set(blogs.map((blog) => blog.category).filter(Boolean)),
+  ];
+
+  const filteredBlogs = blogs.filter((blog) => {
+    const matchesSearch =
+      blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      blog.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory =
+      selectedCategory === "All" || blog.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <section className="bg-linear-to-br from-emerald-800 via-teal-700 to-cyan-800 text-white py-20">
+          <div className="max-w-7xl mx-auto px-6 text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              Welcome to Daily Blogs
+            </h1>
+            <p className="text-xl text-emerald-100">Loading articles...</p>
+          </div>
+        </section>
+        <section className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 animate-pulse">
+                <div className="h-40 bg-gray-200 rounded-xl mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center px-6">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Failed to Load Articles
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-linear-to-r from-emerald-500 to-teal-500 text-white px-6 py-2 rounded-xl hover:from-emerald-600 hover:to-teal-600 transition"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-24 md:py-32">
+        {/* Animated Background Elements */}
+        <div className="absolute inset-0">
+          {/* Gradient Orbs */}
+          <div className="absolute -top-20 -left-20 w-96 h-96 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+          <div
+            className="absolute top-40 -right-20 w-72 h-72 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+            style={{ animationDelay: "1s" }}
+          />
+          <div
+            className="absolute -bottom-20 left-1/3 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"
+            style={{ animationDelay: "2s" }}
+          />
+
+          {/* Decorative Shapes */}
+          <div className="absolute top-20 left-[5%] w-20 h-20 border border-white/10 rounded-full" />
+          <div className="absolute top-40 right-[10%] w-32 h-32 border border-white/10 rounded-full" />
+          <div className="absolute bottom-20 left-[15%] w-16 h-16 border border-white/10 rotate-45" />
+
+          {/* Floating Dots */}
+          <div
+            className="absolute top-24 left-[15%] w-2 h-2 bg-emerald-300 rounded-full animate-bounce"
+            style={{ animationDuration: "3s" }}
+          />
+          <div
+            className="absolute top-48 left-[30%] w-1.5 h-1.5 bg-cyan-300 rounded-full animate-bounce"
+            style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}
+          />
+          <div
+            className="absolute top-36 right-[20%] w-2 h-2 bg-teal-300 rounded-full animate-bounce"
+            style={{ animationDuration: "3.5s", animationDelay: "1s" }}
+          />
+          <div
+            className="absolute bottom-40 left-[20%] w-1 h-1 bg-lime-300 rounded-full animate-bounce"
+            style={{ animationDuration: "2.8s", animationDelay: "1.5s" }}
+          />
+          <div
+            className="absolute bottom-28 right-[30%] w-1.5 h-1.5 bg-emerald-200 rounded-full animate-bounce"
+            style={{ animationDuration: "3.2s", animationDelay: "0.8s" }}
+          />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6">
+          <div className="text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2.5 mb-8 hover:bg-white/15 transition-colors">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-lime-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lime-400"></span>
+              </span>
+              <span className="text-sm font-medium text-emerald-100">
+                ✨ Fresh articles every week
+              </span>
+            </div>
+
+            {/* Main Heading */}
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
+              <span className="block text-white drop-shadow-lg">
+                Explore. Learn.
+              </span>
+              <span className="bg-linear-to-r from-lime-300 via-emerald-300 to-cyan-300 bg-clip-text text-transparent">
+                Grow Daily.
+              </span>
+            </h1>
+
+            {/* Typewriter Effect */}
+            <div className="h-12 md:h-14 mb-6 flex items-center justify-center">
+              <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-emerald-100">
+                Discover insights on{" "}
+                <span className="text-lime-300 font-bold">
+                  {currentText}
+                  <span className="animate-pulse">|</span>
+                </span>
+              </span>
+            </div>
+
+            {/* Description */}
+            <p className="text-lg md:text-xl text-emerald-100/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+              Your daily source for insightful articles on web development,
+              design trends, and cutting-edge technology.
+            </p>
+
+            {/* Search Bar */}
+            <div className="max-w-2xl mx-auto relative mb-12">
+              <div className="relative flex items-center bg-white rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
+                <div className="absolute left-5 text-gray-400">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                    />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search articles, topics, or keywords..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-14 pr-32 py-5 text-gray-800 placeholder-gray-400 focus:outline-none"
+                />
+                <button className="absolute right-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg">
+                  Search
+                </button>
+              </div>
+            </div>
+
+            {/* Stats Cards */}
+            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
+                <div className="text-3xl md:text-4xl font-bold text-lime-300">
+                  500+
+                </div>
+                <div className="text-emerald-200 text-sm mt-1">Articles</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
+                <div className="text-3xl md:text-4xl font-bold text-cyan-300">
+                  10K+
+                </div>
+                <div className="text-emerald-200 text-sm mt-1">Readers</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
+                <div className="text-3xl md:text-4xl font-bold text-teal-300">
+                  50+
+                </div>
+                <div className="text-emerald-200 text-sm mt-1">Authors</div>
+              </div>
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
+                <div className="text-3xl md:text-4xl font-bold text-emerald-300">
+                  100K+
+                </div>
+                <div className="text-emerald-200 text-sm mt-1">Views</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Wave */}
+        <div className="absolute bottom-0 left-0 right-0">
+          <svg
+            viewBox="0 0 1440 120"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-full h-auto"
+          >
+            <path
+              d="M0 60L48 54C96 48 192 36 288 42C384 48 480 72 576 78C672 84 768 72 864 60C960 48 1056 36 1152 36C1248 36 1344 48 1392 54L1440 60V120H1392C1344 120 1248 120 1152 120C1056 120 960 120 864 120C768 120 672 120 576 120C480 120 384 120 288 120C192 120 96 120 48 120H0V60Z"
+              fill="#f9fafb"
+            />
+          </svg>
+        </div>
+      </section>
+
+      {/* Main Content */}
+      <section className="max-w-7xl mx-auto px-6 py-12">
+        {/* Category Filters */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          {categories.map((category) => (
+            <button
+              key={category}
+              onClick={() => setSelectedCategory(category)}
+              className={`px-4 py-2 rounded-full font-medium text-sm transition ${
+                selectedCategory === category
+                  ? "bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-md"
+                  : "bg-white text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 border"
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        {/* Results Count */}
+        <div className="mb-6">
+          <p className="text-gray-600">
+            {filteredBlogs.length} article
+            {filteredBlogs.length !== 1 ? "s" : ""} found
+          </p>
+        </div>
+
+        {/* Blog Grid */}
+        {filteredBlogs.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredBlogs.map((blog) => (
+              <BlogCard key={blog._id || blog.id} blog={blog} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-16">
+            <svg
+              className="w-16 h-16 text-gray-300 mx-auto mb-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              No articles found
+            </h3>
+            <p className="text-gray-500">
+              Try adjusting your search or filter to find what you're looking
+              for.
+            </p>
+          </div>
+        )}
+      </section>
+
+      {/* FAQ Section */}
+      <section className="bg-white py-16">
+        <div className="max-w-4xl mx-auto px-6">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Find answers to common questions about Daily Blogs
+            </p>
+          </div>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 rounded-2xl overflow-hidden transition-all duration-200 hover:border-emerald-200 hover:shadow-md"
+              >
+                <button
+                  onClick={() => toggleFaq(index)}
+                  className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-emerald-50/50 transition"
+                >
+                  <span className="font-semibold text-gray-900 pr-4">
+                    {faq.question}
+                  </span>
+                  <svg
+                    className={`w-5 h-5 text-emerald-600 shrink-0 transition-transform duration-300 ${
+                      openFaq === index ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+                <div
+                  className={`overflow-hidden transition-all duration-300 ${
+                    openFaq === index ? "max-h-96" : "max-h-0"
+                  }`}
+                >
+                  <div className="px-6 pb-5 text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                    {faq.answer}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="text-center mt-10">
+            <p className="text-gray-600 mb-4">Still have questions?</p>
+            <a
+              href="/contact"
+              className="inline-flex items-center gap-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 transition shadow-lg shadow-emerald-500/25"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+                />
+              </svg>
+              Contact Us
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Newsletter Subscription Section */}
+      <NewsletterSubscription />
+    </div>
+  );
+};
+
+export default Home;
