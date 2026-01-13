@@ -93,6 +93,35 @@ const startServer = async () => {
   try {
     console.log("\n🚀 Starting Daily Blogs Server...\n");
 
+    // Validate environment variables before attempting connection
+    if (!process.env.MONGODB_URI) {
+      throw new Error("MONGODB_URI environment variable is not defined in .env file");
+    }
+
+    if (process.env.MONGODB_URI.includes("<db_password>")) {
+      console.error("\n");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("🚨 CRITICAL: MongoDB password not configured!");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("");
+      console.error("The server cannot start because the MongoDB password is not set.");
+      console.error("");
+      console.error("📝 TO FIX:");
+      console.error("   1. Open: daily-blogs\\backend\\.env");
+      console.error("   2. Find this line:");
+      console.error("      MONGODB_URI=mongodb+srv://mahar:<db_password>@project.e5k7hmj.mongodb.net/?appName=Project");
+      console.error("");
+      console.error("   3. Replace <db_password> with your actual MongoDB Atlas password");
+      console.error("      Example: MONGODB_URI=mongodb+srv://mahar:MyPassword123@project.e5k7hmj.mongodb.net/?appName=Project");
+      console.error("");
+      console.error("   4. Save the file");
+      console.error("   5. Restart the server");
+      console.error("");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("\n");
+      throw new Error("MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password.");
+    }
+
     await database.connect();
     console.log("✅ MongoDB connected\n");
 
@@ -102,8 +131,10 @@ const startServer = async () => {
     app.use(notFoundHandler);
     app.use(errorHandler);
 
-    const server = app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
+    const server = app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server running on:`);
+      console.log(`   Local:   http://localhost:${PORT}`);
+      console.log(`   Network: http://<your-ip>:${PORT}`);
       console.log(`📍 Environment: ${NODE_ENV}\n`);
     });
 
@@ -121,7 +152,13 @@ const startServer = async () => {
     process.on("SIGTERM", () => shutdown("SIGTERM"));
     process.on("SIGINT", () => shutdown("SIGINT"));
   } catch (error) {
-    console.error("❌ Failed to start server:", error.message);
+    console.error("\n❌ Failed to start server:", error.message);
+    console.error("\nStack trace:", error.stack);
+    console.error("\n💡 Troubleshooting tips:");
+    console.error("   1. Check that all required environment variables are set in .env");
+    console.error("   2. Verify MongoDB connection string is correct");
+    console.error("   3. Ensure MongoDB Atlas allows connections from your IP");
+    console.error("   4. Check that the port (5000) is not already in use\n");
     process.exit(1);
   }
 };

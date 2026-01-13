@@ -18,6 +18,27 @@ class DatabaseConnection {
       throw new Error("MONGODB_URI environment variable is not defined");
     }
 
+    // Check if MongoDB URI contains placeholder password
+    if (mongoUri.includes("<db_password>")) {
+      console.error("\n");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("❌ CRITICAL ERROR: MongoDB password not configured!");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("");
+      console.error("The MONGODB_URI in your .env file contains <db_password> placeholder.");
+      console.error("Please replace <db_password> with your actual MongoDB Atlas password.");
+      console.error("");
+      console.error("Current value:");
+      console.error("  MONGODB_URI=mongodb+srv://mahar:<db_password>@project.e5k7hmj.mongodb.net/?appName=Project");
+      console.error("");
+      console.error("Should be:");
+      console.error("  MONGODB_URI=mongodb+srv://mahar:YOUR_ACTUAL_PASSWORD@project.e5k7hmj.mongodb.net/?appName=Project");
+      console.error("");
+      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+      console.error("\n");
+      throw new Error("MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password in the .env file.");
+    }
+
     // Mongoose connection options
     const options = {
       maxPoolSize: 10, // Maximum number of connections in the pool
@@ -43,8 +64,7 @@ class DatabaseConnection {
       if (this.retryCount < MAX_RETRY_ATTEMPTS) {
         this.retryCount++;
         console.log(
-          `🔄 Retrying connection (${
-            this.retryCount
+          `🔄 Retrying connection (${this.retryCount
           }/${MAX_RETRY_ATTEMPTS}) in ${RETRY_DELAY_MS / 1000}s...`
         );
 

@@ -11,9 +11,8 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
     throw new UnauthorizedError("Please log in to access this resource");
   }
 
-  // Find user by session userId
+  // Find user by session userId - explicitly include isSuperAdmin
   const user = await User.findById(req.session.userId)
-    .select("-password")
     .lean();
 
   // Check if user still exists
@@ -103,11 +102,18 @@ const isAdmin = (req, res, next) => {
 // Require super admin access
 const isSuperAdmin = (req, res, next) => {
   if (!req.user) {
+    console.error(`[AUTH] isSuperAdmin check failed - No user in request`);
     throw new UnauthorizedError("Authentication required");
   }
   if (!req.user.isSuperAdmin) {
+    console.error(
+      `[AUTH] isSuperAdmin check FAILED - user=${req.user.email}, isSuperAdmin=${req.user.isSuperAdmin}, role=${req.user.role}`
+    );
     throw new ForbiddenError("Super admin access required");
   }
+  console.log(
+    `[AUTH] isSuperAdmin check PASSED for user=${req.user.email}`
+  );
   next();
 };
 

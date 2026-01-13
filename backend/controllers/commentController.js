@@ -181,7 +181,7 @@ const updateComment = asyncHandler(async (req, res) => {
   }
 
   // Update comment
-  comment.text = text.trim();
+  comment.text = escapeHtml(text.trim());
   comment.isEdited = true;
   comment.editedAt = new Date();
   await comment.save();
@@ -383,7 +383,7 @@ const toggleLikeComment = asyncHandler(async (req, res) => {
 
   res.json(
     buildSuccessResponse(
-      { liked, likeCount: comment.likeCount },
+      { liked, likeCount: comment.likes.length },
       liked ? "Comment liked" : "Comment unliked"
     )
   );

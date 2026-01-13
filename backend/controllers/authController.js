@@ -40,33 +40,53 @@ const register = asyncHandler(async (req, res) => {
     emailVerificationExpires: verificationExpires,
   });
 
-  // Send verification email
+  // Send verification email (optional in development if SMTP not configured)
+  let emailSent = false;
   try {
     await sendEmailVerification(user.email, user.name, verificationToken);
+    emailSent = true;
   } catch (emailError) {
-    // If email fails, delete the user and throw error
-    await User.findByIdAndDelete(user._id);
     console.error(`[AUTH] Failed to send verification email:`, emailError);
-    throw new BadRequestError(
-      "Failed to send verification email. Please check if the email address is valid and try again."
-    );
+
+    // In development, if email service is not configured, skip email verification
+    const isDevelopment = process.env.NODE_ENV !== "production";
+    const isEmailNotConfigured = emailError.message.includes("not configured");
+
+    if (isDevelopment && isEmailNotConfigured) {
+      console.warn("[AUTH] SMTP not configured - skipping email verification in development mode");
+      // Auto-verify user in development when email is not configured
+      user.isEmailVerified = true;
+      user.emailVerificationToken = undefined;
+      user.emailVerificationExpires = undefined;
+      await user.save();
+    } else {
+      // In production or if it's a real email error, delete user and throw
+      await User.findByIdAndDelete(user._id);
+      throw new BadRequestError(
+        "Failed to send verification email. Please check if the email address is valid and try again."
+      );
+    }
   }
 
   // Log registration
   console.log(
-    `[AUTH] New user registered (pending verification): ${user.email} (ID: ${user._id})`
+    `[AUTH] New user registered${emailSent ? ' (pending verification)' : ' (auto-verified in dev)'}: ${user.email} (ID: ${user._id})`
   );
 
-  // Send response - DO NOT auto-login, require email verification first
+  // Send response based on whether email was sent
+  const responseMessage = emailSent
+    ? "Registration successful! Please check your email to verify your account before logging in."
+    : "Registration successful! You can now log in. (Email verification skipped - SMTP not configured)";
+
   res.status(201).json(
     buildSuccessResponse(
       {
-        message:
-          "Registration successful! Please check your email to verify your account before logging in.",
+        message: responseMessage,
         email: user.email,
-        requiresVerification: true,
+        requiresVerification: emailSent,
+        autoVerified: !emailSent,
       },
-      "User registered - verification email sent"
+      emailSent ? "User registered - verification email sent" : "User registered - auto-verified"
     )
   );
 });
@@ -142,11 +162,26 @@ const login = asyncHandler(async (req, res) => {
   req.session.userId = user._id;
   req.session.createdAt = new Date();
 
+  // Debug: Log session info
+  console.log(`[AUTH] Session created:`, {
+    sessionID: req.session.id,
+    userId: user._id,
+    cookie: {
+      maxAge: req.session.cookie.maxAge,
+      expires: req.session.cookie.expires,
+      httpOnly: req.session.cookie.httpOnly,
+      secure: req.session.cookie.secure,
+      sameSite: req.session.cookie.sameSite,
+    }
+  });
+
   // Get safe user data
   const userData = user.getSafeProfile();
 
-  // Log login
-  console.log(`[AUTH] User logged in: ${user.email} (ID: ${user._id})`);
+  // Debug log to verify isSuperAdmin is included
+  console.log(
+    `[AUTH] User logged in: ${user.email} (ID: ${user._id}), isSuperAdmin=${userData.isSuperAdmin}, role=${userData.role}`
+  );
 
   // Send response
   res.json(
@@ -220,14 +255,13 @@ const checkSession = asyncHandler(async (req, res) => {
     );
   }
 
-  // Find user
+  // Find user - isSuperAdmin will be included by default
   const user = await User.findById(req.session.userId)
-    .select("-password")
     .lean();
 
   if (!user || !user.isActive) {
     // Invalid session, destroy it
-    req.session.destroy(() => {});
+    req.session.destroy(() => { });
 
     return res.json(
       buildSuccessResponse(
@@ -239,6 +273,11 @@ const checkSession = asyncHandler(async (req, res) => {
       )
     );
   }
+
+  // Debug log to verify isSuperAdmin is included
+  console.log(
+    `[AUTH] Session check: user=${user.email}, isSuperAdmin=${user.isSuperAdmin}, role=${user.role}`
+  );
 
   res.json(
     buildSuccessResponse(

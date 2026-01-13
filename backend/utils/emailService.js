@@ -4,29 +4,40 @@ const nodemailer = require("nodemailer");
 
 // Create transporter based on environment
 const createTransporter = () => {
-  // For production, use real SMTP settings
-  if (process.env.NODE_ENV === "production") {
+  // Check if SMTP credentials are available
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn("⚠️ SMTP credentials not configured. Email functionality will be disabled.");
+    return null;
+  }
+
+  try {
+    // For production, use real SMTP settings
+    if (process.env.NODE_ENV === "production") {
+      return nodemailer.createTransport({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === "true",
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+    }
+
+    // For development, use Gmail
     return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
+      host: process.env.SMTP_HOST || "smtp.gmail.com",
       port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_SECURE === "true",
+      secure: false,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
     });
+  } catch (error) {
+    console.error("❌ Failed to create email transporter:", error.message);
+    return null;
   }
-
-  // For development, use Ethereal (fake SMTP) or Gmail
-  return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || "smtp.gmail.com",
-    port: parseInt(process.env.SMTP_PORT) || 587,
-    secure: false,
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
 };
 
 const transporter = createTransporter();
@@ -39,9 +50,8 @@ const generateOTP = () => {
 // Send OTP email for password reset
 const sendPasswordResetOTP = async (email, otp, userName) => {
   const mailOptions = {
-    from: `"Daily Blogs" <${
-      process.env.SMTP_USER || "noreply@dailyblogs.com"
-    }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
+      }>`,
     to: email,
     subject: "Password Reset OTP - Daily Blogs",
     html: `
@@ -86,10 +96,14 @@ const sendPasswordResetOTP = async (email, otp, userName) => {
       </body>
       </html>
     `,
-    text: `Hello ${
-      userName || "User"
-    },\n\nYour password reset OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\n- Daily Blogs Team`,
+    text: `Hello ${userName || "User"
+      },\n\nYour password reset OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\n- Daily Blogs Team`,
   };
+
+  if (!transporter) {
+    console.warn(`[EMAIL] Transporter not configured. Skipping OTP email to ${email}`);
+    return { success: false, message: "Email service not configured" };
+  }
 
   try {
     const info = await transporter.sendMail(mailOptions);
@@ -104,9 +118,8 @@ const sendPasswordResetOTP = async (email, otp, userName) => {
 // Send welcome email
 const sendWelcomeEmail = async (email, userName) => {
   const mailOptions = {
-    from: `"Daily Blogs" <${
-      process.env.SMTP_USER || "noreply@dailyblogs.com"
-    }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
+      }>`,
     to: email,
     subject: "Welcome to Daily Blogs! 🎉",
     html: `
@@ -147,6 +160,11 @@ const sendWelcomeEmail = async (email, userName) => {
     `,
   };
 
+  if (!transporter) {
+    console.warn(`[EMAIL] Transporter not configured. Skipping welcome email to ${email}`);
+    return;
+  }
+
   try {
     await transporter.sendMail(mailOptions);
     console.log(`[EMAIL] Welcome email sent to: ${email}`);
@@ -161,9 +179,8 @@ const sendWelcomeEmail = async (email, userName) => {
 // Send contact confirmation email
 const sendContactConfirmation = async (email, name, subject) => {
   const mailOptions = {
-    from: `"Daily Blogs Support" <${
-      process.env.SMTP_USER || "support@dailyblogs.com"
-    }>`,
+    from: `"Daily Blogs Support" <${process.env.SMTP_USER || "support@dailyblogs.com"
+      }>`,
     to: email,
     subject: "We received your message - Daily Blogs",
     html: `
@@ -200,6 +217,11 @@ const sendContactConfirmation = async (email, name, subject) => {
     `,
   };
 
+  if (!transporter) {
+    console.warn(`[EMAIL] Transporter not configured. Skipping contact confirmation to ${email}`);
+    return;
+  }
+
   try {
     await transporter.sendMail(mailOptions);
     console.log(`[EMAIL] Contact confirmation sent to: ${email}`);
@@ -230,9 +252,8 @@ const sendNewBlogNotification = async (
   const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
 
   const mailOptions = {
-    from: `"Daily Blogs" <${
-      process.env.SMTP_USER || "noreply@dailyblogs.com"
-    }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
+      }>`,
     to: subscriberEmail,
     subject: `📝 New Blog: ${blog.title} - Daily Blogs`,
     html: `
@@ -262,28 +283,24 @@ const sendNewBlogNotification = async (
             <h1>📝 New Blog Post!</h1>
           </div>
           <div class="content">
-            <p>Hello${
-              subscriberName ? ` <strong>${subscriberName}</strong>` : ""
-            }!</p>
+            <p>Hello${subscriberName ? ` <strong>${subscriberName}</strong>` : ""
+      }!</p>
             <p>Great news! <strong>${authorName}</strong> just published a new article on Daily Blogs that we think you'll love.</p>
             
             <div class="blog-card">
-              ${
-                blog.image
-                  ? `<img src="${blog.image}" alt="${blog.title}" class="blog-image" />`
-                  : '<div class="blog-image"></div>'
-              }
+              ${blog.image
+        ? `<img src="${blog.image}" alt="${blog.title}" class="blog-image" />`
+        : '<div class="blog-image"></div>'
+      }
               <div class="blog-info">
                 <h2 class="blog-title">${blog.title}</h2>
                 <p class="blog-meta">
-                  By ${authorName} • ${blog.category || "Article"} • ${
-      blog.readTime || 5
-    } min read
+                  By ${authorName} • ${blog.category || "Article"} • ${blog.readTime || 5
+      } min read
                 </p>
                 <p class="blog-description">${blog.description || ""}</p>
-                <a href="${clientUrl}/blog/${
-      blog._id || blog.id
-    }" class="read-btn">Read Full Article →</a>
+                <a href="${clientUrl}/blog/${blog._id || blog.id
+      }" class="read-btn">Read Full Article →</a>
               </div>
             </div>
             
@@ -302,14 +319,16 @@ const sendNewBlogNotification = async (
       </body>
       </html>
     `,
-    text: `Hello${
-      subscriberName ? ` ${subscriberName}` : ""
-    }!\n\n${authorName} just published a new article: "${
-      blog.title
-    }"\n\nRead it here: ${clientUrl}/blog/${
-      blog._id || blog.id
-    }\n\n— The Daily Blogs Team\n\nUnsubscribe: ${backendUrl}/api/subscribe/unsubscribe/${unsubscribeToken}`,
+    text: `Hello${subscriberName ? ` ${subscriberName}` : ""
+      }!\n\n${authorName} just published a new article: "${blog.title
+      }"\n\nRead it here: ${clientUrl}/blog/${blog._id || blog.id
+      }\n\n— The Daily Blogs Team\n\nUnsubscribe: ${backendUrl}/api/subscribe/unsubscribe/${unsubscribeToken}`,
   };
+
+  if (!transporter) {
+    console.warn(`[EMAIL] Transporter not configured. Skipping blog notification to ${subscriberEmail}`);
+    return { success: false, error: "Email service not configured" };
+  }
 
   try {
     await transporter.sendMail(mailOptions);
@@ -399,9 +418,8 @@ async function sendEmailVerification(email, userName, verificationToken) {
   const verificationLink = `${clientUrl}/verify-email/${verificationToken}`;
 
   const mailOptions = {
-    from: `"Daily Blogs" <${
-      process.env.SMTP_USER || "noreply@dailyblogs.com"
-    }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
+      }>`,
     to: email,
     subject: "Verify Your Email - Daily Blogs ✉️",
     html: `
@@ -450,10 +468,14 @@ async function sendEmailVerification(email, userName, verificationToken) {
       </body>
       </html>
     `,
-    text: `Hello ${
-      userName || "there"
-    }!\n\nThank you for registering with Daily Blogs.\n\nPlease verify your email by clicking this link:\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.\n\n— Daily Blogs Team`,
+    text: `Hello ${userName || "there"
+      }!\n\nThank you for registering with Daily Blogs.\n\nPlease verify your email by clicking this link:\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.\n\n— Daily Blogs Team`,
   };
+
+  if (!transporter) {
+    console.warn(`[EMAIL] Transporter not configured. Skipping verification email to ${email}`);
+    throw new Error("Email service not configured. Please contact support.");
+  }
 
   try {
     const info = await transporter.sendMail(mailOptions);

@@ -1,5 +1,16 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getBlogs, getBlogBySlug, toggleLike as apiToggleLike, getLikeStatus } from "../services/blogService";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
+import {
+  getBlogs,
+  getBlogBySlug,
+  toggleLike as apiToggleLike,
+  getLikeStatus,
+} from "../services/blogService";
 
 const BlogContext = createContext();
 
@@ -27,18 +38,35 @@ export const BlogProvider = ({ children }) => {
       setLoading(true);
       setError(null);
       const response = await getBlogs(params);
-      
-      if (response.success) {
+
+      if (response && response.success) {
         setBlogs(response.data?.blogs || []);
-        setPagination(response.data?.pagination || {
-          currentPage: 1,
-          totalPages: 1,
-          totalItems: 0,
-        });
+        setPagination(
+          response.data?.pagination || {
+            currentPage: 1,
+            totalPages: 1,
+            totalItems: 0,
+          }
+        );
+      } else {
+        // Handle case where response doesn't have success property
+        setError("Invalid response from server");
+        setBlogs([]);
       }
     } catch (err) {
       console.error("Error fetching blogs:", err);
-      setError(err.message || "Failed to fetch blogs");
+      // Provide more specific error messages
+      let errorMessage = "Failed to fetch blogs";
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.request) {
+        errorMessage =
+          "Cannot connect to server. Please make sure the backend is running on http://localhost:5000";
+      } else if (err.response) {
+        errorMessage =
+          err.response.data?.message || `Server error: ${err.response.status}`;
+      }
+      setError(errorMessage);
       setBlogs([]);
     } finally {
       setLoading(false);
@@ -73,7 +101,10 @@ export const BlogProvider = ({ children }) => {
         setBlogs((prev) =>
           prev.map((blog) =>
             blog._id === blogId
-              ? { ...blog, likeCount: response.data?.likeCount || blog.likeCount }
+              ? {
+                  ...blog,
+                  likeCount: response.data?.likeCount || blog.likeCount,
+                }
               : blog
           )
         );

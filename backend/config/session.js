@@ -15,6 +15,11 @@ const createSessionConfig = () => {
     );
   }
 
+  // Check if MongoDB URI contains placeholder password
+  if (process.env.MONGODB_URI.includes("<db_password>")) {
+    throw new Error("MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password in the .env file.");
+  }
+
   const isProduction = process.env.NODE_ENV === "production";
 
   const sessionOptions = {
@@ -32,16 +37,23 @@ const createSessionConfig = () => {
     cookie: {
       maxAge: parseInt(process.env.SESSION_MAX_AGE) || 7 * 24 * 60 * 60 * 1000,
       httpOnly: process.env.COOKIE_HTTP_ONLY !== "false",
-      secure: isProduction || process.env.COOKIE_SECURE === "true",
-      sameSite: process.env.COOKIE_SAME_SITE || "lax",
+      secure: false, // Always false for local development (HTTP)
+      sameSite: "lax", // Works for same-site requests (localhost or same IP)
       path: "/",
-      domain: process.env.COOKIE_DOMAIN || undefined,
+      // Don't set domain - let browser handle it automatically
+      // This allows cookies to work on both localhost and network IP
     },
     rolling: true,
     proxy: isProduction,
   };
 
   console.log("📦 Session store configured with MongoDB");
+  console.log(`🍪 Cookie settings:`);
+  console.log(`   - maxAge: ${sessionOptions.cookie.maxAge}ms (${sessionOptions.cookie.maxAge / (1000 * 60 * 60 * 24)} days)`);
+  console.log(`   - httpOnly: ${sessionOptions.cookie.httpOnly}`);
+  console.log(`   - secure: ${sessionOptions.cookie.secure}`);
+  console.log(`   - sameSite: ${sessionOptions.cookie.sameSite}`);
+  console.log(`   - rolling: ${sessionOptions.rolling}`);
 
   return session(sessionOptions);
 };

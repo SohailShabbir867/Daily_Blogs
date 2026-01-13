@@ -6,11 +6,11 @@ const AuthContext = createContext(null);
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider. Make sure your component is wrapped in <AuthProvider>.");
   }
-  
+
   return context;
 };
 
@@ -23,13 +23,25 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
+        console.log("[AUTH] Checking session on mount...");
         const response = await authService.checkSession();
-        
+
+        console.log("[AUTH] Session check response:", {
+          success: response.success,
+          isAuthenticated: response.data?.isAuthenticated,
+          hasUser: !!response.data?.user,
+          user: response.data?.user,
+        });
+
         if (response.success && response.data?.isAuthenticated && response.data?.user) {
+          console.log("[AUTH] Restoring user from session:", response.data.user.email);
           setUser(response.data.user);
+        } else {
+          console.log("[AUTH] No valid session found, user not restored");
         }
       } catch (err) {
-        console.error("Session check failed:", err);
+        console.error("[AUTH] Session check failed:", err);
+        console.error("[AUTH] Error details:", err.message, err.status);
       } finally {
         setLoading(false);
       }
@@ -41,15 +53,15 @@ export const AuthProvider = ({ children }) => {
   // Log in user with email and password
   const login = useCallback(async (email, password) => {
     setError(null);
-    
+
     try {
       const response = await authService.login({ email, password });
-      
+
       if (response.success && response.data?.user) {
         setUser(response.data.user);
         return response.data.user;
       }
-      
+
       throw new Error("Login failed - no user data received");
     } catch (err) {
       const errorMessage = err.message || "Login failed. Please try again.";
@@ -73,7 +85,7 @@ export const AuthProvider = ({ children }) => {
   // Register new user (requires email verification before login)
   const register = useCallback(async (userData) => {
     setError(null);
-    
+
     try {
       const response = await authService.register({
         name: userData.name,
@@ -81,16 +93,16 @@ export const AuthProvider = ({ children }) => {
         password: userData.password,
         confirmPassword: userData.confirmPassword || userData.password,
       });
-      
+
       if (response.success && response.data?.requiresVerification) {
         return response.data;
       }
-      
+
       if (response.success && response.data?.user) {
         setUser(response.data.user);
         return response.data;
       }
-      
+
       throw new Error("Registration failed - unexpected response");
     } catch (err) {
       const errorMessage = err.message || "Registration failed. Please try again.";
