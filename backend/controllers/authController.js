@@ -17,7 +17,12 @@ const {
 
 // Register a new user
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, acceptTerms } = req.body;
+
+  // Validate terms acceptance
+  if (!acceptTerms) {
+    throw new BadRequestError("You must accept the Terms and Conditions to register");
+  }
 
   // Check if email already exists
   const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -38,6 +43,7 @@ const register = asyncHandler(async (req, res) => {
     isEmailVerified: false,
     emailVerificationToken: verificationToken,
     emailVerificationExpires: verificationExpires,
+    termsAcceptedAt: new Date(), // Record when terms were accepted
   });
 
   // Send verification email (optional in development if SMTP not configured)

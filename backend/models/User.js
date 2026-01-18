@@ -57,6 +57,11 @@ const userSchema = new mongoose.Schema(
       default: false,
     },
 
+    isChatSupport: {
+      type: Boolean,
+      default: false,
+    },
+
     isActive: {
       type: Boolean,
       default: true,
@@ -122,6 +127,11 @@ const userSchema = new mongoose.Schema(
     emailVerificationExpires: {
       type: Date,
       select: false,
+    },
+
+    termsAcceptedAt: {
+      type: Date,
+      required: [true, "You must accept the Terms and Conditions"],
     },
   },
   {
@@ -255,6 +265,7 @@ userSchema.methods.getSafeProfile = function () {
     bio: this.bio,
     role: this.role,
     isSuperAdmin: this.isSuperAdmin,
+    isChatSupport: this.isChatSupport,
     isActive: this.isActive,
     isEmailVerified: this.isEmailVerified,
     savedBlogs: this.savedBlogs,

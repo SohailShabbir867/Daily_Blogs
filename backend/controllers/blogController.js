@@ -517,7 +517,8 @@ const adminGetAllBlogs = asyncHandler(async (req, res) => {
 
   // Add canEdit and canDelete flags to each blog for the frontend
   const blogsWithPermissions = blogs.map((blog) => {
-    const isOwner = blog.author._id.toString() === req.user._id.toString();
+    // Check if author exists (in case user was deleted)
+    const isOwner = blog.author && blog.author._id ? blog.author._id.toString() === req.user._id.toString() : false;
     const isSuperAdmin = req.user.isSuperAdmin === true;
     return {
       ...blog,
@@ -559,8 +560,7 @@ const toggleFeatured = asyncHandler(async (req, res) => {
   await blog.save();
 
   console.log(
-    `[ADMIN] Blog ${blog.isFeatured ? "featured" : "unfeatured"}: "${
-      blog.title
+    `[ADMIN] Blog ${blog.isFeatured ? "featured" : "unfeatured"}: "${blog.title
     }"`
   );
 
@@ -747,8 +747,8 @@ const adminGetBlog = asyncHandler(async (req, res) => {
     throw new NotFoundError("Blog post not found");
   }
 
-  // Check ownership for regular admins
-  const isOwner = blog.author._id.toString() === req.user._id.toString();
+  // Check ownership for regular admins (handle orphaned blogs)
+  const isOwner = blog.author && blog.author._id ? blog.author._id.toString() === req.user._id.toString() : false;
   const isSuperAdmin = req.user.isSuperAdmin === true;
 
   if (!isOwner && !isSuperAdmin) {

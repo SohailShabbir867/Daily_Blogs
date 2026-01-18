@@ -378,9 +378,8 @@ const BlogDetails = () => {
               <img
                 src={blog.image}
                 alt={blog.title}
-                className={`w-full h-full object-cover transition-opacity duration-500 ${
-                  imageLoaded ? "opacity-100" : "opacity-0"
-                }`}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
+                  }`}
                 onLoad={() => setImageLoaded(true)}
               />
             </>
@@ -474,15 +473,13 @@ const BlogDetails = () => {
               <button
                 onClick={handleLike}
                 disabled={!user || likeLoading}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-                  isLiked
-                    ? "bg-red-100 text-red-600"
-                    : "bg-white text-gray-600 hover:bg-gray-100"
-                } ${
-                  !user || likeLoading
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${isLiked
+                  ? "bg-red-100 text-red-600"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  } ${!user || likeLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                }`}
+                  }`}
                 title={user ? "Like this article" : "Login to like"}
               >
                 <svg
@@ -505,15 +502,13 @@ const BlogDetails = () => {
               <button
                 onClick={handleSave}
                 disabled={!user || saveLoading}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
-                  isSaved
-                    ? "bg-emerald-100 text-emerald-600"
-                    : "bg-white text-gray-600 hover:bg-gray-100"
-                } ${
-                  !user || saveLoading
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${isSaved
+                  ? "bg-emerald-100 text-emerald-600"
+                  : "bg-white text-gray-600 hover:bg-gray-100"
+                  } ${!user || saveLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                }`}
+                  }`}
                 title={user ? (isSaved ? "Unsave" : "Save") : "Login to save"}
               >
                 <svg
@@ -590,59 +585,54 @@ const BlogDetails = () => {
                 prose-li:text-gray-700 prose-li:text-lg
                 prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:bg-emerald-50 prose-blockquote:rounded-r-lg
                 prose-hr:border-gray-300 prose-hr:my-8
-                prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8"
+                prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8
+                prose-code:bg-gray-100 prose-code:text-red-600 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono
+                prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:my-6
+                prose-table:w-full prose-table:border-collapse prose-table:my-6
+                prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-th:bg-gray-100 prose-th:text-left prose-th:font-semibold
+                prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2"
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
                   blog.content || `<p>${blog.description}</p>`,
                   {
                     ALLOWED_TAGS: [
-                      "p",
-                      "br",
-                      "b",
-                      "i",
-                      "u",
-                      "strong",
-                      "em",
-                      "h1",
-                      "h2",
-                      "h3",
-                      "h4",
-                      "h5",
-                      "h6",
-                      "ul",
-                      "ol",
-                      "li",
-                      "a",
-                      "blockquote",
-                      "hr",
-                      "img",
-                      "span",
-                      "div",
+                      // Basic text
+                      "p", "br", "span", "div",
+                      // Formatting
+                      "b", "strong", "i", "em", "u", "s", "strike", "del", "sub", "sup", "mark",
+                      // Headings
+                      "h1", "h2", "h3", "h4", "h5", "h6",
+                      // Lists
+                      "ul", "ol", "li",
+                      // Links & Media
+                      "a", "img",
+                      // Block elements
+                      "blockquote", "hr",
+                      // Code
+                      "code", "pre",
+                      // Tables
+                      "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+                      // Font styling
+                      "font",
+                      // Interactive (for code copy buttons)
+                      "button",
                     ],
                     ALLOWED_ATTR: [
-                      "href",
-                      "target",
-                      "rel",
-                      "src",
-                      "alt",
-                      "class",
-                      "style",
+                      "href", "target", "rel",
+                      "src", "alt", "width", "height",
+                      "class", "style",
+                      "color", "size", "face",
+                      "colspan", "rowspan", "align", "valign",
+                      // For code blocks
+                      "id", "onclick", "contenteditable",
                     ],
                     ALLOW_DATA_ATTR: false,
                     ADD_ATTR: ["target"],
                     FORBID_TAGS: [
-                      "script",
-                      "iframe",
-                      "object",
-                      "embed",
-                      "form",
-                      "input",
+                      "script", "iframe", "object", "embed", "form", "input",
                     ],
                     FORBID_ATTR: [
-                      "onerror",
-                      "onload",
-                      "onclick",
-                      "onmouseover",
+                      "onerror", "onload", "onclick", "onmouseover",
                     ],
                   }
                 ),
@@ -697,15 +687,13 @@ const BlogDetails = () => {
                 <button
                   onClick={handleLike}
                   disabled={!user || likeLoading}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                    isLiked
-                      ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-red-300 hover:text-red-600"
-                  } ${
-                    !user || likeLoading
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${isLiked
+                    ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                    : "bg-white text-gray-700 border border-gray-200 hover:border-red-300 hover:text-red-600"
+                    } ${!user || likeLoading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
-                  }`}
+                    }`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -725,15 +713,13 @@ const BlogDetails = () => {
                 <button
                   onClick={handleSave}
                   disabled={!user || saveLoading}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
-                    isSaved
-                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
-                      : "bg-white text-gray-700 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600"
-                  } ${
-                    !user || saveLoading
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${isSaved
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                    : "bg-white text-gray-700 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600"
+                    } ${!user || saveLoading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
-                  }`}
+                    }`}
                 >
                   <svg
                     className="w-5 h-5"

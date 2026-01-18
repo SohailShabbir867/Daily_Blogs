@@ -79,6 +79,7 @@ const UserManagement = () => {
       promote: `Promote ${userName} to admin? They will be able to manage blogs.`,
       demote: `Demote ${userName} to regular user? They will lose admin privileges.`,
       toggleStatus: `Toggle active status for ${userName}?`,
+      toggleChat: `Toggle chat support for ${userName}?`,
     };
 
     if (!window.confirm(confirmMessages[action])) return;
@@ -98,10 +99,21 @@ const UserManagement = () => {
       } else if (action === "toggleStatus") {
         url += "/toggle-status";
         method = "PATCH";
+      } else if (action === "toggleChat") {
+        url = `http://localhost:5000/api/chat/admin-status/${userId}`;
+        method = "PATCH";
+        // Need to send actual body for chat toggle, but simplified for single action
+        // For consistent API, we might need to update fetch body below
       }
 
       const response = await fetch(url, {
         method,
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: action === "toggleChat"
+          ? JSON.stringify({ enabled: !users.find(u => u._id === userId).isChatSupport })
+          : undefined,
         credentials: "include",
       });
 
@@ -312,11 +324,10 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${
-                          user.isActive !== false
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${user.isActive !== false
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                        }`}
+                          }`}
                       >
                         {user.isActive !== false ? "Active" : "Inactive"}
                       </span>
@@ -352,6 +363,24 @@ const UserManagement = () => {
                                 : "Demote"}
                             </button>
                           )}
+                          {user.role === "admin" && (
+                            <button
+                              onClick={() =>
+                                handleAction(user._id, "toggleChat", user.name)
+                              }
+                              disabled={actionLoading === `${user._id}-toggleChat`}
+                              className={`px-3 py-1 rounded-lg transition disabled:opacity-50 ${user.isChatSupport
+                                  ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
+                                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                                }`}
+                            >
+                              {actionLoading === `${user._id}-toggleChat`
+                                ? "..."
+                                : user.isChatSupport
+                                  ? "Disable Chat"
+                                  : "Enable Chat"}
+                            </button>
+                          )}
                           <button
                             onClick={() =>
                               handleAction(user._id, "toggleStatus", user.name)
@@ -364,8 +393,8 @@ const UserManagement = () => {
                             {actionLoading === `${user._id}-toggleStatus`
                               ? "..."
                               : user.isActive !== false
-                              ? "Deactivate"
-                              : "Activate"}
+                                ? "Deactivate"
+                                : "Activate"}
                           </button>
                           <button
                             onClick={() =>

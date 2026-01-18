@@ -23,25 +23,13 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkSession = async () => {
       try {
-        console.log("[AUTH] Checking session on mount...");
         const response = await authService.checkSession();
 
-        console.log("[AUTH] Session check response:", {
-          success: response.success,
-          isAuthenticated: response.data?.isAuthenticated,
-          hasUser: !!response.data?.user,
-          user: response.data?.user,
-        });
-
         if (response.success && response.data?.isAuthenticated && response.data?.user) {
-          console.log("[AUTH] Restoring user from session:", response.data.user.email);
           setUser(response.data.user);
-        } else {
-          console.log("[AUTH] No valid session found, user not restored");
         }
       } catch (err) {
-        console.error("[AUTH] Session check failed:", err);
-        console.error("[AUTH] Error details:", err.message, err.status);
+        // Silent fail - user just not authenticated
       } finally {
         setLoading(false);
       }
@@ -92,6 +80,7 @@ export const AuthProvider = ({ children }) => {
         email: userData.email,
         password: userData.password,
         confirmPassword: userData.confirmPassword || userData.password,
+        acceptTerms: userData.acceptTerms,
       });
 
       if (response.success && response.data?.requiresVerification) {

@@ -8,6 +8,7 @@ const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
@@ -34,10 +35,15 @@ const Register = () => {
       return;
     }
 
+    if (!acceptTerms) {
+      setError("You must accept the Terms and Conditions to register");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await register({ name, email, password, confirmPassword });
+      const result = await register({ name, email, password, confirmPassword, acceptTerms });
 
       if (result.requiresVerification) {
         setRegistrationSuccess(true);
@@ -216,9 +222,39 @@ const Register = () => {
               />
             </div>
 
+            {/* Terms and Conditions */}
+            <div className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                id="acceptTerms"
+                checked={acceptTerms}
+                onChange={(e) => setAcceptTerms(e.target.checked)}
+                className="w-5 h-5 mt-0.5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"
+              />
+              <label htmlFor="acceptTerms" className="text-sm text-gray-600 cursor-pointer">
+                I agree to the{" "}
+                <Link
+                  to="/terms"
+                  className="text-emerald-600 font-medium hover:underline"
+                  target="_blank"
+                >
+                  Terms and Conditions
+                </Link>{" "}
+                and{" "}
+                <Link
+                  to="/privacy"
+                  className="text-emerald-600 font-medium hover:underline"
+                  target="_blank"
+                >
+                  Privacy Policy
+                </Link>{" "}
+                of Daily Blogs
+              </label>
+            </div>
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !acceptTerms}
               className="w-full bg-linear-to-r from-emerald-500 to-teal-600 text-white py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-700 transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
               aria-busy={isLoading}
             >

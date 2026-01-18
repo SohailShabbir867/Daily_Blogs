@@ -17,18 +17,10 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // Debug: Log requests to auth endpoints
-    if (config.url?.includes('/auth/')) {
-      console.log(`[API] ${config.method.toUpperCase()} ${config.url}`, {
-        withCredentials: config.withCredentials,
-        baseURL: config.baseURL,
-      });
-    }
     // For session-based auth, cookies are sent automatically
     return config;
   },
   (error) => {
-    console.error("Request Error:", error);
     return Promise.reject(error);
   }
 );
@@ -53,41 +45,21 @@ api.interceptors.response.use(
         error.message ||
         "An unexpected error occurred";
 
-      // Handle specific status codes
+      // Handle specific status codes (silent handling)
       switch (error.response.status) {
         case 401:
-          // Unauthorized - session expired
-          console.warn("Session expired or unauthorized");
-          // Optionally trigger logout or redirect
-          break;
         case 403:
-          // Forbidden
-          console.warn("Access forbidden");
-          break;
         case 404:
-          // Not found
-          console.warn("Resource not found");
-          break;
         case 429:
-          // Rate limited
-          console.warn("Rate limit exceeded");
-          break;
         case 500:
-          // Server error
-          console.error("Server error");
+          // These are handled by the error object returned
           break;
         default:
           break;
       }
     } else if (error.request) {
       // Request made but no response received (network error, CORS, etc.)
-      errorMessage = "Cannot connect to server. Please make sure the backend server is running on http://localhost:5000";
-      console.error("Network error - Server not responding:", error.message);
-      console.error("Request details:", {
-        url: error.config?.url,
-        baseURL: error.config?.baseURL,
-        method: error.config?.method
-      });
+      errorMessage = "Cannot connect to server. Please check your internet connection.";
     } else {
       // Error setting up request
       errorMessage = error.message || "An unexpected error occurred";

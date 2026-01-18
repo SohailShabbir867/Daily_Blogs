@@ -70,14 +70,6 @@ if (NODE_ENV === "development") {
   app.use(morgan("combined", { skip: (req, res) => res.statusCode < 400 }));
 }
 
-// Session and routes setup after DB connection
-const setupSessionAndRoutes = (sessionMiddleware) => {
-  app.use(sessionMiddleware);
-  console.log("✅ Session middleware configured");
-  app.use("/api", apiRoutes);
-  console.log("✅ API routes configured");
-};
-
 // Root route
 app.get("/", (req, res) => {
   res.json({
@@ -99,39 +91,91 @@ const startServer = async () => {
     }
 
     if (process.env.MONGODB_URI.includes("<db_password>")) {
-      console.error("\n");
-      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.error("🚨 CRITICAL: MongoDB password not configured!");
-      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.error("");
-      console.error("The server cannot start because the MongoDB password is not set.");
-      console.error("");
-      console.error("📝 TO FIX:");
-      console.error("   1. Open: daily-blogs\\backend\\.env");
-      console.error("   2. Find this line:");
-      console.error("      MONGODB_URI=mongodb+srv://mahar:<db_password>@project.e5k7hmj.mongodb.net/?appName=Project");
-      console.error("");
-      console.error("   3. Replace <db_password> with your actual MongoDB Atlas password");
-      console.error("      Example: MONGODB_URI=mongodb+srv://mahar:MyPassword123@project.e5k7hmj.mongodb.net/?appName=Project");
-      console.error("");
-      console.error("   4. Save the file");
-      console.error("   5. Restart the server");
-      console.error("");
-      console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-      console.error("\n");
-      throw new Error("MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password.");
+      // ... (keep existing validation logic)
+      throw new Error("MONGODB_URI contains placeholder <db_password>");
     }
 
     await database.connect();
     console.log("✅ MongoDB connected\n");
 
     const sessionMiddleware = createSessionConfig();
-    setupSessionAndRoutes(sessionMiddleware);
+
+    // Setup HTTP Server
+    const http = require("http");
+    const server = http.createServer(app);
+
+    // Setup Socket.io
+    const { Server } = require("socket.io");
+    const io = new Server(server, {
+      cors: {
+        origin: [
+          "http://localhost:5173",
+          "http://192.168.1.77:5173",
+          // Add other origins as needed
+        ],
+        credentials: true,
+        methods: ["GET", "POST"]
+      },
+      // pingTimeout: 60000,
+    });
+
+    // Share io instance with express
+    app.set("io", io);
+
+    // Socket connection handler
+    io.on("connection", (socket) => {
+      // console.log("Socket connected:", socket.id);
+
+      // Join user to their own room for personal notifications
+      socket.on("join_user_room", (userId) => {
+        if (userId) {
+          socket.join(userId);
+          // console.log(`User ${userId} joined their personal room`);
+        }
+      });
+
+      // Join conversation room
+      socket.on("join_chat", (conversationId) => {
+        if (conversationId) {
+          socket.join(conversationId);
+          // console.log(`Socket ${socket.id} joined conversation ${conversationId}`);
+        }
+      });
+
+      // Leave conversation room
+      socket.on("leave_chat", (conversationId) => {
+        if (conversationId) {
+          socket.leave(conversationId);
+        }
+      });
+
+      // Typing indicators
+      socket.on("typing", ({ conversationId, userId }) => {
+        socket.to(conversationId).emit("user_typing", { conversationId, userId });
+      });
+
+      socket.on("stop_typing", ({ conversationId, userId }) => {
+        socket.to(conversationId).emit("user_stop_typing", { conversationId, userId });
+      });
+
+      socket.on("disconnect", () => {
+        // console.log("Socket disconnected:", socket.id);
+      });
+    });
+
+    // Register routes
+    app.use(sessionMiddleware);
+    console.log("✅ Session middleware configured");
+
+    app.use("/api", apiRoutes);
+    const chatRoutes = require("./routes/chatRoutes");
+    app.use("/api/chat", chatRoutes); // Register chat routes separately or integrate into apiRoutes
+    console.log("✅ API routes configured");
 
     app.use(notFoundHandler);
     app.use(errorHandler);
 
-    const server = app.listen(PORT, '0.0.0.0', () => {
+    server.listen(PORT, '0.0.0.0', () => {
       console.log(`✅ Server running on:`);
       console.log(`   Local:   http://localhost:${PORT}`);
       console.log(`   Network: http://<your-ip>:${PORT}`);
