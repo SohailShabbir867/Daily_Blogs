@@ -1,12 +1,14 @@
 import BlogCard from "../components/BlogCard";
 import NewsletterSubscription from "../components/NewsletterSubscription";
+import SEO from "../components/SEO";
 import { useBlog } from "../context/BlogContext";
 import { useState, useEffect } from "react";
 
 const Home = () => {
-  const { blogs, loading, error } = useBlog();
+  const { blogs, trendingBlogs, trendingLoading, loading, error } = useBlog();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [showTrending, setShowTrending] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
   // Typewriter effect state
@@ -16,20 +18,29 @@ const Home = () => {
 
   useEffect(() => {
     const typewriterPhrases = [
-      "Government Schemes",
       "New Technologies",
+      "Movie Reviews",
+      "Study Materials",
+      "Game Guides",
+      "Government Schemes",
+      "Job & Resume Tips",
+      "Visa & Immigration",
+      "Linux Tools",
+      "Coding Tutorials",
+      "Cybersecurity",
       "Earning Opportunities",
-      "Cybersecurity Articles",
-      "New Phones and Gadgets",
-      "Mobile Apps",
+      "Mobile Apps & Gadgets",
       "University Admissions",
       "Data Science",
+      "Foreign Study Abroad",
+      "Career Advice",
     ];
 
     const currentPhrase = typewriterPhrases[currentPhraseIndex];
     const typingSpeed = isDeleting ? 50 : 100;
     const pauseTime = 2000;
 
+    let pauseTimeout;
     const timeout = setTimeout(() => {
       if (!isDeleting) {
         // Typing
@@ -37,7 +48,7 @@ const Home = () => {
           setCurrentText(currentPhrase.slice(0, currentText.length + 1));
         } else {
           // Pause before deleting
-          setTimeout(() => setIsDeleting(true), pauseTime);
+          pauseTimeout = setTimeout(() => setIsDeleting(true), pauseTime);
         }
       } else {
         // Deleting
@@ -46,30 +57,38 @@ const Home = () => {
         } else {
           setIsDeleting(false);
           setCurrentPhraseIndex(
-            (prev) => (prev + 1) % typewriterPhrases.length
+            (prev) => (prev + 1) % typewriterPhrases.length,
           );
         }
       }
     }, typingSpeed);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      clearTimeout(pauseTimeout);
+    };
   }, [currentText, isDeleting, currentPhraseIndex]);
 
   const faqs = [
     {
       question: "What is Daily Blogs?",
       answer:
-        "Daily Blogs is a platform dedicated to sharing knowledge, insights, and stories about web development, programming, design, and technology. We publish high-quality articles to help developers learn and grow.",
+        "Daily Blogs is an all-in-one knowledge platform covering a wide range of topics including technologies, coding tutorials, study materials, movie & game reviews, government schemes, job guides & resume tips, visa & immigration help, Linux tools, cybersecurity, and much more.",
+    },
+    {
+      question: "What topics does Daily Blogs cover?",
+      answer:
+        "We cover technologies, programming & coding, study materials, movie reviews, game guides, government schemes, jobs & resume writing, visa & foreign travel, Linux tools, cybersecurity, data science, mobile apps, earning opportunities, university admissions, and more.",
     },
     {
       question: "How often is new content published?",
       answer:
-        "We publish new articles regularly, typically several times a week. Subscribe to our newsletter to get notified when new content is available.",
+        "We publish new articles regularly, typically several times a week across all our categories. Subscribe to our newsletter to get notified when new content is available.",
     },
     {
       question: "Can I contribute to Daily Blogs?",
       answer:
-        "Yes! We welcome guest contributors. If you're passionate about technology and want to share your knowledge, contact us through our Contact page to discuss collaboration opportunities.",
+        "Yes! We welcome guest contributors across all topics. Whether you're into tech, movies, gaming, career advice, or travel — contact us through our Contact page to discuss collaboration.",
     },
     {
       question: "Is the content free to read?",
@@ -169,6 +188,13 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="Daily Blogs - Tech, Study Materials, Movies, Games, Jobs, Visa & More"
+        description="Your all-in-one knowledge hub. Explore expert articles on technologies, coding tutorials, study materials, movie reviews, game guides, government schemes, job tips & resume writing, visa & immigration help, Linux tools, cybersecurity, and much more. Updated daily."
+        keywords="daily blogs, blog website, technologies, coding tutorials, study material, movie reviews, game guides, government schemes, job tips, resume writing, visa guide, immigration help, foreign study, Linux tools, cybersecurity, web development, programming, javascript, react, earning opportunities, mobile apps, data science, university admissions, gadgets, career advice, tech news, how to guides, educational articles, how to earn money online, best programming languages, latest tech news, coding tutorials for beginners, learn web development free"
+        type="website"
+        faqItems={faqs}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-24 md:py-32">
         {/* Animated Background Elements */}
@@ -248,8 +274,8 @@ const Home = () => {
 
             {/* Description */}
             <p className="text-lg md:text-xl text-emerald-100/90 mb-12 max-w-2xl mx-auto leading-relaxed">
-              Your daily source for insightful articles on web development,
-              design trends, and cutting-edge technology.
+              Your daily source for insightful articles on tech, study
+              materials, movies, games, jobs, visa guides, and much more.
             </p>
 
             {/* Search Bar */}
@@ -329,16 +355,144 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Trending Blogs Section */}
+      {!showTrending && trendingBlogs.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 pt-12 pb-4">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                <svg
+                  className="w-5 h-5 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                  <path d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">
+                  Trending Now
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Most popular articles picked by our editors
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                setShowTrending(true);
+                setSelectedCategory("All");
+              }}
+              className="text-sm font-medium text-orange-600 hover:text-orange-700 transition flex items-center gap-1"
+            >
+              View All
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {trendingLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div
+                  key={i}
+                  className="bg-white rounded-2xl p-6 animate-pulse border border-gray-100"
+                >
+                  <div className="h-40 bg-gray-200 rounded-xl mb-4"></div>
+                  <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                  <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
+                  <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {trendingBlogs.slice(0, 3).map((blog) => (
+                <div key={blog._id || blog.id} className="relative">
+                  <div className="absolute -top-2 -left-2 z-10">
+                    <span className="inline-flex items-center gap-1 bg-linear-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                      </svg>
+                      Trending
+                    </span>
+                  </div>
+                  <BlogCard blog={blog} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-6 py-12">
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-8">
+          {/* Trending Filter */}
+          <button
+            onClick={() => {
+              setShowTrending(!showTrending);
+              if (!showTrending) setSelectedCategory("All");
+            }}
+            className={`px-4 py-2 rounded-full font-medium text-sm transition flex items-center gap-1.5 ${
+              showTrending
+                ? "bg-linear-to-r from-orange-500 to-red-500 text-white shadow-md"
+                : "bg-white text-orange-600 hover:bg-orange-50 border border-orange-200"
+            }`}
+          >
+            <svg
+              className="w-4 h-4"
+              fill={showTrending ? "currentColor" : "none"}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+              />
+            </svg>
+            Trending
+            {trendingBlogs.length > 0 && (
+              <span
+                className={`text-xs rounded-full px-1.5 py-0.5 ${
+                  showTrending ? "bg-white/20" : "bg-orange-100 text-orange-700"
+                }`}
+              >
+                {trendingBlogs.length}
+              </span>
+            )}
+          </button>
+
+          <div className="w-px h-8 bg-gray-200 self-center mx-1" />
+
           {categories.map((category) => (
             <button
               key={category}
-              onClick={() => setSelectedCategory(category)}
+              onClick={() => {
+                setSelectedCategory(category);
+                setShowTrending(false);
+              }}
               className={`px-4 py-2 rounded-full font-medium text-sm transition ${
-                selectedCategory === category
+                !showTrending && selectedCategory === category
                   ? "bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-md"
                   : "bg-white text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 border"
               }`}
@@ -351,13 +505,62 @@ const Home = () => {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-gray-600">
-            {filteredBlogs.length} article
-            {filteredBlogs.length !== 1 ? "s" : ""} found
+            {showTrending ? (
+              <>
+                <span className="font-medium text-orange-600">
+                  {trendingBlogs.length} trending
+                </span>{" "}
+                article{trendingBlogs.length !== 1 ? "s" : ""}
+              </>
+            ) : (
+              <>
+                {filteredBlogs.length} article
+                {filteredBlogs.length !== 1 ? "s" : ""} found
+              </>
+            )}
           </p>
         </div>
 
         {/* Blog Grid */}
-        {filteredBlogs.length > 0 ? (
+        {showTrending ? (
+          trendingBlogs.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {trendingBlogs.map((blog) => (
+                <div key={blog._id || blog.id} className="relative">
+                  <div className="absolute -top-2 -left-2 z-10">
+                    <span className="inline-flex items-center gap-1 bg-linear-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                      </svg>
+                      Trending
+                    </span>
+                  </div>
+                  <BlogCard blog={blog} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <svg
+                className="w-16 h-16 text-orange-200 mx-auto mb-4"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                No trending articles yet
+              </h3>
+              <p className="text-gray-500">
+                Check back later for trending content.
+              </p>
+            </div>
+          )
+        ) : filteredBlogs.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBlogs.map((blog) => (
               <BlogCard key={blog._id || blog.id} blog={blog} />

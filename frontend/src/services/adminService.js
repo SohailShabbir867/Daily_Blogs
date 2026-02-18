@@ -61,6 +61,12 @@ export const toggleFeatured = async (id) => {
   return response;
 };
 
+// Toggle trending status (Super Admin only)
+export const toggleTrending = async (id) => {
+  const response = await api.put(`/admin/blogs/${id}/trending`);
+  return response;
+};
+
 // Bulk update blog status
 export const bulkUpdateStatus = async (blogIds, status) => {
   const response = await api.put("/admin/blogs/bulk-status", {
@@ -144,6 +150,7 @@ const adminService = {
   updateBlog,
   deleteBlog,
   toggleFeatured,
+  toggleTrending,
   bulkUpdateStatus,
 
   // Comments

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
+import SEO from "../components/SEO";
 import { useAuth } from "../context/AuthContext";
 import {
   getBlogBySlug,
@@ -110,8 +111,8 @@ const BlogDetails = () => {
       setLikeLoading(true);
       const response = await apiToggleLike(blog._id);
       if (response.success) {
-        setIsLiked(response.data?.liked || !isLiked);
-        setLikeCount(response.data?.likeCount || likeCount);
+        setIsLiked((prev) => response.data?.liked ?? !prev);
+        setLikeCount((prev) => response.data?.likeCount ?? prev);
       }
     } catch (err) {
       console.error("Error toggling like:", err);
@@ -127,7 +128,7 @@ const BlogDetails = () => {
       setSaveLoading(true);
       const response = await apiToggleSave(blog._id);
       if (response.success) {
-        setIsSaved(response.data?.saved || !isSaved);
+        setIsSaved((prev) => response.data?.saved ?? !prev);
       }
     } catch (err) {
       console.error("Error toggling save:", err);
@@ -365,6 +366,53 @@ const BlogDetails = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title={blog.title}
+        description={
+          blog.description ||
+          `Read ${blog.title} on Daily Blogs - Expert insights and tutorials`
+        }
+        keywords={
+          blog.tags?.join(", ") ||
+          "blog, article, technology, tutorial, programming"
+        }
+        image={blog.image}
+        type="article"
+        author={authorName}
+        publishedDate={new Date(
+          blog.createdAt || blog.publishedAt,
+        ).toISOString()}
+        modifiedDate={
+          blog.updatedAt ? new Date(blog.updatedAt).toISOString() : undefined
+        }
+        category={blog.category}
+        tags={blog.tags}
+        section={blog.category}
+        readingTime={
+          blog.content
+            ? Math.ceil(
+                blog.content.replace(/<[^>]*>/g, "").split(/\s+/).length / 200,
+              )
+            : undefined
+        }
+        wordCount={
+          blog.content
+            ? blog.content.replace(/<[^>]*>/g, "").split(/\s+/).length
+            : undefined
+        }
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          ...(blog.category
+            ? [
+                {
+                  name: blog.category,
+                  url: `/?category=${encodeURIComponent(blog.category)}`,
+                },
+              ]
+            : []),
+          { name: blog.title },
+        ]}
+      />
       {/* Hero Section */}
       <div className="relative">
         {/* Background Image/Gradient */}
@@ -377,9 +425,12 @@ const BlogDetails = () => {
               )}
               <img
                 src={blog.image}
-                alt={blog.title}
-                className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? "opacity-100" : "opacity-0"
-                  }`}
+                alt={`${blog.title} - ${blog.category || "Article"} on Daily Blogs`}
+                className={`w-full h-full object-cover transition-opacity duration-500 ${
+                  imageLoaded ? "opacity-100" : "opacity-0"
+                }`}
+                fetchPriority="high"
+                decoding="async"
                 onLoad={() => setImageLoaded(true)}
               />
             </>
@@ -473,13 +524,15 @@ const BlogDetails = () => {
               <button
                 onClick={handleLike}
                 disabled={!user || likeLoading}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${isLiked
-                  ? "bg-red-100 text-red-600"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
-                  } ${!user || likeLoading
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+                  isLiked
+                    ? "bg-red-100 text-red-600"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
+                } ${
+                  !user || likeLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                  }`}
+                }`}
                 title={user ? "Like this article" : "Login to like"}
               >
                 <svg
@@ -502,13 +555,15 @@ const BlogDetails = () => {
               <button
                 onClick={handleSave}
                 disabled={!user || saveLoading}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${isSaved
-                  ? "bg-emerald-100 text-emerald-600"
-                  : "bg-white text-gray-600 hover:bg-gray-100"
-                  } ${!user || saveLoading
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all ${
+                  isSaved
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-white text-gray-600 hover:bg-gray-100"
+                } ${
+                  !user || saveLoading
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:scale-105"
-                  }`}
+                }`}
                 title={user ? (isSaved ? "Unsave" : "Save") : "Login to save"}
               >
                 <svg
@@ -597,44 +652,93 @@ const BlogDetails = () => {
                   {
                     ALLOWED_TAGS: [
                       // Basic text
-                      "p", "br", "span", "div",
+                      "p",
+                      "br",
+                      "span",
+                      "div",
                       // Formatting
-                      "b", "strong", "i", "em", "u", "s", "strike", "del", "sub", "sup", "mark",
+                      "b",
+                      "strong",
+                      "i",
+                      "em",
+                      "u",
+                      "s",
+                      "strike",
+                      "del",
+                      "sub",
+                      "sup",
+                      "mark",
                       // Headings
-                      "h1", "h2", "h3", "h4", "h5", "h6",
+                      "h1",
+                      "h2",
+                      "h3",
+                      "h4",
+                      "h5",
+                      "h6",
                       // Lists
-                      "ul", "ol", "li",
+                      "ul",
+                      "ol",
+                      "li",
                       // Links & Media
-                      "a", "img",
+                      "a",
+                      "img",
                       // Block elements
-                      "blockquote", "hr",
+                      "blockquote",
+                      "hr",
                       // Code
-                      "code", "pre",
+                      "code",
+                      "pre",
                       // Tables
-                      "table", "thead", "tbody", "tfoot", "tr", "th", "td",
+                      "table",
+                      "thead",
+                      "tbody",
+                      "tfoot",
+                      "tr",
+                      "th",
+                      "td",
                       // Font styling
                       "font",
                       // Interactive (for code copy buttons)
                       "button",
                     ],
                     ALLOWED_ATTR: [
-                      "href", "target", "rel",
-                      "src", "alt", "width", "height",
-                      "class", "style",
-                      "color", "size", "face",
-                      "colspan", "rowspan", "align", "valign",
+                      "href",
+                      "target",
+                      "rel",
+                      "src",
+                      "alt",
+                      "width",
+                      "height",
+                      "class",
+                      "style",
+                      "color",
+                      "size",
+                      "face",
+                      "colspan",
+                      "rowspan",
+                      "align",
+                      "valign",
                       // For code blocks
-                      "id", "onclick", "contenteditable",
+                      "id",
+                      "contenteditable",
                     ],
                     ALLOW_DATA_ATTR: false,
                     ADD_ATTR: ["target"],
                     FORBID_TAGS: [
-                      "script", "iframe", "object", "embed", "form", "input",
+                      "script",
+                      "iframe",
+                      "object",
+                      "embed",
+                      "form",
+                      "input",
                     ],
                     FORBID_ATTR: [
-                      "onerror", "onload", "onclick", "onmouseover",
+                      "onerror",
+                      "onload",
+                      "onclick",
+                      "onmouseover",
                     ],
-                  }
+                  },
                 ),
               }}
             />
@@ -687,13 +791,15 @@ const BlogDetails = () => {
                 <button
                   onClick={handleLike}
                   disabled={!user || likeLoading}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${isLiked
-                    ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
-                    : "bg-white text-gray-700 border border-gray-200 hover:border-red-300 hover:text-red-600"
-                    } ${!user || likeLoading
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                    isLiked
+                      ? "bg-red-500 text-white shadow-lg shadow-red-500/25"
+                      : "bg-white text-gray-700 border border-gray-200 hover:border-red-300 hover:text-red-600"
+                  } ${
+                    !user || likeLoading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
-                    }`}
+                  }`}
                 >
                   <svg
                     className="w-5 h-5"
@@ -713,13 +819,15 @@ const BlogDetails = () => {
                 <button
                   onClick={handleSave}
                   disabled={!user || saveLoading}
-                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${isSaved
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
-                    : "bg-white text-gray-700 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600"
-                    } ${!user || saveLoading
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold transition-all ${
+                    isSaved
+                      ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                      : "bg-white text-gray-700 border border-gray-200 hover:border-emerald-300 hover:text-emerald-600"
+                  } ${
+                    !user || saveLoading
                       ? "opacity-50 cursor-not-allowed"
                       : "hover:scale-105"
-                    }`}
+                  }`}
                 >
                   <svg
                     className="w-5 h-5"

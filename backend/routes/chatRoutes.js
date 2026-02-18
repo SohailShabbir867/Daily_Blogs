@@ -10,6 +10,7 @@ const {
     markAsRead,
 } = require("../controllers/chatController");
 const { isAuthenticated, isSuperAdmin } = require("../middleware/auth");
+const { chatMessageLimiter } = require("../middleware/rateLimiter");
 
 // All chat routes require authentication
 router.use(isAuthenticated);
@@ -19,7 +20,7 @@ router.get("/support-admins", getSupportAdmins);
 router.post("/conversation", startConversation);
 router.get("/conversations", getConversations);
 router.get("/messages/:conversationId", getMessages);
-router.post("/message", sendMessage);
+router.post("/message", chatMessageLimiter, sendMessage); // Add rate limiting
 router.patch("/read/:conversationId", markAsRead);
 
 // Super Admin routes

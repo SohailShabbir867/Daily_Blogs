@@ -76,7 +76,7 @@ const CommentSection = ({ blogId }) => {
               };
             }
             return c;
-          })
+          }),
         );
         setReplyText("");
         setReplyingTo(null);
@@ -109,18 +109,18 @@ const CommentSection = ({ blogId }) => {
                   replies: c.replies.map((r) =>
                     r._id === commentId
                       ? { ...r, likeCount, userLiked: liked }
-                      : r
+                      : r,
                   ),
                 };
               }
               return c;
-            })
+            }),
           );
         } else {
           setComments((prev) =>
             prev.map((c) =>
-              c._id === commentId ? { ...c, likeCount, userLiked: liked } : c
-            )
+              c._id === commentId ? { ...c, likeCount, userLiked: liked } : c,
+            ),
           );
         }
       }
@@ -146,7 +146,7 @@ const CommentSection = ({ blogId }) => {
                 };
               }
               return c;
-            })
+            }),
           );
         } else {
           setComments((prev) => prev.filter((c) => c._id !== commentId));
@@ -199,7 +199,7 @@ const CommentSection = ({ blogId }) => {
     if (!user) return false;
     if (comment.userLiked !== undefined) return comment.userLiked;
     return comment.likes?.some(
-      (like) => like.user === user._id || like.user === user.id
+      (like) => like.user === user._id || like.user === user.id,
     );
   };
 
@@ -249,7 +249,7 @@ const CommentSection = ({ blogId }) => {
           isReply ? "ml-12 mt-4" : "p-4 bg-gray-50 rounded-xl"
         }`}
       >
-        <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
+        <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
           <span className="text-white font-medium">
             {authorName.charAt(0).toUpperCase()}
           </span>
@@ -357,7 +357,7 @@ const CommentSection = ({ blogId }) => {
           {!isReply && comment.replies && comment.replies.length > 0 && (
             <div className="mt-4 space-y-4 border-l-2 border-gray-200 pl-4">
               {comment.replies.map((reply) =>
-                renderComment(reply, true, comment._id)
+                renderComment(reply, true, comment._id),
               )}
             </div>
           )}
@@ -376,7 +376,7 @@ const CommentSection = ({ blogId }) => {
       {user ? (
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="flex gap-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
               <span className="text-white font-medium">
                 {user.name?.charAt(0).toUpperCase() || "U"}
               </span>

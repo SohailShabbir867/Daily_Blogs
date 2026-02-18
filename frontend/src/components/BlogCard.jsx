@@ -1,12 +1,12 @@
 // BlogCard - Displays blog article previews with like and save functionality
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 import { useAuth } from "../context/AuthContext";
 import { toggleSaveBlog } from "../services/userService";
 import { toggleLike } from "../services/blogService";
 
-const BlogCard = ({ blog }) => {
+const BlogCard = memo(({ blog }) => {
   const { user } = useAuth();
   const [likeCount, setLikeCount] = useState(blog.likeCount || 0);
   const [isLiked, setIsLiked] = useState(false);
@@ -87,9 +87,12 @@ const BlogCard = ({ blog }) => {
         {blog.image ? (
           <img
             src={blog.image}
-            alt={`Cover for ${blog.title}`}
+            alt={`${blog.title} - ${blog.category || "Tech"} article cover image`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             loading="lazy"
+            decoding="async"
+            width="400"
+            height="192"
             onError={(e) => {
               e.target.style.display = "none";
             }}
@@ -110,6 +113,17 @@ const BlogCard = ({ blog }) => {
           <span className="bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-full shadow-sm">
             {blog.category || "Article"}
           </span>
+          {/* Trending Badge */}
+          {blog.isTrending && (
+            <span
+              className="bg-linear-to-r from-orange-500 to-red-500 text-white text-xs font-semibold px-2 py-1.5 rounded-full shadow-sm flex items-center gap-1"
+              title="Trending"
+            >
+              <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+              </svg>
+            </span>
+          )}
           {/* Members Only Badge */}
           {blog.visibility === "registered" && (
             <span
@@ -256,7 +270,9 @@ const BlogCard = ({ blog }) => {
       </div>
     </article>
   );
-};
+});
+
+BlogCard.displayName = "BlogCard";
 
 BlogCard.propTypes = {
   blog: PropTypes.shape({
@@ -279,6 +295,7 @@ BlogCard.propTypes = {
     publishedAt: PropTypes.string,
     readTime: PropTypes.number,
     likeCount: PropTypes.number,
+    isTrending: PropTypes.bool,
   }).isRequired,
 };
 

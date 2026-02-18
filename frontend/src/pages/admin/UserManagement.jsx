@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 
 const UserManagement = () => {
   const { user, isSuperAdmin, loading: authLoading } = useAuth();
@@ -24,18 +25,8 @@ const UserManagement = () => {
   // Fetch users
   const fetchUsers = useCallback(async () => {
     try {
-      const response = await fetch(
-        "http://localhost:5000/api/admin/manage/users",
-        {
-          credentials: "include",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Failed to fetch users");
-      }
+      setError("");
+      const data = await api.get("/admin/manage/users");
 
       setUsers(data.data.users);
     } catch (err) {
@@ -46,14 +37,8 @@ const UserManagement = () => {
   // Fetch stats
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/admin/stats", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      }
+      const data = await api.get("/admin/stats");
+      setStats(data.data);
     } catch (err) {
       console.error("Failed to fetch stats:", err);
     }
@@ -87,40 +72,20 @@ const UserManagement = () => {
     setActionLoading(`${userId}-${action}`);
 
     try {
-      let url = `http://localhost:5000/api/admin/manage/users/${userId}`;
-      let method = "DELETE";
-
-      if (action === "promote") {
-        url += "/promote";
-        method = "PATCH";
+      if (action === "delete") {
+        await api.delete(`/admin/manage/users/${userId}`);
+      } else if (action === "promote") {
+        await api.patch(`/admin/manage/users/${userId}/promote`);
       } else if (action === "demote") {
-        url += "/demote";
-        method = "PATCH";
+        await api.patch(`/admin/manage/users/${userId}/demote`);
       } else if (action === "toggleStatus") {
-        url += "/toggle-status";
-        method = "PATCH";
+        await api.patch(`/admin/manage/users/${userId}/toggle-status`);
       } else if (action === "toggleChat") {
-        url = `http://localhost:5000/api/chat/admin-status/${userId}`;
-        method = "PATCH";
-        // Need to send actual body for chat toggle, but simplified for single action
-        // For consistent API, we might need to update fetch body below
-      }
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: action === "toggleChat"
-          ? JSON.stringify({ enabled: !users.find(u => u._id === userId).isChatSupport })
-          : undefined,
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || `Failed to ${action} user`);
+        const targetUser = users.find((u) => u._id === userId);
+        if (!targetUser) throw new Error("User not found");
+        await api.patch(`/chat/admin-status/${userId}`, {
+          enabled: !targetUser.isChatSupport,
+        });
       }
 
       // Refresh users list
@@ -324,10 +289,11 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs font-medium ${user.isActive !== false
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${
+                          user.isActive !== false
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
-                          }`}
+                        }`}
                       >
                         {user.isActive !== false ? "Active" : "Inactive"}
                       </span>
@@ -368,11 +334,14 @@ const UserManagement = () => {
                               onClick={() =>
                                 handleAction(user._id, "toggleChat", user.name)
                               }
-                              disabled={actionLoading === `${user._id}-toggleChat`}
-                              className={`px-3 py-1 rounded-lg transition disabled:opacity-50 ${user.isChatSupport
+                              disabled={
+                                actionLoading === `${user._id}-toggleChat`
+                              }
+                              className={`px-3 py-1 rounded-lg transition disabled:opacity-50 ${
+                                user.isChatSupport
                                   ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                                }`}
+                              }`}
                             >
                               {actionLoading === `${user._id}-toggleChat`
                                 ? "..."

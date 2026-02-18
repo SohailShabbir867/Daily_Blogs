@@ -258,4 +258,25 @@ module.exports = {
   searchLimiter,
   createRateLimiter,
   slidingWindowLimiter,
+  chatMessageLimiter: rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 30, // 30 messages per minute per user
+    message: {
+      success: false,
+      status: "error",
+      message: "Too many messages sent. Please slow down.",
+      code: "CHAT_RATE_LIMIT_EXCEEDED",
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => {
+      // Rate limit per user ID instead of IP
+      return req.user?._id?.toString() || req.ip;
+    },
+    handler: (req, res, next, options) => {
+      const error = new ApiError(options.message.message, 429);
+      error.code = "CHAT_RATE_LIMIT_EXCEEDED";
+      next(error);
+    },
+  }),
 };

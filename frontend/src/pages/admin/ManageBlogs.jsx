@@ -6,6 +6,7 @@ import {
   getAllBlogs,
   deleteBlog,
   updateBlog,
+  toggleTrending,
 } from "../../services/adminService";
 
 const ManageBlogs = () => {
@@ -19,6 +20,7 @@ const ManageBlogs = () => {
 
   // Filter state
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
   // Stats
@@ -30,6 +32,14 @@ const ManageBlogs = () => {
 
   // Action loading states
   const [actionLoading, setActionLoading] = useState(null);
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   // Fetch blogs from API
   const fetchBlogs = useCallback(async () => {
@@ -46,8 +56,8 @@ const ManageBlogs = () => {
         params.status = filterStatus;
       }
 
-      if (searchTerm) {
-        params.search = searchTerm;
+      if (debouncedSearch) {
+        params.search = debouncedSearch;
       }
 
       const response = await getAllBlogs(params);
@@ -64,7 +74,7 @@ const ManageBlogs = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, filterStatus, searchTerm]);
+  }, [currentPage, filterStatus, debouncedSearch]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -111,6 +121,18 @@ const ManageBlogs = () => {
       fetchBlogs();
     } catch (err) {
       alert(err.message || "Failed to update blog status");
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleToggleTrending = async (blog) => {
+    try {
+      setActionLoading(`trending-${blog._id}`);
+      await toggleTrending(blog._id);
+      fetchBlogs();
+    } catch (err) {
+      alert(err.message || "Failed to update trending status");
     } finally {
       setActionLoading(null);
     }
@@ -191,6 +213,25 @@ const ManageBlogs = () => {
               {stats.draft || 0}
             </p>
           </div>
+          {isSuperAdmin && (
+            <div className="bg-white rounded-xl p-4 shadow-sm border border-orange-100">
+              <p className="text-gray-500 text-sm flex items-center gap-1.5">
+                <svg
+                  className="w-4 h-4 text-orange-500"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
+                </svg>
+                Trending
+              </p>
+              <p className="text-2xl font-bold text-orange-600">
+                {stats.trending ||
+                  blogs.filter((b) => b.isTrending).length ||
+                  0}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Filters */}
@@ -306,6 +347,11 @@ const ManageBlogs = () => {
                       <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">
                         Status
                       </th>
+                      {isSuperAdmin && (
+                        <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">
+                          Trending
+                        </th>
+                      )}
                       <th className="text-left px-6 py-4 text-sm font-semibold text-gray-600">
                         Date
                       </th>
@@ -399,6 +445,51 @@ const ManageBlogs = () => {
                             {actionLoading === blog._id ? "..." : blog.status}
                           </button>
                         </td>
+                        {isSuperAdmin && (
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleToggleTrending(blog)}
+                              disabled={
+                                actionLoading === `trending-${blog._id}`
+                              }
+                              className={`px-3 py-1 rounded-full text-sm font-medium transition flex items-center gap-1.5 ${
+                                blog.isTrending
+                                  ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                                  : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                              }`}
+                              title={
+                                blog.isTrending
+                                  ? "Remove from trending"
+                                  : "Mark as trending"
+                              }
+                            >
+                              <svg
+                                className="w-4 h-4"
+                                fill={blog.isTrending ? "currentColor" : "none"}
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"
+                                />
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2}
+                                  d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"
+                                />
+                              </svg>
+                              {actionLoading === `trending-${blog._id}`
+                                ? "..."
+                                : blog.isTrending
+                                  ? "Trending"
+                                  : "Set Trending"}
+                            </button>
+                          </td>
+                        )}
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {formatDate(blog.createdAt)}
                         </td>
@@ -475,7 +566,7 @@ const ManageBlogs = () => {
                                   handleDelete(
                                     blog._id,
                                     blog.title,
-                                    blog.canDelete
+                                    blog.canDelete,
                                   )
                                 }
                                 disabled={actionLoading === blog._id}

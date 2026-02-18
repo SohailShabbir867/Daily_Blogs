@@ -1,6 +1,7 @@
 // Reset password page - set new password after OTP verification
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import SEO from "../components/SEO";
 import api from "../services/api";
 
 const ResetPassword = () => {
@@ -13,11 +14,15 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { email, otp } = location.state || {};
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     if (!email || !otp) {
       navigate("/forgot-password");
     }
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
   }, [email, otp, navigate]);
 
   const handleSubmit = async (e) => {
@@ -43,14 +48,14 @@ const ResetPassword = () => {
         newPassword: password,
       });
       setSuccess(true);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         navigate("/login");
       }, 3000);
     } catch (err) {
       setError(
         err.response?.data?.error?.message ||
           err.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -59,6 +64,13 @@ const ResetPassword = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <SEO
+        title="Reset Password"
+        description="Set a new password for your Daily Blogs account. Create a strong, secure password to protect your account."
+        keywords="reset password, new password, account security, daily blogs"
+        noindex={true}
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Reset Password" }]}
+      />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}

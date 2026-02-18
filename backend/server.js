@@ -168,8 +168,6 @@ const startServer = async () => {
     console.log("✅ Session middleware configured");
 
     app.use("/api", apiRoutes);
-    const chatRoutes = require("./routes/chatRoutes");
-    app.use("/api/chat", chatRoutes); // Register chat routes separately or integrate into apiRoutes
     console.log("✅ API routes configured");
 
     app.use(notFoundHandler);

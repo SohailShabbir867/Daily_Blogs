@@ -1,6 +1,7 @@
 // Contact page with support form
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import SEO from "../components/SEO";
 import api from "../services/api";
 
 const Contact = () => {
@@ -31,7 +32,7 @@ const Contact = () => {
       setError(
         err.response?.data?.error?.message ||
           err.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -79,6 +80,13 @@ const Contact = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
+      <SEO
+        title="Contact Us"
+        description="Have questions, feedback, or collaboration inquiries? Contact the Daily Blogs team. We cover tech, study materials, movies, games, jobs, visa guides, and more. We respond within 24-48 hours."
+        keywords="contact daily blogs, support, feedback, get in touch, guest posting, collaboration, partnership, blog contact"
+        type="website"
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Contact Us" }]}
+      />
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">

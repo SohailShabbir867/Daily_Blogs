@@ -1,6 +1,7 @@
 // Register page - new user registration
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEO from "../components/SEO";
 import { useAuth } from "../context/AuthContext";
 
 const Register = () => {
@@ -43,7 +44,13 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const result = await register({ name, email, password, confirmPassword, acceptTerms });
+      const result = await register({
+        name,
+        email,
+        password,
+        confirmPassword,
+        acceptTerms,
+      });
 
       if (result.requiresVerification) {
         setRegistrationSuccess(true);
@@ -58,10 +65,21 @@ const Register = () => {
     }
   };
 
+  const seoTag = (
+    <SEO
+      title="Create Account"
+      description="Join Daily Blogs - Create a free account to save articles, like posts, comment, and connect with the developer community. Start learning today."
+      keywords="register, sign up, create account, join daily blogs, free developer account"
+      noindex={true}
+      breadcrumbs={[{ name: "Home", url: "/" }, { name: "Register" }]}
+    />
+  );
+
   // Show success message after registration
   if (registrationSuccess) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+        {seoTag}
         <div className="max-w-md w-full">
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             {/* Success Icon */}
@@ -123,6 +141,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      {seoTag}
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
@@ -231,7 +250,10 @@ const Register = () => {
                 onChange={(e) => setAcceptTerms(e.target.checked)}
                 className="w-5 h-5 mt-0.5 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500 cursor-pointer"
               />
-              <label htmlFor="acceptTerms" className="text-sm text-gray-600 cursor-pointer">
+              <label
+                htmlFor="acceptTerms"
+                className="text-sm text-gray-600 cursor-pointer"
+              >
                 I agree to the{" "}
                 <Link
                   to="/terms"

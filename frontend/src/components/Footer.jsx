@@ -12,12 +12,15 @@ const Footer = () => {
   ];
 
   const categories = [
-    "Development",
-    "Design",
-    "Career",
-    "React",
-    "JavaScript",
-    "Best Practices",
+    "Technology",
+    "Study Material",
+    "Movies & Entertainment",
+    "Games",
+    "Government Schemes",
+    "Jobs & Career",
+    "Visa & Immigration",
+    "Linux & Tools",
+    "Coding",
   ];
 
   const socialLinks = [
@@ -114,9 +117,9 @@ const Footer = () => {
               <span className="text-2xl font-bold text-white">Daily Blogs</span>
             </Link>
             <p className="text-gray-400 max-w-md leading-relaxed mb-6">
-              Discover insightful articles on development, design, and
-              technology. Learn something new every day with our curated content
-              from industry experts.
+              Your all-in-one knowledge hub — discover articles on tech, study
+              materials, movies, games, government schemes, jobs, visa guides,
+              Linux tools, coding, and much more.
             </p>
 
             {/* Newsletter Mini */}

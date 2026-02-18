@@ -153,6 +153,12 @@ const blogSchema = new mongoose.Schema(
       default: false,
     },
 
+    isTrending: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+
     allowComments: {
       type: Boolean,
       default: true,

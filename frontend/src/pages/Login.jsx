@@ -1,6 +1,7 @@
 // Login page - user authentication
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEO from "../components/SEO";
 import { useAuth } from "../context/AuthContext";
 import { resendVerification } from "../services/authService";
 
@@ -62,7 +63,7 @@ const Login = () => {
       setError("");
     } catch (err) {
       setError(
-        err.message || "Failed to resend verification email. Please try again."
+        err.message || "Failed to resend verification email. Please try again.",
       );
     } finally {
       setResendLoading(false);
@@ -71,6 +72,13 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <SEO
+        title="Login"
+        description="Sign in to Daily Blogs to access your saved articles, like posts, and join the developer community. Secure login with email and password."
+        keywords="login, sign in, daily blogs login, developer login, access account"
+        noindex={true}
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Login" }]}
+      />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}

@@ -6,6 +6,7 @@ const {
   getBlogs,
   getBlogBySlug,
   getFeaturedBlogs,
+  getTrendingBlogs,
   getCategories,
   toggleLike,
   getLikeStatus,
@@ -42,6 +43,7 @@ router.get(
 );
 
 router.get("/featured", getFeaturedBlogs);
+router.get("/trending", getTrendingBlogs);
 router.get("/categories", getCategories);
 router.get("/:identifier", optionalAuth, getBlogBySlug);
 

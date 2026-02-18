@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
 
 const ContactsManagement = () => {
   const { user, isSuperAdmin, loading: authLoading } = useAuth();
@@ -24,15 +25,8 @@ const ContactsManagement = () => {
   // Fetch contacts
   const fetchContacts = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/contact", {
-        credentials: "include",
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Failed to fetch contacts");
-      }
+      setError("");
+      const data = await api.get("/contact");
 
       setContacts(data.data.contacts);
     } catch (err) {
@@ -43,14 +37,8 @@ const ContactsManagement = () => {
   // Fetch stats
   const fetchStats = useCallback(async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/contact/stats", {
-        credentials: "include",
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStats(data.data);
-      }
+      const data = await api.get("/contact/stats");
+      setStats(data.data);
     } catch (err) {
       console.error("Failed to fetch stats:", err);
     }
@@ -74,24 +62,15 @@ const ContactsManagement = () => {
     setActionLoading(`${contactId}-status`);
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/contact/${contactId}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ status }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Failed to update status");
-      }
+      await api.patch(`/contact/${contactId}`, { status });
 
       await fetchContacts();
       await fetchStats();
+
+      // Update selectedContact to reflect the new status
+      if (selectedContact?._id === contactId) {
+        setSelectedContact((prev) => (prev ? { ...prev, status } : null));
+      }
     } catch (err) {
       alert(err.message);
     } finally {
@@ -107,19 +86,7 @@ const ContactsManagement = () => {
     setActionLoading(`${contactId}-delete`);
 
     try {
-      const response = await fetch(
-        `http://localhost:5000/api/contact/${contactId}`,
-        {
-          method: "DELETE",
-          credentials: "include",
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Failed to delete contact");
-      }
+      await api.delete(`/contact/${contactId}`);
 
       await fetchContacts();
       await fetchStats();
@@ -291,7 +258,7 @@ const ContactsManagement = () => {
                       </div>
                       <span
                         className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                          contact.status
+                          contact.status,
                         )}`}
                       >
                         {contact.status}

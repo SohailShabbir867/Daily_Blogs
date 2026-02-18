@@ -11,15 +11,15 @@ const getIO = (req) => req.app.get("io");
 // @route   GET /api/chat/support-admins
 // @access  Registered Users
 const getSupportAdmins = asyncHandler(async (req, res) => {
-    // Find admins and super admins who have chat support enabled
+    // Find all admins and super admins who are active
+    // Everyone can chat with all admins (no isChatSupport requirement)
     const admins = await User.find({
         $or: [
-            { role: "admin", isChatSupport: true },
-            { isSuperAdmin: true } // Super admins are always available for chat
-        ],
-        isActive: true
+            { role: "admin", isActive: true },
+            { isSuperAdmin: true, isActive: true }
+        ]
     })
-        .select("name email avatar bio role isSuperAdmin isActive lastLogin")
+        .select("name email avatar bio role isSuperAdmin isActive lastLogin isChatSupport")
         .lean();
 
     res.status(200).json({
@@ -46,10 +46,10 @@ const startConversation = asyncHandler(async (req, res) => {
         throw new BadRequestError("User not found or inactive");
     }
 
-    // Must be either admin with chat support OR super admin
-    const isValidChatTarget = admin.isSuperAdmin || (admin.role === "admin" && admin.isChatSupport);
+    // Must be either admin OR super admin (removed isChatSupport requirement)
+    const isValidChatTarget = admin.isSuperAdmin || admin.role === "admin";
     if (!isValidChatTarget) {
-        throw new BadRequestError("This user is not available for chat support");
+        throw new BadRequestError("This user is not available for chat");
     }
 
     // Check for existing conversation
@@ -90,10 +90,24 @@ const getConversations = asyncHandler(async (req, res) => {
         .populate("lastMessage")
         .sort({ updatedAt: -1 });
 
+    // Decrypt lastMessage content for preview
+    const decryptedConversations = conversations.map(conv => {
+        const convObj = conv.toObject();
+        if (convObj.lastMessage && convObj.lastMessage.isEncrypted && convObj.lastMessage.content) {
+            const { decrypt } = require("../utils/encryption");
+            try {
+                convObj.lastMessage.content = decrypt(convObj.lastMessage.content);
+            } catch {
+                convObj.lastMessage.content = "Unable to decrypt message";
+            }
+        }
+        return convObj;
+    });
+
     res.status(200).json({
         success: true,
-        count: conversations.length,
-        data: conversations,
+        count: decryptedConversations.length,
+        data: decryptedConversations,
     });
 });
 
@@ -134,6 +148,20 @@ const sendMessage = asyncHandler(async (req, res) => {
     const { conversationId, content } = req.body;
     const userId = req.user._id;
 
+    // Validate message content
+    if (!content || typeof content !== 'string') {
+        throw new BadRequestError("Message content is required");
+    }
+
+    const trimmedContent = content.trim();
+    if (trimmedContent.length === 0) {
+        throw new BadRequestError("Message cannot be empty");
+    }
+
+    if (trimmedContent.length > 2000) {
+        throw new BadRequestError("Message exceeds maximum length of 2000 characters");
+    }
+
     const conversation = await Conversation.findOne({
         _id: conversationId,
         participants: userId,
@@ -146,7 +174,7 @@ const sendMessage = asyncHandler(async (req, res) => {
     const message = await Message.create({
         conversationId,
         sender: userId,
-        content,
+        content: trimmedContent,
     });
 
     // Update conversation

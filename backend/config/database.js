@@ -42,9 +42,11 @@ class DatabaseConnection {
     // Mongoose connection options
     const options = {
       maxPoolSize: 10, // Maximum number of connections in the pool
-      serverSelectionTimeoutMS: 5000, // Timeout for server selection
+      serverSelectionTimeoutMS: 30000, // Increased timeout for server selection (30s)
       socketTimeoutMS: 45000, // Timeout for socket operations
       family: 4, // Use IPv4, skip trying IPv6
+      // DNS resolution options to help with SRV lookup issues
+      directConnection: false,
     };
 
     try {
@@ -59,6 +61,28 @@ class DatabaseConnection {
       console.log(`📦 Database: ${mongoose.connection.db.databaseName}`);
     } catch (error) {
       console.error("❌ MongoDB connection error:", error.message);
+
+      // Check for DNS timeout error and provide specific guidance
+      if (error.message.includes("ETIMEOUT") || error.message.includes("queryTxt")) {
+        console.error("\n");
+        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.error("🔧 DNS RESOLUTION ERROR DETECTED");
+        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.error("");
+        console.error("Your DNS server cannot resolve MongoDB Atlas addresses.");
+        console.error("");
+        console.error("QUICK FIX - Change DNS to Google DNS:");
+        console.error("  1. Press Win+R, type 'ncpa.cpl', press Enter");
+        console.error("  2. Right-click your network adapter > Properties");
+        console.error("  3. Select 'Internet Protocol Version 4 (TCP/IPv4)' > Properties");
+        console.error("  4. Set DNS servers to: 8.8.8.8 and 8.8.4.4");
+        console.error("  5. Run 'ipconfig /flushdns' in Command Prompt");
+        console.error("  6. Restart this server");
+        console.error("");
+        console.error("See FIX-DNS-ISSUE.md for more solutions.");
+        console.error("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+        console.error("\n");
+      }
 
       // Retry logic
       if (this.retryCount < MAX_RETRY_ATTEMPTS) {

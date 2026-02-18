@@ -1,26 +1,13 @@
-// About page - Daily Blogs platform information
+// page - Daily Blogs platform information
 import { Link } from "react-router-dom";
-import { useEffect } from "react";
+import SEO from "../components/SEO";
 
 const About = () => {
-  useEffect(() => {
-    document.title = "About Us - Daily Blogs | Your Source for Tech Insights";
-
-    // Add meta description
-    const metaDescription = document.querySelector('meta[name="description"]');
-    if (metaDescription) {
-      metaDescription.setAttribute(
-        "content",
-        "Learn about Daily Blogs - a platform dedicated to sharing knowledge, insights, and stories about web development, programming, design, and technology."
-      );
-    }
-  }, []);
-
   const teamMembers = [
     {
       name: "Shabbir Sohail",
       role: "Founder & Lead Developer",
-      bio: "Full-stack developer passionate about creating innovative web solutions and sharing knowledge with the developer community.",
+      bio: "Full-stack developer passionate creating innovative web solutions and sharing knowledge with the developer community.",
       avatar: "S",
       color: "from-emerald-500 to-teal-500",
     },
@@ -132,6 +119,13 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="About Us"
+        description="Learn about Daily Blogs - an all-in-one knowledge hub sharing articles on technologies, study materials, movies, games, government schemes, jobs & resume tips, visa & immigration, Linux tools, coding, and more. Meet our team and mission."
+        keywords="about daily blogs, knowledge platform, multi-topic blog, tech articles, study material, movie reviews, game guides, government schemes, jobs, visa help, Linux, coding tutorials, our mission, meet the team"
+        type="website"
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "About Us" }]}
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-24 md:py-32">
         {/* Animated Background Elements */}
@@ -176,7 +170,7 @@ const About = () => {
                 <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-lime-400"></span>
               </span>
               <span className="text-sm font-medium text-emerald-100">
-                Learn more about us
+                Learn more us
               </span>
             </div>
 
@@ -187,8 +181,8 @@ const About = () => {
               </span>
             </h1>
             <p className="text-lg md:text-xl text-emerald-100/90 max-w-3xl mx-auto leading-relaxed">
-              Empowering developers with knowledge, insights, and inspiration to
-              build amazing things.
+              Empowering everyone with knowledge, insights, and inspiration
+              across tech, education, entertainment, careers, and beyond.
             </p>
           </div>
         </div>
@@ -218,23 +212,23 @@ const About = () => {
                 Our Mission
               </span>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-6">
-                Making Tech Knowledge Accessible to Everyone
+                Making Knowledge Accessible to Everyone
               </h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">
                 Daily Blogs was founded with a simple yet powerful mission: to
-                democratize technical knowledge and make learning accessible to
-                developers of all skill levels.
+                be an all-in-one knowledge hub that makes learning accessible to
+                everyone — from coding and technologies to movies, games, career
+                advice, and beyond.
               </p>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">
-                Whether you're a beginner taking your first steps in coding or
-                an experienced developer looking to stay updated with the latest
-                trends, we've got content tailored for you.
+                Whether you're looking for study materials, visa and immigration
+                guides, government scheme updates, Linux tools, job tips, or the
+                latest movie and game reviews — we've got content for you.
               </p>
               <p className="text-gray-600 text-lg leading-relaxed">
                 We believe that sharing knowledge is the key to building a
-                stronger, more innovative tech community. Every article we
-                publish is crafted with care to provide real value to our
-                readers.
+                stronger, more informed community. Every article we publish is
+                crafted with care to provide real value to our readers.
               </p>
             </div>
             <div className="relative">
@@ -302,8 +296,8 @@ const About = () => {
               Meet Our Team
             </h2>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
-              A passionate group of developers, writers, and designers working
-              together to bring you the best content.
+              A passionate group of writers, creators, and tech enthusiasts
+              working together to bring you the best content.
             </p>
           </div>
 
@@ -346,34 +340,49 @@ const About = () => {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               {
-                title: "Web Development",
-                desc: "React, Vue, Angular, Node.js, and modern web technologies",
-                icon: "🌐",
+                title: "Technologies",
+                desc: "Latest tech trends, gadgets, mobile apps, and innovation updates",
+                icon: "🚀",
               },
               {
-                title: "Programming",
-                desc: "JavaScript, Python, TypeScript, and best coding practices",
+                title: "Coding & Programming",
+                desc: "JavaScript, Python, React, web development tutorials, and best practices",
                 icon: "💻",
               },
               {
-                title: "UI/UX Design",
-                desc: "Design principles, CSS tricks, and user experience insights",
-                icon: "🎨",
+                title: "Study Materials",
+                desc: "Notes, guides, exam prep, university admissions, and educational resources",
+                icon: "📚",
               },
               {
-                title: "DevOps & Cloud",
-                desc: "Docker, AWS, CI/CD pipelines, and deployment strategies",
-                icon: "☁️",
+                title: "Movies & Entertainment",
+                desc: "Movie reviews, OTT recommendations, TV series, and entertainment news",
+                icon: "🎬",
               },
               {
-                title: "Career Growth",
-                desc: "Interview tips, career advice, and professional development",
-                icon: "📈",
+                title: "Games & Gaming",
+                desc: "Game reviews, guides, walkthroughs, tips, and gaming news",
+                icon: "🎮",
               },
               {
-                title: "Tech News",
-                desc: "Latest updates, trends, and innovations in the tech world",
-                icon: "📰",
+                title: "Government Schemes",
+                desc: "Latest govt schemes, benefits, eligibility, and application guides",
+                icon: "🏛️",
+              },
+              {
+                title: "Jobs & Career",
+                desc: "Job tips, resume writing, interview prep, and career growth strategies",
+                icon: "💼",
+              },
+              {
+                title: "Visa & Immigration",
+                desc: "Visa guides, foreign study, immigration tips, and travel documentation",
+                icon: "✈️",
+              },
+              {
+                title: "Linux & Tools",
+                desc: "Linux tutorials, open-source tools, DevOps, and developer productivity",
+                icon: "🐧",
               },
             ].map((topic, index) => (
               <div
@@ -395,11 +404,11 @@ const About = () => {
       <section className="py-20 bg-white">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Ready to Start Your Journey?
+            Ready to Start Exploring?
           </h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join our community of developers and start exploring articles that
-            will help you grow your skills.
+            Join our community and discover articles on tech, movies, games,
+            study materials, jobs, government schemes, and so much more.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
@@ -449,7 +458,7 @@ const About = () => {
         <div className="max-w-6xl mx-auto px-6 text-center">
           <p className="text-gray-600">
             © {new Date().getFullYear()} Daily Blogs. All rights reserved. Made
-            with ❤️ for the developer community.
+            with ❤️ for our readers.
           </p>
         </div>
       </section>

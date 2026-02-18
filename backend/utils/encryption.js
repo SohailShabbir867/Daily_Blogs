@@ -2,6 +2,9 @@
 const crypto = require("crypto");
 
 // Encryption key - should be stored in environment variables
+if (!process.env.CHAT_ENCRYPTION_KEY && process.env.NODE_ENV === "production") {
+    console.error("⚠️ WARNING: CHAT_ENCRYPTION_KEY not set in production. Using random key - messages will not persist across restarts!");
+}
 const ENCRYPTION_KEY = process.env.CHAT_ENCRYPTION_KEY || crypto.randomBytes(32).toString("hex").slice(0, 32);
 const ALGORITHM = "aes-256-gcm";
 const IV_LENGTH = 16; // GCM mode needs 12-16 bytes IV

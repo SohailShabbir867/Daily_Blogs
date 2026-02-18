@@ -10,7 +10,7 @@ import {
 } from "../../services/adminService";
 
 const SendNotifications = () => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("general");
@@ -45,10 +45,10 @@ const SendNotifications = () => {
 
   // Check if user is super admin
   useEffect(() => {
-    if (!user?.isSuperAdmin) {
+    if (!authLoading && !user?.isSuperAdmin) {
       navigate("/admin");
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   // Fetch recipient count when type changes
   useEffect(() => {

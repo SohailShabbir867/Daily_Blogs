@@ -1,6 +1,7 @@
 // Verify OTP page - enter the OTP code sent to email
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import SEO from "../components/SEO";
 import api from "../services/api";
 
 const VerifyOTP = () => {
@@ -72,7 +73,7 @@ const VerifyOTP = () => {
       setError(
         err.response?.data?.error?.message ||
           err.message ||
-          "Invalid or expired OTP"
+          "Invalid or expired OTP",
       );
     } finally {
       setIsLoading(false);
@@ -93,7 +94,7 @@ const VerifyOTP = () => {
       setError(
         err.response?.data?.error?.message ||
           err.message ||
-          "Failed to resend OTP"
+          "Failed to resend OTP",
       );
     } finally {
       setResendLoading(false);
@@ -102,6 +103,17 @@ const VerifyOTP = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <SEO
+        title="Verify OTP"
+        description="Enter the verification code sent to your email to complete your Daily Blogs password reset."
+        keywords="verify OTP, verification code, password reset verification"
+        noindex={true}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Forgot Password", url: "/forgot-password" },
+          { name: "Verify OTP" },
+        ]}
+      />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}
@@ -172,7 +184,7 @@ const VerifyOTP = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-linear-to-r from-emerald-500 to-teal-500 text-white py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition shadow-lg shadow-emerald-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Verifying..." : "Verify Code"}
             </button>

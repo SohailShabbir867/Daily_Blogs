@@ -16,6 +16,7 @@ const {
   adminUpdateBlog,
   adminDeleteBlog,
   toggleFeatured,
+  toggleTrending,
   bulkUpdateStatus,
 } = require("../controllers/blogController");
 
@@ -26,7 +27,7 @@ const {
 } = require("../controllers/commentController");
 
 // Middleware
-const { isAuthenticated } = require("../middleware/auth");
+const { isAuthenticated, isSuperAdmin } = require("../middleware/auth");
 const { isAdmin, isModerator } = require("../middleware/admin");
 const { handleValidationErrors } = require("../middleware/errorHandler");
 
@@ -269,6 +270,15 @@ router.put(
   toggleFeatured
 );
 
+// PUT /api/admin/blogs/:id/trending - Toggle trending status (Super Admin only)
+router.put(
+  "/blogs/:id/trending",
+  isSuperAdmin,
+  validateObjectId("id"),
+  handleValidationErrors,
+  toggleTrending
+);
+
 // PUT /api/admin/blogs/bulk-status - Bulk update blog status
 router.put("/blogs/bulk-status", isAdmin, bulkUpdateStatus);
 
@@ -302,7 +312,6 @@ const {
   demoteToUser,
   toggleUserStatus: superAdminToggleUserStatus,
 } = require("../controllers/adminController");
-const { isSuperAdmin } = require("../middleware/auth");
 
 router.get("/manage/users", isSuperAdmin, superAdminGetAllUsers);
 router.get("/manage/users/:id", isSuperAdmin, superAdminGetUser);

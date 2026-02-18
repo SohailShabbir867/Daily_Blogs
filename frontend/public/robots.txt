@@ -1,0 +1,44 @@
+# Daily Blogs - Robots.txt
+# https://dailyblogs.com
+
+User-agent: *
+Allow: /
+Allow: /blog/
+Allow: /about
+Allow: /contact
+Allow: /privacy
+Allow: /terms
+
+# Block private/auth pages from indexing
+Disallow: /admin/
+Disallow: /admin
+Disallow: /verify-email/
+Disallow: /reset-password
+Disallow: /verify-otp
+Disallow: /forgot-password
+Disallow: /saved
+Disallow: /login
+Disallow: /register
+
+# Block query parameters that create duplicate content
+Disallow: /*?sort=
+Disallow: /*?page=
+
+# Crawl-delay (be kind to server)
+Crawl-delay: 1
+
+# Googlebot specific (no crawl-delay needed, Google ignores it)
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+Disallow: /admin
+Disallow: /verify-email/
+Disallow: /reset-password
+Disallow: /verify-otp
+Disallow: /forgot-password
+Disallow: /saved
+Disallow: /login
+Disallow: /register
+
+# Sitemap location
+Sitemap: https://dailyblogs.com/sitemap.xml

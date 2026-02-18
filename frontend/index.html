@@ -1,50 +1,156 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
-    <!-- SEO Meta Tags -->
+    <!-- Favicon & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Theme & Mobile -->
+    <meta name="theme-color" content="#10b981" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="Daily Blogs" />
+    <meta name="application-name" content="Daily Blogs" />
+
+    <!-- Primary SEO Meta Tags -->
     <title>
-      Daily Blogs - Your Source for Tech Insights & Development Tutorials
+      Daily Blogs - Tech, Study Materials, Movies, Games, Jobs, Visa & More
     </title>
     <meta
       name="description"
-      content="Daily Blogs is a platform for developers to explore articles on web development, programming, design, and technology. Learn, share, and grow with our community."
+      content="Daily Blogs - Your all-in-one knowledge hub. Explore expert articles on technologies, coding tutorials, study materials, movie reviews, game guides, government schemes, job tips, resume writing, visa & immigration help, Linux tools, cybersecurity, and much more."
     />
     <meta
       name="keywords"
-      content="web development, programming, javascript, react, tutorials, tech blog, coding, developer, software engineering"
+      content="daily blogs, blog website, technologies, coding tutorials, study material, movie reviews, game guides, government schemes, job tips, resume writing, visa guide, immigration help, foreign study, Linux tools, cybersecurity, web development, programming, javascript, react, earning opportunities, mobile apps, data science, university admissions, gadgets, career advice, tech news, how to guides, educational articles, how to earn money online, best programming languages, latest tech news"
     />
     <meta name="author" content="Daily Blogs Team" />
+    <meta
+      name="robots"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <meta
+      name="googlebot"
+      content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
+    />
+    <meta name="bingbot" content="index, follow" />
+    <link rel="canonical" href="https://dailyblogs.com/" />
 
-    <!-- Open Graph / Social Media Meta Tags -->
+    <!-- Content Language -->
+    <meta http-equiv="content-language" content="en" />
+    <meta name="language" content="English" />
+    <meta name="geo.region" content="IN" />
+    <meta name="geo.placename" content="India" />
+    <meta name="distribution" content="global" />
+    <meta name="rating" content="general" />
+    <meta name="revisit-after" content="1 days" />
+
+    <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dailyblogs.com/" />
     <meta
       property="og:title"
-      content="Daily Blogs - Your Source for Tech Insights"
+      content="Daily Blogs - Tech, Study Materials, Movies, Games, Jobs, Visa & More"
     />
     <meta
       property="og:description"
-      content="Explore articles on web development, programming, design, and technology. Learn, share, and grow with our community."
+      content="Your all-in-one knowledge hub. Explore articles on technologies, study materials, movie & game reviews, government schemes, job guides, visa help, Linux tools, coding tutorials, and much more."
+    />
+    <meta property="og:image" content="https://dailyblogs.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Daily Blogs - Your All-in-One Knowledge Hub"
     />
     <meta property="og:site_name" content="Daily Blogs" />
+    <meta property="og:locale" content="en_US" />
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta
       name="twitter:title"
-      content="Daily Blogs - Your Source for Tech Insights"
+      content="Daily Blogs - Tech, Study Materials, Movies, Games, Jobs, Visa & More"
     />
     <meta
       name="twitter:description"
-      content="Explore articles on web development, programming, design, and technology."
+      content="Your all-in-one knowledge hub. Articles on tech, study material, movies, games, government schemes, jobs, visa, Linux tools, coding, and more."
     />
+    <meta name="twitter:image" content="https://dailyblogs.com/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="Daily Blogs - Your All-in-One Knowledge Hub"
+    />
+    <!-- <meta name="twitter:site" content="@dailyblogs" /> -->
 
-    <!-- Additional SEO -->
-    <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://dailyblogs.com" />
+    <!-- Performance: DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="dns-prefetch" href="https://ui-avatars.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Google Site Verification (replace with your verification code) -->
+    <!-- <meta name="google-site-verification" content="YOUR_VERIFICATION_CODE" /> -->
+    <!-- Bing Webmaster Verification -->
+    <!-- <meta name="msvalidate.01" content="YOUR_BING_CODE" /> -->
+
+    <!-- JSON-LD Structured Data: WebSite + Organization (static, always present) -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://dailyblogs.com/#website",
+            "name": "Daily Blogs",
+            "alternateName": "DailyBlogs",
+            "url": "https://dailyblogs.com/",
+            "description": "Daily Blogs - Your all-in-one knowledge hub covering technologies, study materials, movie reviews, game guides, government schemes, job tips, visa & immigration, Linux tools, coding tutorials, and much more.",
+            "inLanguage": "en",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://dailyblogs.com/?search={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "Organization",
+            "@id": "https://dailyblogs.com/#organization",
+            "name": "Daily Blogs",
+            "url": "https://dailyblogs.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://dailyblogs.com/logo.png",
+              "width": 512,
+              "height": 512
+            },
+            "description": "A multi-niche knowledge platform publishing articles on technologies, study materials, movies, games, government schemes, jobs, visa & immigration, Linux, coding, and more.",
+            "foundingDate": "2025",
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer support",
+              "url": "https://dailyblogs.com/contact",
+              "availableLanguage": ["English"]
+            }
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

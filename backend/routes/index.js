@@ -10,6 +10,7 @@ const userRoutes = require("./userRoutes");
 const adminRoutes = require("./adminRoutes");
 const contactRoutes = require("./contactRoutes");
 const subscriberRoutes = require("./subscriberRoutes");
+const chatRoutes = require("./chatRoutes");
 
 // Health check endpoint
 router.get("/health", (req, res) => {
@@ -30,6 +31,7 @@ router.use("/users", userRoutes);
 router.use("/admin", adminRoutes);
 router.use("/contact", contactRoutes);
 router.use("/subscribe", subscriberRoutes);
+router.use("/chat", chatRoutes);
 
 // API info endpoint
 router.get("/", (req, res) => {
@@ -45,6 +47,8 @@ router.get("/", (req, res) => {
       users: "/api/users",
       admin: "/api/admin",
       contact: "/api/contact",
+      subscribe: "/api/subscribe",
+      chat: "/api/chat",
       health: "/api/health",
     },
   });

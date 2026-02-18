@@ -1,6 +1,7 @@
 // Forgot password page - request OTP for password reset
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import SEO from "../components/SEO";
 import api from "../services/api";
 
 const ForgotPassword = () => {
@@ -9,6 +10,14 @@ const ForgotPassword = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const timeoutRef = useRef(null);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,14 +27,14 @@ const ForgotPassword = () => {
     try {
       await api.post("/auth/forgot-password", { email });
       setSuccess(true);
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         navigate("/verify-otp", { state: { email } });
       }, 2000);
     } catch (err) {
       setError(
         err.response?.data?.error?.message ||
           err.message ||
-          "Something went wrong. Please try again."
+          "Something went wrong. Please try again.",
       );
     } finally {
       setIsLoading(false);
@@ -34,6 +43,17 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <SEO
+        title="Forgot Password"
+        description="Reset your Daily Blogs password. Enter your email to receive a one-time password (OTP) for secure account recovery."
+        keywords="forgot password, reset password, account recovery, daily blogs"
+        noindex={true}
+        breadcrumbs={[
+          { name: "Home", url: "/" },
+          { name: "Login", url: "/login" },
+          { name: "Forgot Password" },
+        ]}
+      />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {/* Header */}

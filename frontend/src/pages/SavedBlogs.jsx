@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, Navigate } from "react-router-dom";
+import SEO from "../components/SEO";
 import { useAuth } from "../context/AuthContext";
 import { getSavedBlogs } from "../services/userService";
 import BlogCard from "../components/BlogCard";
@@ -65,6 +66,14 @@ const SavedBlogs = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <SEO
+        title="Saved Articles"
+        description="Access your bookmarked articles and saved blog posts on Daily Blogs. Keep track of your favorite tech articles, tutorials, and programming guides."
+        keywords="saved blogs, bookmarks, saved articles, daily blogs bookmarks, reading list"
+        type="website"
+        noindex={true}
+        breadcrumbs={[{ name: "Home", url: "/" }, { name: "Saved Articles" }]}
+      />
       <div className="max-w-7xl mx-auto px-6 py-12">
         {/* Header */}
         <div className="mb-10">

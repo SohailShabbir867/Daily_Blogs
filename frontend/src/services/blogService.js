@@ -19,6 +19,11 @@ export const getFeaturedBlogs = async () => {
   return response;
 };
 
+export const getTrendingBlogs = async () => {
+  const response = await api.get("/blogs/trending");
+  return response;
+};
+
 export const getCategories = async () => {
   const response = await api.get("/blogs/categories");
   return response;
@@ -59,6 +64,7 @@ const blogService = {
   getBlogs,
   getBlogBySlug,
   getFeaturedBlogs,
+  getTrendingBlogs,
   getCategories,
   createBlog,
   updateBlog,

@@ -180,6 +180,23 @@ const getFeaturedBlogs = asyncHandler(async (req, res) => {
   );
 });
 
+// Get trending blogs
+const getTrendingBlogs = asyncHandler(async (req, res) => {
+  const blogs = await Blog.find({
+    status: "published",
+    isTrending: true,
+  })
+    .populate("author", "name avatar")
+    .select("-content")
+    .sort({ publishedAt: -1 })
+    .limit(10)
+    .lean();
+
+  res.json(
+    buildSuccessResponse({ blogs }, "Trending blogs retrieved successfully")
+  );
+});
+
 // Get blog categories with counts
 const getCategories = asyncHandler(async (req, res) => {
   const categories = await Blog.getCategoryStats();
@@ -575,6 +592,34 @@ const toggleFeatured = asyncHandler(async (req, res) => {
   );
 });
 
+// Toggle blog trending status - Super Admin only
+const toggleTrending = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const blog = await Blog.findById(id);
+
+  if (!blog) {
+    throw new NotFoundError("Blog post not found");
+  }
+
+  blog.isTrending = !blog.isTrending;
+  await blog.save();
+
+  console.log(
+    `[ADMIN] Blog ${blog.isTrending ? "marked as trending" : "removed from trending"}: "${blog.title}"`
+  );
+
+  res.json(
+    buildSuccessResponse(
+      {
+        blog,
+        isTrending: blog.isTrending,
+      },
+      `Blog ${blog.isTrending ? "marked as trending" : "removed from trending"} successfully`
+    )
+  );
+});
+
 // Bulk update blog status - Admin only
 const bulkUpdateStatus = asyncHandler(async (req, res) => {
   const { blogIds, status } = req.body;
@@ -775,6 +820,7 @@ module.exports = {
   getBlogs,
   getBlogBySlug,
   getFeaturedBlogs,
+  getTrendingBlogs,
   getCategories,
 
   // Authenticated
@@ -791,5 +837,6 @@ module.exports = {
   adminUpdateBlog,
   adminDeleteBlog,
   toggleFeatured,
+  toggleTrending,
   bulkUpdateStatus,
 };

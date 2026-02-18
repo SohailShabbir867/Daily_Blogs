@@ -8,6 +8,7 @@ import {
 import {
   getBlogs,
   getBlogBySlug,
+  getTrendingBlogs as apiGetTrendingBlogs,
   toggleLike as apiToggleLike,
   getLikeStatus,
 } from "../services/blogService";
@@ -24,6 +25,8 @@ export const useBlog = () => {
 
 export const BlogProvider = ({ children }) => {
   const [blogs, setBlogs] = useState([]);
+  const [trendingBlogs, setTrendingBlogs] = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
@@ -46,7 +49,7 @@ export const BlogProvider = ({ children }) => {
             currentPage: 1,
             totalPages: 1,
             totalItems: 0,
-          }
+          },
         );
       } else {
         // Handle case where response doesn't have success property
@@ -76,7 +79,24 @@ export const BlogProvider = ({ children }) => {
   // Initial fetch on mount
   useEffect(() => {
     fetchBlogs();
+    fetchTrendingBlogs();
   }, [fetchBlogs]);
+
+  // Fetch trending blogs
+  const fetchTrendingBlogs = useCallback(async () => {
+    try {
+      setTrendingLoading(true);
+      const response = await apiGetTrendingBlogs();
+      if (response && response.success) {
+        setTrendingBlogs(response.data?.blogs || []);
+      }
+    } catch (err) {
+      console.error("Error fetching trending blogs:", err);
+      setTrendingBlogs([]);
+    } finally {
+      setTrendingLoading(false);
+    }
+  }, []);
 
   // Get blog by ID or slug
   const getBlogById = async (identifier) => {
@@ -105,8 +125,8 @@ export const BlogProvider = ({ children }) => {
                   ...blog,
                   likeCount: response.data?.likeCount || blog.likeCount,
                 }
-              : blog
-          )
+              : blog,
+          ),
         );
         return response.data;
       }
@@ -132,16 +152,20 @@ export const BlogProvider = ({ children }) => {
   // Refresh blogs
   const refreshBlogs = () => {
     fetchBlogs();
+    fetchTrendingBlogs();
   };
 
   return (
     <BlogContext.Provider
       value={{
         blogs,
+        trendingBlogs,
+        trendingLoading,
         loading,
         error,
         pagination,
         fetchBlogs,
+        fetchTrendingBlogs,
         getBlogById,
         toggleLike,
         checkLikeStatus,

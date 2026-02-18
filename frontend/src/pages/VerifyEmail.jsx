@@ -1,6 +1,7 @@
 // Email verification page - handles verification link from email
 import { useState, useEffect, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
+import SEO from "../components/SEO";
 import { verifyEmail } from "../services/authService";
 
 const VerifyEmail = () => {
@@ -37,7 +38,7 @@ const VerifyEmail = () => {
         } else {
           setStatus("error");
           setMessage(
-            response.message || "Verification failed. Please try again."
+            response.message || "Verification failed. Please try again.",
           );
         }
       } catch (err) {
@@ -50,13 +51,13 @@ const VerifyEmail = () => {
         if (isAlreadyUsed) {
           setStatus("already-verified");
           setMessage(
-            "This verification link has already been used. You can proceed to login."
+            "This verification link has already been used. You can proceed to login.",
           );
         } else {
           setStatus("error");
           setMessage(
             err.message ||
-              "Verification failed. The link may be invalid or expired."
+              "Verification failed. The link may be invalid or expired.",
           );
         }
       }
@@ -143,6 +144,12 @@ const VerifyEmail = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4">
+      <SEO
+        title="Verify Email"
+        description="Verify your email address to activate your Daily Blogs account and start exploring tech articles."
+        keywords="verify email, email verification, activate account"
+        noindex={true}
+      />
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
           {/* Error Icon */}
