@@ -168,7 +168,7 @@ const ContactsManagement = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
             Contact Management
           </h1>
           <p className="text-gray-600">

@@ -463,7 +463,7 @@ const BlogDetails = () => {
         </button>
 
         {/* Hero Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-12">
           <div className="w-full">
             {/* Category */}
             <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
@@ -518,7 +518,7 @@ const BlogDetails = () => {
         {/* Article Card */}
         <article className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* Quick Actions Bar */}
-          <div className="flex items-center justify-between px-6 py-4 bg-gray-50 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-b border-gray-100 gap-2">
             <div className="flex items-center gap-2">
               {/* Like Button */}
               <button
@@ -780,7 +780,7 @@ const BlogDetails = () => {
           </div>
 
           {/* Engagement Bar */}
-          <div className="px-8 md:px-12 py-6 bg-linear-to-r from-emerald-50 to-teal-50 border-t border-gray-100">
+          <div className="px-4 sm:px-8 md:px-12 py-4 sm:py-6 bg-linear-to-r from-emerald-50 to-teal-50 border-t border-gray-100">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-gray-600">
                 {user

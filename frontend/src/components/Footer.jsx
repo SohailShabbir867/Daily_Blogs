@@ -97,7 +97,7 @@ const Footer = () => {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-teal-500 rounded-full blur-3xl opacity-5" />
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-6 py-16">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-16">
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">

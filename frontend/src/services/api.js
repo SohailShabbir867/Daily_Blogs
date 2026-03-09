@@ -7,7 +7,7 @@ const API_BASE_URL =
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 10000,
+  timeout: 35000, // 35s — accounts for Render free tier cold start (~30s wake-up time)
   withCredentials: true, // Required for session cookies
   headers: {
     "Content-Type": "application/json",

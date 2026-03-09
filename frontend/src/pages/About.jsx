@@ -204,14 +204,14 @@ const About = () => {
       </section>
 
       {/* Mission Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="grid md:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div>
               <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider">
                 Our Mission
               </span>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-6">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-6">
                 Making Knowledge Accessible to Everyone
               </h2>
               <p className="text-gray-600 text-lg leading-relaxed mb-6">
@@ -232,11 +232,11 @@ const About = () => {
               </p>
             </div>
             <div className="relative">
-              <div className="bg-linear-to-br from-emerald-100 to-teal-100 rounded-3xl p-8 md:p-12">
-                <div className="grid grid-cols-2 gap-6">
+              <div className="bg-linear-to-br from-emerald-100 to-teal-100 rounded-3xl p-6 sm:p-8 md:p-12">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   {stats.map((stat, index) => (
                     <div key={index} className="text-center">
-                      <div className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-600">
+                      <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-linear-to-r from-emerald-600 to-teal-600">
                         {stat.number}
                       </div>
                       <div className="text-gray-600 mt-1">{stat.label}</div>
@@ -245,26 +245,26 @@ const About = () => {
                 </div>
               </div>
               {/* Decorative elements */}
-              <div className="absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-2xl -z-10 rotate-12" />
-              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-emerald-400 rounded-full -z-10" />
+              <div className="hidden sm:block absolute -top-4 -right-4 w-24 h-24 bg-yellow-400 rounded-2xl -z-10 rotate-12" />
+              <div className="hidden sm:block absolute -bottom-4 -left-4 w-32 h-32 bg-emerald-400 rounded-full -z-10" />
             </div>
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section className="py-16 sm:py-20 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
             <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider">
               What We Stand For
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               Our Core Values
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
             {values.map((value, index) => (
               <div
                 key={index}
@@ -286,13 +286,13 @@ const About = () => {
       </section>
 
       {/* Team Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
             <span className="text-emerald-600 font-semibold text-sm uppercase tracking-wider">
               The People Behind
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mt-2">
               Meet Our Team
             </h2>
             <p className="text-gray-600 mt-4 max-w-2xl mx-auto">
@@ -301,7 +301,7 @@ const About = () => {
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             {teamMembers.map((member, index) => (
               <div
                 key={index}
@@ -326,18 +326,18 @@ const About = () => {
       </section>
 
       {/* What We Cover Section */}
-      <section className="py-20 bg-linear-to-br from-gray-900 to-gray-800 text-white">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-16">
+      <section className="py-16 sm:py-20 bg-linear-to-br from-gray-900 to-gray-800 text-white">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center mb-12 sm:mb-16">
             <span className="text-emerald-400 font-semibold text-sm uppercase tracking-wider">
               Our Content
             </span>
-            <h2 className="text-3xl md:text-4xl font-bold mt-2">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-2">
               What We Cover
             </h2>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
             {[
               {
                 title: "Technologies",
@@ -401,9 +401,9 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+      <section className="py-16 sm:py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             Ready to Start Exploring?
           </h2>
           <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">

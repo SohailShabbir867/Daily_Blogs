@@ -37,11 +37,10 @@ const createSessionConfig = () => {
     cookie: {
       maxAge: parseInt(process.env.SESSION_MAX_AGE) || 7 * 24 * 60 * 60 * 1000,
       httpOnly: process.env.COOKIE_HTTP_ONLY !== "false",
-      secure: false, // Always false for local development (HTTP)
-      sameSite: "lax", // Works for same-site requests (localhost or same IP)
+      // In production (HTTPS + cross-domain), cookies MUST be secure:true and sameSite:"none"
+      secure: isProduction,
+      sameSite: isProduction ? "none" : "lax",
       path: "/",
-      // Don't set domain - let browser handle it automatically
-      // This allows cookies to work on both localhost and network IP
     },
     rolling: true,
     proxy: isProduction,

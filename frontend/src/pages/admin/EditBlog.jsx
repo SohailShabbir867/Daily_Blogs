@@ -186,7 +186,7 @@ const EditBlog = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-12">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         {/* Header */}
         <div className="mb-8">
           <button
@@ -208,7 +208,7 @@ const EditBlog = () => {
             </svg>
             Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-900">Edit Post</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Edit Post</h1>
           <p className="text-gray-500 mt-1">Update your article</p>
         </div>
 

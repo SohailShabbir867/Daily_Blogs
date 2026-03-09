@@ -1,6 +1,10 @@
 // Daily Blogs API Server
 require("dotenv").config();
 
+// Fix Node.js c-ares DNS resolution for MongoDB Atlas SRV records
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+
 const express = require("express");
 const helmet = require("helmet");
 const morgan = require("morgan");
@@ -37,10 +41,22 @@ app.use(
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        connectSrc: ["'self'", "http://localhost:*"],
+        connectSrc: [
+          "'self'",
+          "http://localhost:*",
+          "ws://localhost:*",
+          "http://192.168.1.*:*",
+          "ws://192.168.1.*:*",
+          // Allow the deployed frontend to connect in production
+          ...(process.env.CORS_ORIGIN
+            ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+            : []),
+        ],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
-        upgradeInsecureRequests: NODE_ENV === "production" ? [] : null,
+        ...(NODE_ENV === "production" && {
+          upgradeInsecureRequests: [],
+        }),
       },
     },
     referrerPolicy: { policy: "strict-origin-when-cross-origin" },
@@ -49,7 +65,6 @@ app.use(
         ? { maxAge: 31536000, includeSubDomains: true, preload: true }
         : false,
     noSniff: true,
-    xssFilter: true,
   })
 );
 
@@ -106,17 +121,24 @@ const startServer = async () => {
 
     // Setup Socket.io
     const { Server } = require("socket.io");
+    // Build allowed Socket.io origins from CORS_ORIGIN env var
+    const socketOrigins = [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://127.0.0.1:5173",
+      ...(process.env.CORS_ORIGIN
+        ? process.env.CORS_ORIGIN.split(",").map((o) => o.trim())
+        : []),
+    ];
+
     const io = new Server(server, {
       cors: {
-        origin: [
-          "http://localhost:5173",
-          "http://192.168.1.77:5173",
-          // Add other origins as needed
-        ],
+        origin: socketOrigins,
         credentials: true,
-        methods: ["GET", "POST"]
+        methods: ["GET", "POST"],
       },
-      // pingTimeout: 60000,
+      pingTimeout: 60000,
+      pingInterval: 25000,
     });
 
     // Share io instance with express

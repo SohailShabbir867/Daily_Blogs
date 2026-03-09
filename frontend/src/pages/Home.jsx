@@ -129,7 +129,7 @@ const Home = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <section className="bg-linear-to-br from-emerald-800 via-teal-700 to-cyan-800 text-white py-20">
-          <div className="max-w-7xl mx-auto px-6 text-center">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Welcome to Daily Blogs
             </h1>
@@ -196,7 +196,7 @@ const Home = () => {
         faqItems={faqs}
       />
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-24 md:py-32">
+      <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-16 sm:py-24 md:py-32">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           {/* Gradient Orbs */}
@@ -238,7 +238,7 @@ const Home = () => {
           />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-6">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
           <div className="text-center">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2.5 mb-8 hover:bg-white/15 transition-colors">
@@ -252,7 +252,7 @@ const Home = () => {
             </div>
 
             {/* Main Heading */}
-            <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight tracking-tight">
               <span className="block text-white drop-shadow-lg">
                 Explore. Learn.
               </span>
@@ -262,8 +262,8 @@ const Home = () => {
             </h1>
 
             {/* Typewriter Effect */}
-            <div className="h-12 md:h-14 mb-6 flex items-center justify-center">
-              <span className="text-xl md:text-2xl lg:text-3xl font-semibold text-emerald-100">
+            <div className="min-h-[2.5rem] sm:h-12 md:h-14 mb-6 flex items-center justify-center">
+              <span className="text-base sm:text-xl md:text-2xl lg:text-3xl font-semibold text-emerald-100 text-center">
                 Discover insights on{" "}
                 <span className="text-lime-300 font-bold">
                   {currentText}
@@ -273,15 +273,15 @@ const Home = () => {
             </div>
 
             {/* Description */}
-            <p className="text-lg md:text-xl text-emerald-100/90 mb-12 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-base sm:text-lg md:text-xl text-emerald-100/90 mb-8 sm:mb-12 max-w-2xl mx-auto leading-relaxed px-2 sm:px-0">
               Your daily source for insightful articles on tech, study
               materials, movies, games, jobs, visa guides, and much more.
             </p>
 
             {/* Search Bar */}
-            <div className="max-w-2xl mx-auto relative mb-12">
+            <div className="max-w-2xl mx-auto relative mb-8 sm:mb-12 px-0">
               <div className="relative flex items-center bg-white rounded-2xl shadow-2xl shadow-black/20 overflow-hidden">
-                <div className="absolute left-5 text-gray-400">
+                <div className="absolute left-4 sm:left-5 text-gray-400">
                   <svg
                     className="w-5 h-5"
                     fill="none"
@@ -298,39 +298,42 @@ const Home = () => {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search articles, topics, or keywords..."
+                  placeholder="Search articles, topics or keywords..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-14 pr-32 py-5 text-gray-800 placeholder-gray-400 focus:outline-none"
+                  className="w-full pl-10 sm:pl-14 pr-20 sm:pr-32 py-4 sm:py-5 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none"
                 />
-                <button className="absolute right-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-medium hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg">
-                  Search
+                <button className="absolute right-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-medium text-sm sm:text-base hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg">
+                  <span className="hidden sm:inline">Search</span>
+                  <svg className="w-4 h-4 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </button>
               </div>
             </div>
 
             {/* Stats Cards */}
-            <div className="flex flex-wrap justify-center gap-4 md:gap-6">
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
-                <div className="text-3xl md:text-4xl font-bold text-lime-300">
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-6">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 sm:px-8 py-3 sm:py-5 hover:bg-white/15 transition-colors">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-lime-300">
                   500+
                 </div>
                 <div className="text-emerald-200 text-sm mt-1">Articles</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
-                <div className="text-3xl md:text-4xl font-bold text-cyan-300">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 sm:px-8 py-3 sm:py-5 hover:bg-white/15 transition-colors">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-300">
                   10K+
                 </div>
                 <div className="text-emerald-200 text-sm mt-1">Readers</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
-                <div className="text-3xl md:text-4xl font-bold text-teal-300">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 sm:px-8 py-3 sm:py-5 hover:bg-white/15 transition-colors">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-teal-300">
                   50+
                 </div>
                 <div className="text-emerald-200 text-sm mt-1">Authors</div>
               </div>
-              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-8 py-5 hover:bg-white/15 transition-colors">
-                <div className="text-3xl md:text-4xl font-bold text-emerald-300">
+              <div className="bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl px-4 sm:px-8 py-3 sm:py-5 hover:bg-white/15 transition-colors">
+                <div className="text-2xl sm:text-3xl md:text-4xl font-bold text-emerald-300">
                   100K+
                 </div>
                 <div className="text-emerald-200 text-sm mt-1">Views</div>
@@ -357,7 +360,7 @@ const Home = () => {
 
       {/* Trending Blogs Section */}
       {!showTrending && trendingBlogs.length > 0 && (
-        <section className="max-w-7xl mx-auto px-6 pt-12 pb-4">
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-linear-to-br from-orange-500 to-red-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20">
@@ -442,7 +445,7 @@ const Home = () => {
       )}
 
       {/* Main Content */}
-      <section className="max-w-7xl mx-auto px-6 py-12">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Category Filters */}
         <div className="flex flex-wrap gap-2 mb-8">
           {/* Trending Filter */}
@@ -567,7 +570,7 @@ const Home = () => {
             ))}
           </div>
         ) : (
-          <div className="text-center py-16">
+          <div className="text-center px-4 sm:px-6">
             <svg
               className="w-16 h-16 text-gray-300 mx-auto mb-4"
               fill="none"
@@ -593,10 +596,10 @@ const Home = () => {
       </section>
 
       {/* FAQ Section */}
-      <section className="bg-white py-16">
-        <div className="max-w-4xl mx-auto px-6">
+      <section className="bg-white py-12 sm:py-16">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Frequently Asked Questions
             </h2>
             <p className="text-gray-600 max-w-2xl mx-auto">

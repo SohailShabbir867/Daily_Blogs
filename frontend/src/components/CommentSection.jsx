@@ -207,32 +207,34 @@ const CommentSection = ({ blogId }) => {
     if (replyingTo !== commentId) return null;
 
     return (
-      <div className="mt-4 flex gap-3">
-        <input
-          type="text"
-          value={replyText}
-          onChange={(e) => setReplyText(e.target.value)}
-          placeholder="Write a reply..."
-          className="grow px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
-          disabled={submitting}
-          autoFocus
-        />
-        <button
-          onClick={() => handleReply(commentId)}
-          disabled={!replyText.trim() || submitting}
-          className="px-4 py-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
-        >
-          {submitting ? "..." : "Reply"}
-        </button>
-        <button
-          onClick={() => {
-            setReplyingTo(null);
-            setReplyText("");
-          }}
-          className="px-4 py-2 text-gray-600 hover:text-gray-800 transition"
-        >
-          Cancel
-        </button>
+      <div className="mt-4">
+        <div className="flex flex-wrap gap-2">
+          <input
+            type="text"
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder="Write a reply..."
+            className="grow min-w-[150px] px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+            disabled={submitting}
+            autoFocus
+          />
+          <button
+            onClick={() => handleReply(commentId)}
+            disabled={!replyText.trim() || submitting}
+            className="px-4 py-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          >
+            {submitting ? "..." : "Reply"}
+          </button>
+          <button
+            onClick={() => {
+              setReplyingTo(null);
+              setReplyText("");
+            }}
+            className="px-4 py-2 text-gray-600 hover:text-gray-800 transition border border-gray-200 rounded-lg"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     );
   };
@@ -245,8 +247,8 @@ const CommentSection = ({ blogId }) => {
     return (
       <div
         key={comment._id}
-        className={`flex gap-4 ${
-          isReply ? "ml-12 mt-4" : "p-4 bg-gray-50 rounded-xl"
+        className={`flex gap-3 ${
+          isReply ? "ml-6 sm:ml-12 mt-4" : "p-3 sm:p-4 bg-gray-50 rounded-xl"
         }`}
       >
         <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
@@ -255,10 +257,10 @@ const CommentSection = ({ blogId }) => {
           </span>
         </div>
         <div className="grow">
-          <div className="flex items-center justify-between mb-2">
-            <div>
-              <span className="font-semibold text-gray-900">{authorName}</span>
-              <span className="text-gray-500 text-sm ml-2">
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <div className="min-w-0">
+              <span className="font-semibold text-gray-900 text-sm sm:text-base">{authorName}</span>
+              <span className="text-gray-500 text-xs sm:text-sm ml-2">
                 {formatDate(comment.createdAt)}
               </span>
               {comment.isEdited && (
@@ -367,17 +369,17 @@ const CommentSection = ({ blogId }) => {
   };
 
   return (
-    <div className="mt-12">
-      <h3 className="text-2xl font-bold text-gray-900 mb-6">
+    <div className="mt-8 sm:mt-12 px-4 sm:px-6 lg:px-8 pb-6">
+      <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
         Comments ({comments.length})
       </h3>
 
       {/* Comment Form */}
       {user ? (
-        <form onSubmit={handleSubmit} className="mb-8">
-          <div className="flex gap-4">
-            <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
-              <span className="text-white font-medium">
+        <form onSubmit={handleSubmit} className="mb-6 sm:mb-8">
+          <div className="flex gap-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
+              <span className="text-white font-medium text-sm">
                 {user.name?.charAt(0).toUpperCase() || "U"}
               </span>
             </div>
@@ -388,13 +390,13 @@ const CommentSection = ({ blogId }) => {
                 placeholder="Write a comment..."
                 rows={3}
                 disabled={submitting}
-                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition disabled:opacity-50"
+                className="w-full px-3 sm:px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent resize-none transition disabled:opacity-50 text-sm sm:text-base"
               />
               <div className="flex justify-end mt-2">
                 <button
                   type="submit"
                   disabled={!commentText.trim() || submitting}
-                  className="px-6 py-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                  className="px-4 sm:px-6 py-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white font-medium rounded-lg hover:from-emerald-600 hover:to-teal-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-sm sm:text-base"
                 >
                   {submitting ? "Posting..." : "Post Comment"}
                 </button>

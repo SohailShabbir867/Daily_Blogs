@@ -137,7 +137,7 @@ const NewsletterSubscription = ({ variant = "default" }) => {
   }
 
   return (
-    <div className="bg-linear-to-br from-emerald-800 via-teal-700 to-cyan-800 rounded-2xl p-8 md:p-12 text-white relative overflow-hidden">
+    <div className="bg-linear-to-br from-emerald-800 via-teal-700 to-cyan-800 rounded-2xl p-6 sm:p-8 md:p-12 text-white relative overflow-hidden">
       <div className="absolute inset-0">
         <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-400 rounded-full blur-3xl opacity-20 transform translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-cyan-400 rounded-full blur-3xl opacity-20 transform -translate-x-1/2 translate-y-1/2" />

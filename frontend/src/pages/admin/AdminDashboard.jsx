@@ -109,11 +109,11 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-linear-to-br from-gray-50 to-emerald-50/30">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-10">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Admin Dashboard
             </h1>
             <p className="text-gray-500 mt-1">Manage your blog content</p>
@@ -140,7 +140,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
           {statCards.map((stat, index) => (
             <div
               key={index}
@@ -165,10 +165,10 @@ const AdminDashboard = () => {
 
         {/* Quick Actions */}
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-10">
-          <h2 className="text-xl font-bold text-gray-900 mb-4">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Link
               to="/admin/create"
               className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-emerald-50 hover:border-emerald-200 transition group"
@@ -253,10 +253,10 @@ const AdminDashboard = () => {
         {/* Super Admin Actions */}
         {isSuperAdmin && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-10">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
               Super Admin Actions
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <Link
                 to="/admin/users"
                 className="flex items-center gap-4 p-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition"
@@ -400,10 +400,10 @@ const AdminDashboard = () => {
               {blogs.slice(0, 5).map((blog) => (
                 <div
                   key={blog._id}
-                  className="flex items-center justify-between p-4 border border-gray-100 rounded-xl"
+                  className="flex items-center justify-between p-3 sm:p-4 border border-gray-100 rounded-xl gap-3"
                 >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-linear-to-br from-emerald-100 to-teal-100 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-linear-to-br from-emerald-100 to-teal-100 rounded-lg overflow-hidden shrink-0">
                       {blog.image && (
                         <img
                           src={blog.image}
@@ -412,18 +412,18 @@ const AdminDashboard = () => {
                         />
                       )}
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900 line-clamp-1">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 line-clamp-1 text-sm sm:text-base">
                         {blog.title}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-xs sm:text-sm text-gray-500">
                         {blog.author?.name || blog.authorName}
                       </p>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <span
-                      className={`px-3 py-1 rounded-full text-xs font-medium ${
+                      className={`px-2 sm:px-3 py-1 rounded-full text-xs font-medium ${
                         blog.status === "published"
                           ? "bg-green-100 text-green-700"
                           : "bg-yellow-100 text-yellow-700"
@@ -433,7 +433,7 @@ const AdminDashboard = () => {
                     </span>
                     <Link
                       to={`/admin/edit/${blog._id}`}
-                      className="p-2 text-gray-500 hover:text-emerald-600 transition"
+                      className="p-1.5 sm:p-2 text-gray-500 hover:text-emerald-600 transition"
                       title="Edit"
                     >
                       <svg

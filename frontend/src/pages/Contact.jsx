@@ -79,7 +79,7 @@ const Contact = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
+    <div className="min-h-screen bg-gray-50 py-8 sm:py-12 px-4">
       <SEO
         title="Contact Us"
         description="Have questions, feedback, or collaboration inquiries? Contact the Daily Blogs team. We cover tech, study materials, movies, games, jobs, visa guides, and more. We respond within 24-48 hours."
@@ -90,14 +90,14 @@ const Contact = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
             Have a question or feedback? We'd love to hear from you. Fill out
             the form below and we'll get back to you as soon as possible.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 sm:gap-8">
           {/* Contact Info */}
           <div className="md:col-span-1 space-y-6">
             <div className="bg-white rounded-2xl shadow-lg p-6">

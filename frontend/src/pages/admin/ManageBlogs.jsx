@@ -159,11 +159,11 @@ const ManageBlogs = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               {isSuperAdmin ? "Manage All Posts" : "Manage My Posts"}
             </h1>
             <p className="text-gray-500 mt-1">
@@ -194,7 +194,7 @@ const ManageBlogs = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
             <p className="text-gray-500 text-sm">Total Posts</p>
             <p className="text-2xl font-bold text-gray-900">
@@ -265,7 +265,7 @@ const ManageBlogs = () => {
                 />
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               {["all", "published", "draft"].map((status) => (
                 <button
                   key={status}
