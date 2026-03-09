@@ -16,22 +16,29 @@ const createTransporter = () => {
     const port = parseInt(process.env.SMTP_PORT) || 587;
     const secure = process.env.SMTP_SECURE === "true"; // false for port 587 (STARTTLS)
 
+    // Trim credentials — prevents invisible whitespace copied into Render env vars
+    const smtpUser = process.env.SMTP_USER.trim();
+    const smtpPass = process.env.SMTP_PASS.trim();
+
     const transport = nodemailer.createTransport({
       host,
       port,
       secure,
+      // requireTLS forces STARTTLS upgrade on port 587 (required for Gmail)
+      requireTLS: !secure,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: smtpUser,
+        pass: smtpPass,
       },
-      // Keep the connection alive so we don't reconnect on every email
-      pool: true,
-      maxConnections: 3,
-      rateDelta: 1000,
-      rateLimit: 5,
+      // Connection timeouts — prevents hanging on Render
+      connectionTimeout: 30000,
+      greetingTimeout: 15000,
+      socketTimeout: 30000,
+      // No pooling — creates a fresh connection per send, avoids stale connections on Render
+      pool: false,
     });
 
-    console.log(`[EMAIL] Transporter created — host: ${host}:${port}, user: ${process.env.SMTP_USER}`);
+    console.log(`[EMAIL] Transporter created — host: ${host}:${port}, user: ${smtpUser}`);
     return transport;
   } catch (error) {
     console.error("❌ Failed to create email transporter:", error.message);
@@ -46,7 +53,9 @@ if (transporter) {
   transporter.verify((error) => {
     if (error) {
       console.error("❌ [EMAIL] SMTP connection FAILED:", error.message);
-      console.error("   Check SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS on Render");
+      console.error(`   Code: ${error.code || "N/A"} | Response: ${error.response || "N/A"}`);
+      console.error("   → Fix: Check SMTP_USER and SMTP_PASS on Render. SMTP_PASS must be a valid");
+      console.error("     16-character Google App Password (Google Account → Security → App Passwords).");
     } else {
       console.log("✅ [EMAIL] SMTP connection verified — ready to send emails");
     }
@@ -497,10 +506,12 @@ async function sendEmailVerification(email, userName, verificationToken) {
     console.log(`[EMAIL] Verification email sent to: ${email}`);
     return { success: true, messageId: info.messageId };
   } catch (error) {
-    console.error(
-      `[EMAIL] Failed to send verification email to ${email}:`,
-      error.message
-    );
+    console.error(`[EMAIL] Failed to send verification email to ${email}:`, {
+      message: error.message,
+      code: error.code,
+      response: error.response,
+      command: error.command,
+    });
     throw new Error("Failed to send verification email. Please try again.");
   }
 }
