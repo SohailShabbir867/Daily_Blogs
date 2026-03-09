@@ -249,6 +249,25 @@ const slidingWindowLimiter = (options = {}) => {
   };
 };
 
+// Contact form limiter: 5 submissions per hour per IP (prevents spam)
+const contactLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,
+  message: {
+    success: false,
+    status: "error",
+    message: "Too many contact form submissions, please try again after an hour",
+    code: "CONTACT_LIMIT_EXCEEDED",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res, next, options) => {
+    const error = new ApiError(options.message.message, 429);
+    error.code = "CONTACT_LIMIT_EXCEEDED";
+    next(error);
+  },
+});
+
 module.exports = {
   defaultLimiter,
   authLimiter,
@@ -256,6 +275,7 @@ module.exports = {
   registrationLimiter,
   writeLimiter,
   searchLimiter,
+  contactLimiter,
   createRateLimiter,
   slidingWindowLimiter,
   chatMessageLimiter: rateLimit({

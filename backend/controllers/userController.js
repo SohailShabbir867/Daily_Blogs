@@ -67,6 +67,9 @@ const updateProfile = asyncHandler(async (req, res) => {
   }
 
   if (avatar !== undefined) {
+    if (avatar && !/^https?:\/\//i.test(avatar)) {
+      throw new BadRequestError("Avatar must be a valid http or https URL");
+    }
     user.avatar = avatar;
   }
 
@@ -151,6 +154,15 @@ const getSavedBlogs = asyncHandler(async (req, res) => {
   const { page, limit, skip } = parsePaginationParams(req.query);
   const userId = req.user._id;
 
+  // Fetch saved blog IDs first to compute accurate total count
+  const userBasic = await User.findById(userId).select("savedBlogs").lean();
+  if (!userBasic) throw new NotFoundError("User not found");
+
+  const totalCount = await Blog.countDocuments({
+    _id: { $in: userBasic.savedBlogs || [] },
+    status: "published",
+  });
+
   const user = await User.findById(userId)
     .populate({
       path: "savedBlogs",
@@ -168,13 +180,6 @@ const getSavedBlogs = asyncHandler(async (req, res) => {
       },
     })
     .lean();
-
-  if (!user) {
-    throw new NotFoundError("User not found");
-  }
-
-  // Get total count of saved blogs
-  const totalCount = user.savedBlogs?.length || 0;
   const totalPages = Math.ceil(totalCount / limit);
 
   res.json(
@@ -268,9 +273,11 @@ const adminGetAllUsers = asyncHandler(async (req, res) => {
   }
 
   if (search) {
+    // Escape regex metacharacters to prevent ReDoS
+    const safeSearch = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { email: { $regex: search, $options: "i" } },
+      { name: { $regex: safeSearch, $options: "i" } },
+      { email: { $regex: safeSearch, $options: "i" } },
     ];
   }
 

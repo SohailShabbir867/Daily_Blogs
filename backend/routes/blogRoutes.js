@@ -45,6 +45,10 @@ router.get(
 router.get("/featured", getFeaturedBlogs);
 router.get("/trending", getTrendingBlogs);
 router.get("/categories", getCategories);
+
+// Authenticated user routes — must be BEFORE /:identifier to avoid catch-all match
+router.get("/user/my-blogs", isAuthenticated, getMyBlogs);
+
 router.get("/:identifier", optionalAuth, getBlogBySlug);
 
 // Blog comments
@@ -64,9 +68,6 @@ router.post(
   handleValidationErrors,
   createComment
 );
-
-// Authenticated routes
-router.get("/user/my-blogs", isAuthenticated, getMyBlogs);
 
 router.post(
   "/",

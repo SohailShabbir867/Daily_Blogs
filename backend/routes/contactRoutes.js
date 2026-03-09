@@ -11,10 +11,10 @@ const {
   getContactStats,
 } = require("../controllers/contactController");
 const { isAuthenticated, isSuperAdmin } = require("../middleware/auth");
-const { defaultLimiter } = require("../middleware/rateLimiter");
+const { contactLimiter } = require("../middleware/rateLimiter");
 
-// Public route - submit contact form
-router.post("/", defaultLimiter, submitContact);
+// Public route - submit contact form (5/hr per IP to prevent spam)
+router.post("/", contactLimiter, submitContact);
 
 // Super admin only routes
 router.get("/", isAuthenticated, isSuperAdmin, getAllContacts);

@@ -75,109 +75,114 @@ router.get("/dashboard", isAdmin, async (req, res) => {
   const Blog = require("../models/Blog");
   const Comment = require("../models/Comment");
 
-  // Get various statistics
-  const [userStats, blogStats, commentStats, recentUsers, recentBlogs] =
-    await Promise.all([
-      User.aggregate([
-        {
-          $group: {
-            _id: null,
-            total: { $sum: 1 },
-            activeToday: {
-              $sum: {
-                $cond: [
-                  {
-                    $gte: [
-                      "$lastActive",
-                      new Date(Date.now() - 24 * 60 * 60 * 1000),
-                    ],
-                  },
-                  1,
-                  0,
-                ],
+  try {
+    // Get various statistics
+    const [userStats, blogStats, commentStats, recentUsers, recentBlogs] =
+      await Promise.all([
+        User.aggregate([
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              activeToday: {
+                $sum: {
+                  $cond: [
+                    {
+                      $gte: [
+                        "$lastActive",
+                        new Date(Date.now() - 24 * 60 * 60 * 1000),
+                      ],
+                    },
+                    1,
+                    0,
+                  ],
+                },
+              },
+              newThisWeek: {
+                $sum: {
+                  $cond: [
+                    {
+                      $gte: [
+                        "$createdAt",
+                        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+                      ],
+                    },
+                    1,
+                    0,
+                  ],
+                },
               },
             },
-            newThisWeek: {
-              $sum: {
-                $cond: [
-                  {
-                    $gte: [
-                      "$createdAt",
-                      new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-                    ],
-                  },
-                  1,
-                  0,
-                ],
-              },
+          },
+        ]),
+        Blog.aggregate([
+          {
+            $group: {
+              _id: "$status",
+              count: { $sum: 1 },
+              totalViews: { $sum: "$viewCount" },
+              totalLikes: { $sum: "$likeCount" },
             },
           },
-        },
-      ]),
-      Blog.aggregate([
-        {
-          $group: {
-            _id: "$status",
-            count: { $sum: 1 },
-            totalViews: { $sum: "$viewCount" },
-            totalLikes: { $sum: "$likeCount" },
+        ]),
+        Comment.aggregate([
+          {
+            $group: {
+              _id: null,
+              total: { $sum: 1 },
+              flagged: { $sum: { $cond: ["$isFlagged", 1, 0] } },
+              deleted: { $sum: { $cond: ["$isDeleted", 1, 0] } },
+            },
           },
-        },
-      ]),
-      Comment.aggregate([
-        {
-          $group: {
-            _id: null,
-            total: { $sum: 1 },
-            flagged: { $sum: { $cond: ["$isFlagged", 1, 0] } },
-            deleted: { $sum: { $cond: ["$isDeleted", 1, 0] } },
-          },
-        },
-      ]),
-      User.find()
-        .select("name email avatar createdAt")
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean(),
-      Blog.find()
-        .select("title slug status createdAt author")
-        .populate("author", "name")
-        .sort({ createdAt: -1 })
-        .limit(5)
-        .lean(),
-    ]);
+        ]),
+        User.find()
+          .select("name email avatar createdAt")
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .lean(),
+        Blog.find()
+          .select("title slug status createdAt author")
+          .populate("author", "name")
+          .sort({ createdAt: -1 })
+          .limit(5)
+          .lean(),
+      ]);
 
-  // Format stats
-  const stats = {
-    users: userStats[0] || { total: 0, activeToday: 0, newThisWeek: 0 },
-    blogs: {
-      total: 0,
-      published: 0,
-      draft: 0,
-      archived: 0,
-      totalViews: 0,
-      totalLikes: 0,
-    },
-    comments: commentStats[0] || { total: 0, flagged: 0, deleted: 0 },
-  };
+    // Format stats
+    const stats = {
+      users: userStats[0] || { total: 0, activeToday: 0, newThisWeek: 0 },
+      blogs: {
+        total: 0,
+        published: 0,
+        draft: 0,
+        archived: 0,
+        totalViews: 0,
+        totalLikes: 0,
+      },
+      comments: commentStats[0] || { total: 0, flagged: 0, deleted: 0 },
+    };
 
-  blogStats.forEach((stat) => {
-    if (stat._id) {
-      stats.blogs[stat._id] = stat.count;
-    }
-    stats.blogs.total += stat.count;
-    stats.blogs.totalViews += stat.totalViews || 0;
-    stats.blogs.totalLikes += stat.totalLikes || 0;
-  });
+    blogStats.forEach((stat) => {
+      if (stat._id) {
+        stats.blogs[stat._id] = stat.count;
+      }
+      stats.blogs.total += stat.count;
+      stats.blogs.totalViews += stat.totalViews || 0;
+      stats.blogs.totalLikes += stat.totalLikes || 0;
+    });
 
-  res.json({
-    success: true,
-    data: {
-      stats,
-      recentUsers,
-      recentBlogs,
-    },
-  });
+    res.json({
+      success: true,
+      data: {
+        stats,
+        recentUsers,
+        recentBlogs,
+      },
+    });
+  } catch (error) {
+    console.error("[ADMIN] Dashboard error:", error);
+    res.status(500).json({ success: false, message: "Failed to load dashboard" });
+  }
 });
 
 // GET /api/admin/users - Get all users

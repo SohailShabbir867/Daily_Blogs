@@ -241,7 +241,10 @@ const adminGetAllComments = asyncHandler(async (req, res) => {
   if (blogId) query.blog = blogId;
   if (userId) query.user = userId;
   if (flagged === "true") query.isFlagged = true;
-  if (search) query.text = { $regex: search, $options: "i" };
+  if (search) {
+    const safeSearch = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    query.text = { $regex: safeSearch, $options: "i" };
+  }
 
   const [comments, totalCount, stats] = await Promise.all([
     Comment.find(query)

@@ -168,26 +168,10 @@ const login = asyncHandler(async (req, res) => {
   req.session.userId = user._id;
   req.session.createdAt = new Date();
 
-  // Debug: Log session info
-  console.log(`[AUTH] Session created:`, {
-    sessionID: req.session.id,
-    userId: user._id,
-    cookie: {
-      maxAge: req.session.cookie.maxAge,
-      expires: req.session.cookie.expires,
-      httpOnly: req.session.cookie.httpOnly,
-      secure: req.session.cookie.secure,
-      sameSite: req.session.cookie.sameSite,
-    }
-  });
-
   // Get safe user data
   const userData = user.getSafeProfile();
 
-  // Debug log to verify isSuperAdmin is included
-  console.log(
-    `[AUTH] User logged in: ${user.email} (ID: ${user._id}), isSuperAdmin=${userData.isSuperAdmin}, role=${userData.role}`
-  );
+  console.log(`[AUTH] User logged in: ${user.email} (ID: ${user._id})`);
 
   // Send response
   res.json(
@@ -281,10 +265,7 @@ const checkSession = asyncHandler(async (req, res) => {
     );
   }
 
-  // Debug log to verify isSuperAdmin is included
-  console.log(
-    `[AUTH] Session check: user=${user.email}, isSuperAdmin=${user.isSuperAdmin}, role=${user.role}`
-  );
+
 
   res.json(
     buildSuccessResponse(
