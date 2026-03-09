@@ -188,6 +188,9 @@ const blogSchema = new mongoose.Schema(
 );
 
 blogSchema.index({ status: 1, publishedAt: -1 });
+blogSchema.index({ status: 1, category: 1, publishedAt: -1 }); // category-filtered listing
+blogSchema.index({ status: 1, isFeatured: 1, publishedAt: -1 }); // featured listing
+blogSchema.index({ status: 1, isTrending: 1, publishedAt: -1 }); // trending listing
 blogSchema.index({ category: 1, status: 1 });
 blogSchema.index({ author: 1, createdAt: -1 });
 blogSchema.index({ title: "text", description: "text", content: "text" });

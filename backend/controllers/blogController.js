@@ -63,6 +63,9 @@ const getBlogs = asyncHandler(async (req, res) => {
   // Calculate pagination metadata
   const totalPages = Math.ceil(totalCount / limit);
 
+  // Cache blog list for 60 seconds in browsers / CDN (public, read-only data)
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+
   res.json(
     buildSuccessResponse(
       {
@@ -129,27 +132,29 @@ const getBlogBySlug = asyncHandler(async (req, res) => {
     }
   }
 
-  // Increment view count (non-blocking)
+  // Increment view count and fetch related blogs + comment count in parallel (non-blocking)
   Blog.findByIdAndUpdate(blog._id, { $inc: { viewCount: 1 } }).catch((err) => {
     console.error("Failed to increment view count:", err.message);
   });
 
-  // Get related blogs
-  const relatedBlogs = await Blog.find({
-    _id: { $ne: blog._id },
-    status: "published",
-    $or: [{ category: blog.category }, { tags: { $in: blog.tags } }],
-  })
-    .select("title slug image publishedAt category visibility")
-    .sort({ publishedAt: -1 })
-    .limit(3)
-    .lean();
+  // Run the two remaining queries in parallel instead of sequentially
+  const [relatedBlogs, commentCount] = await Promise.all([
+    Blog.find({
+      _id: { $ne: blog._id },
+      status: "published",
+      $or: [{ category: blog.category }, { tags: { $in: blog.tags } }],
+    })
+      .select("title slug image publishedAt category visibility")
+      .sort({ publishedAt: -1 })
+      .limit(3)
+      .lean(),
+    Comment.countDocuments({ blog: blog._id, isDeleted: false }),
+  ]);
 
-  // Get comment count
-  const commentCount = await Comment.countDocuments({
-    blog: blog._id,
-    isDeleted: false,
-  });
+  // Cache public blog detail for 2 minutes
+  if (blog.visibility !== "registered") {
+    res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
+  }
 
   res.json(
     buildSuccessResponse(
@@ -177,6 +182,7 @@ const getFeaturedBlogs = asyncHandler(async (req, res) => {
     .limit(5)
     .lean();
 
+  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
   res.json(
     buildSuccessResponse({ blogs }, "Featured blogs retrieved successfully")
   );
@@ -194,6 +200,7 @@ const getTrendingBlogs = asyncHandler(async (req, res) => {
     .limit(10)
     .lean();
 
+  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=300");
   res.json(
     buildSuccessResponse({ blogs }, "Trending blogs retrieved successfully")
   );
@@ -203,6 +210,8 @@ const getTrendingBlogs = asyncHandler(async (req, res) => {
 const getCategories = asyncHandler(async (req, res) => {
   const categories = await Blog.getCategoryStats();
 
+  // Categories rarely change — cache for 5 minutes
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=600");
   res.json(
     buildSuccessResponse({ categories }, "Categories retrieved successfully")
   );

@@ -11,29 +11,28 @@ const createTransporter = () => {
   }
 
   try {
-    // For production, use real SMTP settings
-    if (process.env.NODE_ENV === "production") {
-      return nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT) || 587,
-        secure: process.env.SMTP_SECURE === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-    }
+    // Same config for both environments — always fall back to Gmail defaults
+    const host = process.env.SMTP_HOST || "smtp.gmail.com";
+    const port = parseInt(process.env.SMTP_PORT) || 587;
+    const secure = process.env.SMTP_SECURE === "true"; // false for port 587 (STARTTLS)
 
-    // For development, use Gmail
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: parseInt(process.env.SMTP_PORT) || 587,
-      secure: false,
+    const transport = nodemailer.createTransport({
+      host,
+      port,
+      secure,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
       },
+      // Keep the connection alive so we don't reconnect on every email
+      pool: true,
+      maxConnections: 3,
+      rateDelta: 1000,
+      rateLimit: 5,
     });
+
+    console.log(`[EMAIL] Transporter created — host: ${host}:${port}, user: ${process.env.SMTP_USER}`);
+    return transport;
   } catch (error) {
     console.error("❌ Failed to create email transporter:", error.message);
     return null;
@@ -41,6 +40,18 @@ const createTransporter = () => {
 };
 
 const transporter = createTransporter();
+
+// Verify SMTP connection on startup — logs clearly to Render logs
+if (transporter) {
+  transporter.verify((error) => {
+    if (error) {
+      console.error("❌ [EMAIL] SMTP connection FAILED:", error.message);
+      console.error("   Check SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS on Render");
+    } else {
+      console.log("✅ [EMAIL] SMTP connection verified — ready to send emails");
+    }
+  });
+}
 
 // Generate 6-digit OTP
 const generateOTP = () => {
