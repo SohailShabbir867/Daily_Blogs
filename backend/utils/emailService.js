@@ -248,7 +248,8 @@ const sendNewBlogNotification = async (
   authorName,
   unsubscribeToken
 ) => {
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  const clientUrl = (process.env.CORS_ORIGIN || process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")[0].trim();
   const backendUrl = process.env.BACKEND_URL || "http://localhost:5000";
 
   const mailOptions = {
@@ -414,7 +415,10 @@ module.exports = {
  * @param {string} verificationToken - Unique verification token
  */
 async function sendEmailVerification(email, userName, verificationToken) {
-  const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+  // Use CORS_ORIGIN (Vercel URL in production) or CLIENT_URL fallback
+  const clientUrl = (process.env.CORS_ORIGIN || process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")[0]  // take first origin if comma-separated
+    .trim();
   const verificationLink = `${clientUrl}/verify-email/${verificationToken}`;
 
   const mailOptions = {

@@ -85,6 +85,17 @@ if (NODE_ENV === "development") {
   app.use(morgan("combined", { skip: (req, res) => res.statusCode < 400 }));
 }
 
+// Health check — used by Render to verify the service is alive
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    success: true,
+    status: "healthy",
+    uptime: Math.floor(process.uptime()),
+    timestamp: new Date().toISOString(),
+    environment: NODE_ENV,
+  });
+});
+
 // Root route
 app.get("/", (req, res) => {
   res.json({

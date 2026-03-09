@@ -54,45 +54,45 @@ const register = asyncHandler(async (req, res) => {
   } catch (emailError) {
     console.error(`[AUTH] Failed to send verification email:`, emailError);
 
-    // In development, if email service is not configured, skip email verification
-    const isDevelopment = process.env.NODE_ENV !== "production";
     const isEmailNotConfigured = emailError.message.includes("not configured");
 
-    if (isDevelopment && isEmailNotConfigured) {
-      console.warn("[AUTH] SMTP not configured - skipping email verification in development mode");
-      // Auto-verify user in development when email is not configured
+    if (isEmailNotConfigured) {
+      // SMTP not configured — auto-verify so user can still log in
+      console.warn("[AUTH] SMTP not configured - auto-verifying user");
       user.isEmailVerified = true;
       user.emailVerificationToken = undefined;
       user.emailVerificationExpires = undefined;
       await user.save();
     } else {
-      // In production or if it's a real email error, delete user and throw
-      await User.findByIdAndDelete(user._id);
-      throw new BadRequestError(
-        "Failed to send verification email. Please check if the email address is valid and try again."
-      );
+      // Real SMTP error (bad credentials, network etc.) — keep the user
+      // saved in DB and ask them to use the resend-verification flow.
+      // Do NOT delete the user — the account exists, only email delivery failed.
+      console.error("[AUTH] SMTP error during registration — user saved but email not sent");
+      emailSent = false;
     }
   }
 
   // Log registration
   console.log(
-    `[AUTH] New user registered${emailSent ? ' (pending verification)' : ' (auto-verified in dev)'}: ${user.email} (ID: ${user._id})`
+    `[AUTH] New user registered${emailSent ? ' (pending verification)' : ' (auto-verified / email failed)'}: ${user.email} (ID: ${user._id})`
   );
 
-  // Send response based on whether email was sent
+  const requiresVerification = !user.isEmailVerified;
   const responseMessage = emailSent
     ? "Registration successful! Please check your email to verify your account before logging in."
-    : "Registration successful! You can now log in. (Email verification skipped - SMTP not configured)";
+    : requiresVerification
+      ? "Registration successful! We couldn't send the verification email right now. Please use 'Resend Verification' on the login page."
+      : "Registration successful! You can now log in.";
 
   res.status(201).json(
     buildSuccessResponse(
       {
         message: responseMessage,
         email: user.email,
-        requiresVerification: emailSent,
-        autoVerified: !emailSent,
+        requiresVerification,
+        autoVerified: !requiresVerification,
       },
-      emailSent ? "User registered - verification email sent" : "User registered - auto-verified"
+      "User registered"
     )
   );
 });
