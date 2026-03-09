@@ -11,8 +11,9 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
     throw new UnauthorizedError("Please log in to access this resource");
   }
 
-  // Find user by session userId - explicitly include isSuperAdmin
+  // Find user — only select fields needed for auth checks and attaching to req.user
   const user = await User.findById(req.session.userId)
+    .select("_id name email role isSuperAdmin isChatSupport isActive isEmailVerified avatar bio savedBlogs createdAt")
     .lean();
 
   // Check if user still exists

@@ -39,8 +39,12 @@ api.interceptors.response.use(
       // Server responded with error status
       const responseData = error.response.data;
 
-      // Extract message from response
-      errorMessage = responseData?.message ||
+      // Extract message from response.
+      // For validation errors (400), prefer the first specific field message
+      // so the user sees "Passwords do not match" rather than "Validation failed".
+      const firstValidationMsg = responseData?.errors?.[0]?.message;
+      errorMessage = firstValidationMsg ||
+        responseData?.message ||
         responseData?.error?.message ||
         error.message ||
         "An unexpected error occurred";

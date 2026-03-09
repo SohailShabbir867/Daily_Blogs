@@ -148,20 +148,22 @@ const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
 
   if (!errors.isEmpty()) {
-    console.log(
-      "[VALIDATION ERROR] Request body:",
-      JSON.stringify(req.body, null, 2)
-    );
-    console.log(
-      "[VALIDATION ERROR] Errors:",
-      JSON.stringify(errors.array(), null, 2)
-    );
+    // Log validation failures without exposing sensitive field values
+    const SENSITIVE_FIELDS = ["password", "confirmPassword", "currentPassword", "newPassword", "confirmNewPassword", "token", "otp"];
+    if (process.env.NODE_ENV === "development") {
+      const safeBody = Object.fromEntries(
+        Object.entries(req.body || {}).filter(([k]) => !SENSITIVE_FIELDS.includes(k))
+      );
+      console.log(`[VALIDATION] ${req.method} ${req.path} — body:`, JSON.stringify(safeBody));
+      console.log("[VALIDATION] Errors:", errors.array().map((e) => `${e.path}: ${e.msg}`).join(", "));
+    }
     const error = new ApiError("Validation failed", 400);
     error.code = "VALIDATION_ERROR";
     error.errors = errors.array().map((err) => ({
       field: err.path,
       message: err.msg,
-      value: err.value,
+      // Never echo back values for sensitive fields (passwords, tokens, OTPs)
+      ...(SENSITIVE_FIELDS.includes(err.path) ? {} : { value: err.value }),
     }));
     return next(error);
   }
@@ -173,20 +175,18 @@ const handleValidationErrors = (req, res, next) => {
 const setupUnhandledErrorHandlers = (server) => {
   // Handle unhandled promise rejections
   process.on("unhandledRejection", (reason, promise) => {
-    console.error("🔴 UNHANDLED REJECTION!");
-    console.error("Reason:", reason);
+    console.error("🔴 UNHANDLED REJECTION!", reason);
 
-    // Give server time to finish ongoing requests, then exit
-    server.close(() => {
-      console.error("Server closed due to unhandled rejection");
-      process.exit(1);
-    });
-
-    // Force exit if server doesn't close in 10 seconds
-    setTimeout(() => {
-      console.error("Forcing exit...");
-      process.exit(1);
-    }, 10000);
+    if (process.env.NODE_ENV !== "production") {
+      // In development: crash immediately so bugs surface fast
+      server.close(() => {
+        console.error("Server closed due to unhandled rejection");
+        process.exit(1);
+      });
+      setTimeout(() => process.exit(1), 10000);
+    }
+    // In production: log and keep serving other requests.
+    // Render will restart the process via health-check if it truly goes unhealthy.
   });
 
   // Handle uncaught exceptions

@@ -162,11 +162,6 @@ const Register = () => {
             </div>
           )}
 
-          {/* Demo Info */}
-          <div className="bg-emerald-50 text-emerald-700 px-4 py-3 rounded-lg mb-6 text-sm border border-emerald-100">
-            <p>Use "admin" in email for admin access (e.g., admin@test.com)</p>
-          </div>
-
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>

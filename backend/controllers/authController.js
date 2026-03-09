@@ -212,12 +212,12 @@ const logout = asyncHandler(async (req, res) => {
       throw new BadRequestError("Failed to logout. Please try again.");
     }
 
-    // Clear session cookie
-    res.clearCookie("connect.sid", {
+    // Clear session cookie using the actual configured session name
+    res.clearCookie(process.env.SESSION_NAME || "dailyblogs_sid", {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
 
     console.log(`[AUTH] User logged out: ${userId}`);
@@ -261,8 +261,9 @@ const checkSession = asyncHandler(async (req, res) => {
     );
   }
 
-  // Find user - isSuperAdmin will be included by default
+  // Find user - only fetch fields needed by the frontend
   const user = await User.findById(req.session.userId)
+    .select("_id name email role isSuperAdmin isChatSupport isActive isEmailVerified avatar bio createdAt lastLogin savedBlogs")
     .lean();
 
   if (!user || !user.isActive) {

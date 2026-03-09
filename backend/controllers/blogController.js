@@ -8,6 +8,7 @@ const {
   asyncHandler,
   buildSuccessResponse,
   parsePaginationParams,
+  isValidObjectId,
 } = require("../utils/helpers");
 const {
   BadRequestError,
@@ -33,12 +34,13 @@ const getBlogs = asyncHandler(async (req, res) => {
     query.category = category;
   }
 
-  // Search filter
+  // Search filter — escape regex metacharacters to prevent ReDoS attacks
   if (search) {
+    const safeSearch = search.trim().slice(0, 100).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     query.$or = [
-      { title: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-      { tags: { $in: [new RegExp(search, "i")] } },
+      { title: { $regex: safeSearch, $options: "i" } },
+      { description: { $regex: safeSearch, $options: "i" } },
+      { tags: { $in: [new RegExp(safeSearch, "i")] } },
     ];
   }
 
@@ -88,8 +90,8 @@ const getBlogBySlug = asyncHandler(async (req, res) => {
     .populate("author", "name avatar bio")
     .lean();
 
-  // If not found by slug, try by ID
-  if (!blog) {
+  // If not found by slug, try by ID only when identifier looks like a valid ObjectId
+  if (!blog && isValidObjectId(identifier)) {
     blog = await Blog.findOne({ _id: identifier, status: "published" })
       .populate("author", "name avatar bio")
       .lean();
