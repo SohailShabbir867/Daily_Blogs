@@ -90,6 +90,7 @@ const register = asyncHandler(async (req, res) => {
         message: responseMessage,
         email: user.email,
         requiresVerification,
+        emailSent,
         autoVerified: !requiresVerification,
       },
       "User registered"

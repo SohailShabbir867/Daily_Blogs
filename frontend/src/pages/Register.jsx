@@ -13,6 +13,7 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [emailActuallySent, setEmailActuallySent] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState("");
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -54,6 +55,7 @@ const Register = () => {
 
       if (result.requiresVerification) {
         setRegistrationSuccess(true);
+        setEmailActuallySent(result.emailSent === true);
         setRegisteredEmail(result.email || email);
       } else {
         navigate("/");
@@ -100,20 +102,25 @@ const Register = () => {
             </div>
 
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Check Your Email!
+              {emailActuallySent ? "Check Your Email!" : "Account Created!"}
             </h1>
 
             <p className="text-gray-600 mb-4">
-              We've sent a verification link to:
+              {emailActuallySent
+                ? "We've sent a verification link to:"
+                : 'Your account has been created, but we couldn\'t send the verification email. Please use "Resend Verification" on the login page.'}
             </p>
 
-            <p className="text-emerald-600 font-semibold text-lg mb-6">
-              {registeredEmail}
-            </p>
+            {emailActuallySent && (
+              <p className="text-emerald-600 font-semibold text-lg mb-6">
+                {registeredEmail}
+              </p>
+            )}
 
             <p className="text-gray-500 text-sm mb-6">
-              Please click the link in the email to verify your account. The
-              link will expire in 24 hours.
+              {emailActuallySent
+                ? "Please click the link in the email to verify your account. The link will expire in 24 hours."
+                : 'Go to the login page and click "Resend Verification Email" to get a new link sent to you.'}
             </p>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
