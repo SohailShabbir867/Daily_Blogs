@@ -153,15 +153,20 @@ const validatePasswordChange = [
  * Valid blog categories
  */
 const VALID_CATEGORIES = [
-  "Development",
-  "Design",
-  "Career",
-  "React",
-  "JavaScript",
-  "Best Practices",
-  "Accessibility",
+  "Technology",
+  "Coding & Programming",
+  "Web Development",
+  "Study Material",
+  "Movies & Entertainment",
+  "Games & Gaming",
+  "Government Schemes",
+  "Jobs & Career",
+  "Visa & Immigration",
+  "Linux & Tools",
   "Tutorial",
   "News",
+  "Design",
+  "Best Practices",
   "Other",
 ];
 
