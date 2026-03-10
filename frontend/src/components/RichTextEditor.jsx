@@ -807,7 +807,8 @@ const RichTextEditor = ({
           tableHtml +=
             '<th style="border: 1px solid #d1d5db; padding: 0.6rem 1rem; background: #f3f4f6; font-weight: 600; text-align: left; color: #111827;">Header</th>';
         } else {
-          tableHtml += '<td style="border: 1px solid #d1d5db; padding: 0.6rem 1rem; color: #374151;">Cell</td>';
+          tableHtml +=
+            '<td style="border: 1px solid #d1d5db; padding: 0.6rem 1rem; color: #374151;">Cell</td>';
         }
       }
       tableHtml += "</tr>";
@@ -1217,7 +1218,7 @@ const RichTextEditor = ({
                 </ToolbarButton>
               </ToolbarGroup>
 
-              {/* Alignment */
+              {/* Alignment */}
               <ToolbarGroup label="Align">
                 <ToolbarButton
                   onClick={() => handleAlign("Left")}
@@ -1383,7 +1384,11 @@ const RichTextEditor = ({
                   title="Text Color"
                   active={showTextColors}
                 >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
                     <path d="M11 3L5.5 17h2.25l1.12-3h6.25l1.12 3h2.25L13 3h-2zm-1.38 9L12 5.67 14.38 12H9.62z" />
                     <rect x="4" y="20" width="16" height="2" />
                   </svg>
@@ -1394,7 +1399,10 @@ const RichTextEditor = ({
                       <button
                         key={color}
                         type="button"
-                        onClick={() => { handleTextColor(color); setShowTextColors(false); }}
+                        onClick={() => {
+                          handleTextColor(color);
+                          setShowTextColors(false);
+                        }}
                         title={`Text: ${color}`}
                         className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform"
                         style={{ backgroundColor: color }}
