@@ -7,11 +7,71 @@ const dns = require("dns");
 // This must be set before any network calls.
 dns.setDefaultResultOrder("ipv4first");
 
-// Create transporter based on environment
+const https = require("https");
+
+// ---------------------------------------------------------------------------
+// Brevo HTTP API sender — uses HTTPS port 443, not blocked by Render free tier.
+// Render blocks ALL outbound TCP on port 587 (SMTP), so this is the only
+// reliable way to send email from a Render free-tier service.
+// ---------------------------------------------------------------------------
+const sendViaBrevoAPI = (mailOptions) => {
+  return new Promise((resolve, reject) => {
+    // Parse "Daily Blogs <email>" format
+    const fromMatch = (mailOptions.from || "").match(/\"?([^\"<]+)\"?\s*<([^>]+)>/);
+    const senderName = fromMatch ? fromMatch[1].trim() : "Daily Blogs";
+    const senderEmail = fromMatch ? fromMatch[2].trim() : (process.env.SMTP_USER || "").trim();
+
+    const payload = JSON.stringify({
+      sender: { name: senderName, email: senderEmail },
+      to: [{ email: mailOptions.to }],
+      subject: mailOptions.subject,
+      htmlContent: mailOptions.html,
+      textContent: mailOptions.text || "",
+    });
+
+    const req = https.request(
+      {
+        hostname: "api.brevo.com",
+        path: "/v3/smtp/email",
+        method: "POST",
+        headers: {
+          "api-key": process.env.BREVO_API_KEY,
+          "Content-Type": "application/json",
+          "Content-Length": Buffer.byteLength(payload),
+          Accept: "application/json",
+        },
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve({ messageId: (JSON.parse(data) || {}).messageId || "sent" });
+          } else {
+            reject(new Error(`Brevo API error ${res.statusCode}: ${data}`));
+          }
+        });
+      }
+    );
+    req.setTimeout(30000, () => req.destroy(new Error("Brevo API timeout")));
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+};
+
+// Create transporter/sender — prefers Brevo HTTP API, falls back to SMTP
 const createTransporter = () => {
-  // Check if SMTP credentials are available
+  // Brevo HTTP API (recommended for Render) — set BREVO_API_KEY in env vars
+  if (process.env.BREVO_API_KEY) {
+    console.log("[EMAIL] BREVO_API_KEY found — using Brevo HTTP API (port 443, works on Render)");
+    // Return duck-typed object compatible with all transporter.sendMail() call sites
+    return { sendMail: sendViaBrevoAPI, _mode: "brevo-api" };
+  }
+
+  // Fall back to SMTP (blocked on Render free tier — provided for local dev)
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("⚠️ SMTP credentials not configured. Email functionality will be disabled.");
+    console.warn("⚠️ No email credentials configured. Set BREVO_API_KEY (recommended) or SMTP_USER/PASS. Email disabled.");
     return null;
   }
 
@@ -60,18 +120,22 @@ const createTransporter = () => {
 
 const transporter = createTransporter();
 
-// Verify SMTP connection on startup — logs clearly to Render logs
+// Log startup email configuration
 if (transporter) {
-  transporter.verify((error) => {
-    if (error) {
-      console.error("❌ [EMAIL] SMTP connection FAILED:", error.message);
-      console.error(`   Code: ${error.code || "N/A"} | Response: ${error.response || "N/A"}`);
-      console.error("   → Fix: Check SMTP_USER and SMTP_PASS on Render. SMTP_PASS must be a valid");
-      console.error("     16-character Google App Password (Google Account → Security → App Passwords).");
-    } else {
-      console.log("✅ [EMAIL] SMTP connection verified — ready to send emails");
-    }
-  });
+  if (transporter._mode === "brevo-api") {
+    console.log("✅ [EMAIL] Brevo HTTP API configured — ready to send emails");
+  } else {
+    // SMTP fallback — verify on startup
+    transporter.verify((error) => {
+      if (error) {
+        console.error("❌ [EMAIL] SMTP connection FAILED:", error.message);
+        console.error(`   Code: ${error.code || "N/A"} | Response: ${error.response || "N/A"}`);
+        console.error("   → Render free tier blocks outbound SMTP (port 587). Add BREVO_API_KEY env var instead.");
+      } else {
+        console.log("✅ [EMAIL] SMTP connection verified — ready to send emails");
+      }
+    });
+  }
 }
 
 // Generate 6-digit OTP
