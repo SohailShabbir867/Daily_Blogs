@@ -21,13 +21,14 @@ const sendViaBrevoAPI = (mailOptions) => {
     const senderName = fromMatch ? fromMatch[1].trim() : "Daily Blogs";
     const senderEmail = fromMatch ? fromMatch[2].trim() : (process.env.SMTP_USER || "").trim();
 
-    const payload = JSON.stringify({
+    const body = {
       sender: { name: senderName, email: senderEmail },
       to: [{ email: mailOptions.to }],
       subject: mailOptions.subject,
-      htmlContent: mailOptions.html,
-      textContent: mailOptions.text || "",
-    });
+    };
+    if (mailOptions.html) body.htmlContent = mailOptions.html;
+    if (mailOptions.text) body.textContent = mailOptions.text;
+    const payload = JSON.stringify(body);
 
     const req = https.request(
       {
