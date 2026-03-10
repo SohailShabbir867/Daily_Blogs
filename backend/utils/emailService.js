@@ -1,6 +1,11 @@
 // Email Service - Nodemailer configuration for sending emails
 
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+// Force IPv4 DNS resolution globally — Render's free tier blocks outbound IPv6.
+// This must be set before any network calls.
+dns.setDefaultResultOrder("ipv4first");
 
 // Create transporter based on environment
 const createTransporter = () => {
@@ -26,9 +31,14 @@ const createTransporter = () => {
       secure,
       // requireTLS forces STARTTLS upgrade on port 587 (required for Gmail)
       requireTLS: !secure,
-      // Force IPv4 — Render free tier cannot make outbound IPv6 connections.
-      // Without this, smtp.gmail.com may resolve to an IPv6 address => ENETUNREACH
-      family: 4,
+      // Force IPv4 DNS resolution — dns.setDefaultResultOrder above handles global
+      // resolution, but this lookup override is belt-and-suspenders for Render.
+      lookup: (hostname, options, callback) => {
+        dns.resolve4(hostname, (err, addresses) => {
+          if (err) return callback(err);
+          callback(null, addresses[0], 4);
+        });
+      },
       auth: {
         user: smtpUser,
         pass: smtpPass,
@@ -37,7 +47,6 @@ const createTransporter = () => {
       connectionTimeout: 30000,
       greetingTimeout: 15000,
       socketTimeout: 30000,
-      // No pooling — creates a fresh connection per send, avoids stale connections on Render
       pool: false,
     });
 

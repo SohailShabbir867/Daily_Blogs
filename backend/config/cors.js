@@ -30,9 +30,12 @@ const createCorsConfig = () => {
       if (origin.includes("ngrok") || origin.includes("ngrok-free.app")) {
         return callback(null, true);
       }
-      // Allow all Vercel preview deployments for this project
-      // Pattern: https://daily-blogs-<hash>-sohail-shabbirs-projects-<id>.vercel.app
-      if (/^https:\/\/daily-blogs(-[a-z0-9]+)*\.vercel\.app$/.test(origin)) {
+      // Allow all Vercel deployments from this project's team.
+      // Every preview URL ends with the constant team suffix: sohail-shabbirs-projects-f49a5b68.vercel.app
+      if (
+        origin.endsWith(".vercel.app") &&
+        (origin.includes("daily-blogs") || origin.endsWith("-f49a5b68.vercel.app"))
+      ) {
         return callback(null, true);
       }
       if (allowedOrigins.includes(origin)) {
