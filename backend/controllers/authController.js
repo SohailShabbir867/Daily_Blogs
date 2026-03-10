@@ -187,32 +187,39 @@ const login = asyncHandler(async (req, res) => {
 });
 
 // Logout user and destroy session
+// Does NOT require isAuthenticated — logout must always succeed even if the
+// session already expired, so the client cookie is always cleared.
 const logout = asyncHandler(async (req, res) => {
-  const userId = req.session.userId;
-
-  // Destroy session
-  req.session.destroy((err) => {
-    if (err) {
-      console.error("[AUTH] Session destruction error:", err);
-      throw new BadRequestError("Failed to logout. Please try again.");
-    }
-
-    // Clear session cookie using the actual configured session name
+  const clearCookieAndRespond = () => {
     res.clearCookie(process.env.SESSION_NAME || "dailyblogs_sid", {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
     });
-
-    console.log(`[AUTH] User logged out: ${userId}`);
-
     res.json(
       buildSuccessResponse(
         { message: "Logged out successfully" },
         "Logout successful"
       )
     );
+  };
+
+  // If no session exists (already expired), just clear the cookie and return OK
+  if (!req.session || !req.session.userId) {
+    console.log("[AUTH] Logout called with no active session — clearing cookie");
+    return clearCookieAndRespond();
+  }
+
+  const userId = req.session.userId;
+
+  req.session.destroy((err) => {
+    if (err) {
+      console.error("[AUTH] Session destruction error:", err);
+      // Still clear the cookie so the client is logged out on their end
+    }
+    console.log(`[AUTH] User logged out: ${userId}`);
+    clearCookieAndRespond();
   });
 });
 

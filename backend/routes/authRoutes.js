@@ -59,7 +59,9 @@ router.get("/verify-email/:token", verifyEmail);
 router.post("/resend-verification", authLimiter, resendVerification);
 
 // Protected routes
-router.post("/logout", isAuthenticated, logout);
+// Note: logout does NOT require isAuthenticated — if the session expired,
+// the logout should still succeed and clear the cookie.
+router.post("/logout", logout);
 router.get("/me", isAuthenticated, getCurrentUser);
 
 router.put(
