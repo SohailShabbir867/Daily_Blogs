@@ -172,7 +172,9 @@ const CreateBlog = () => {
             </svg>
             Back
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Create New Post</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Create New Post
+          </h1>
           <p className="text-gray-500 mt-1">Write and publish a new article</p>
         </div>
 
@@ -286,17 +288,17 @@ const CreateBlog = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Read Time (minutes)
+                    Read Time{" "}
+                    <span className="text-gray-400 font-normal">
+                      (auto-calculated)
+                    </span>
                   </label>
-                  <input
-                    type="number"
-                    name="readTime"
-                    value={formData.readTime}
-                    onChange={handleChange}
-                    min="1"
-                    max="60"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                  />
+                  <div className="w-full px-4 py-3 border border-gray-100 rounded-xl bg-gray-50 text-gray-600 flex items-center gap-2">
+                    <span>⏱️</span>
+                    <span className="font-medium">
+                      {formData.readTime} min read
+                    </span>
+                  </div>
                 </div>
 
                 <div>

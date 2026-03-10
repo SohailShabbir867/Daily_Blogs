@@ -29,13 +29,8 @@ const ToolbarButton = ({
 );
 
 // Toolbar Group Component
-const ToolbarGroup = ({ children, label }) => (
+const ToolbarGroup = ({ children }) => (
   <div className="flex items-center gap-1 px-2 py-1 bg-gray-50 rounded-lg border border-gray-200">
-    {label && (
-      <span className="text-[10px] text-gray-500 mr-1 font-medium uppercase">
-        {label}
-      </span>
-    )}
     {children}
   </div>
 );
@@ -133,6 +128,7 @@ const RichTextEditor = ({
   const [showFindReplace, setShowFindReplace] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showHighlightColors, setShowHighlightColors] = useState(false);
+  const [showTextColors, setShowTextColors] = useState(false);
 
   // Link state
   const [linkUrl, setLinkUrl] = useState("");
@@ -171,7 +167,7 @@ const RichTextEditor = ({
   const [showPreview, setShowPreview] = useState(false);
   const [showHtml, setShowHtml] = useState(false);
   const [fontSize, setFontSize] = useState("16px");
-  const [editorHeight, setEditorHeight] = useState(400);
+  const [editorHeight, setEditorHeight] = useState(550);
   const [isResizing, setIsResizing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -905,10 +901,13 @@ const RichTextEditor = ({
       ) {
         setShowHighlightColors(false);
       }
+      if (showTextColors && !e.target.closest(".text-color-picker-container")) {
+        setShowTextColors(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [showEmojiPicker, showHighlightColors]);
+  }, [showEmojiPicker, showHighlightColors, showTextColors]);
 
   const editorContent = (
     <div
@@ -1219,19 +1218,9 @@ const RichTextEditor = ({
                 >
                   <span className="line-through text-base">S</span>
                 </ToolbarButton>
-                <ToolbarButton onClick={handleSubscript} title="Subscript">
-                  <span className="text-sm">
-                    X<sub className="text-[10px]">2</sub>
-                  </span>
-                </ToolbarButton>
-                <ToolbarButton onClick={handleSuperscript} title="Superscript">
-                  <span className="text-sm">
-                    X<sup className="text-[10px]">2</sup>
-                  </span>
-                </ToolbarButton>
               </ToolbarGroup>
 
-              {/* Alignment */}
+              {/* Alignment */
               <ToolbarGroup label="Align">
                 <ToolbarButton
                   onClick={() => handleAlign("Left")}
@@ -1387,21 +1376,36 @@ const RichTextEditor = ({
                 </ToolbarButton>
               </ToolbarGroup>
 
-              {/* Colors */}
-              <ToolbarGroup label="Color">
-                <div className="flex gap-0.5">
-                  {textColors.map((color) => (
-                    <button
-                      key={color}
-                      type="button"
-                      onClick={() => handleTextColor(color)}
-                      title={`Text color: ${color}`}
-                      className="w-5 h-5 rounded-full border border-gray-300 hover:scale-110 transition-transform"
-                      style={{ backgroundColor: color }}
-                    />
-                  ))}
-                </div>
-              </ToolbarGroup>
+              {/* Text Color */}
+              <div className="relative text-color-picker-container">
+                <ToolbarButton
+                  onClick={() => {
+                    saveSelection();
+                    setShowTextColors((prev) => !prev);
+                  }}
+                  title="Text Color"
+                  active={showTextColors}
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M11 3L5.5 17h2.25l1.12-3h6.25l1.12 3h2.25L13 3h-2zm-1.38 9L12 5.67 14.38 12H9.62z" />
+                    <rect x="4" y="20" width="16" height="2" />
+                  </svg>
+                </ToolbarButton>
+                {showTextColors && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-xl p-2 z-50 flex gap-1 flex-wrap w-36">
+                    {textColors.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        onClick={() => { handleTextColor(color); setShowTextColors(false); }}
+                        title={`Text: ${color}`}
+                        className="w-6 h-6 rounded-full border border-gray-300 hover:scale-110 transition-transform"
+                        style={{ backgroundColor: color }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* Highlight */}
               <div className="relative highlight-picker-container">
@@ -1476,25 +1480,7 @@ const RichTextEditor = ({
               </div>
 
               {/* Utilities */}
-              <ToolbarGroup label="Format">
-                <ToolbarButton onClick={handleIndent} title="Increase Indent">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M3 21h18v-2H3v2zM3 8v8l4-4-4-4zm8 9h10v-2H11v2zm0-4h10v-2H11v2zm0-4h10V7H11v2zM3 3v2h18V3H3z" />
-                  </svg>
-                </ToolbarButton>
-                <ToolbarButton onClick={handleOutdent} title="Decrease Indent">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M11 17h10v-2H11v2zm-8-5l4 4V8l-4 4zm0 9h18v-2H3v2zM3 3v2h18V3H3zm8 6h10V7H11v2zm0 4h10v-2H11v2z" />
-                  </svg>
-                </ToolbarButton>
+              <ToolbarGroup>
                 <ToolbarButton
                   onClick={handleClearFormatting}
                   title="Clear Formatting"
@@ -1538,7 +1524,7 @@ const RichTextEditor = ({
         className={`relative ${isFullscreen ? "flex-1 overflow-hidden" : ""}`}
       >
         {/* ── Raw HTML source editor ── */}
-        {showHtml && (
+        {showHtml ? (
           <div
             className={`border-2 border-t-0 border-amber-300 bg-gray-950 ${isFullscreen ? "h-full flex flex-col rounded-none" : "rounded-b-xl"}`}
           >
@@ -1573,9 +1559,7 @@ const RichTextEditor = ({
               placeholder="<!-- Write or paste raw HTML here... -->"
             />
           </div>
-        )}
-
-        {showPreview ? (
+        ) : showPreview ? (
           <div
             className={`p-8 blog-content overflow-y-auto border-2 border-t-0 border-gray-200 bg-white ${isFullscreen ? "h-full rounded-none" : "min-h-125 rounded-b-xl"}`}
             dangerouslySetInnerHTML={{
