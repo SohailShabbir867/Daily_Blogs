@@ -26,6 +26,9 @@ const createTransporter = () => {
       secure,
       // requireTLS forces STARTTLS upgrade on port 587 (required for Gmail)
       requireTLS: !secure,
+      // Force IPv4 — Render free tier blocks outbound IPv6 connections
+      // Without this, DNS may resolve smtp.gmail.com to an IPv6 address (ENETUNREACH)
+      family: 4,
       auth: {
         user: smtpUser,
         pass: smtpPass,
