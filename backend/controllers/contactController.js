@@ -5,17 +5,20 @@ const { asyncHandler, buildSuccessResponse } = require("../utils/helpers");
 const { BadRequestError, NotFoundError } = require("../utils/errors");
 const { sendContactConfirmation } = require("../utils/emailService");
 
-// Submit a new contact form (public)
+// Submit a new contact form (authenticated users only)
 const submitContact = asyncHandler(async (req, res) => {
-  const { name, email, subject, message } = req.body;
+  // Always use the authenticated user's identity — never trust submitted name/email
+  const name = req.user.name;
+  const email = req.user.email;
+  const { subject, message } = req.body;
 
-  if (!name || !email || !subject || !message) {
-    throw new BadRequestError("All fields are required");
+  if (!subject || !message) {
+    throw new BadRequestError("Subject and message are required");
   }
 
   const contact = await Contact.create({
-    name: name.trim(),
-    email: email.toLowerCase().trim(),
+    name,
+    email,
     subject: subject.trim(),
     message: message.trim(),
   });

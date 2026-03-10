@@ -13,8 +13,8 @@ const {
 const { isAuthenticated, isSuperAdmin } = require("../middleware/auth");
 const { contactLimiter } = require("../middleware/rateLimiter");
 
-// Public route - submit contact form (5/hr per IP to prevent spam)
-router.post("/", contactLimiter, submitContact);
+// Authenticated users only — prevents spoofing another user's email
+router.post("/", isAuthenticated, contactLimiter, submitContact);
 
 // Super admin only routes
 router.get("/", isAuthenticated, isSuperAdmin, getAllContacts);
