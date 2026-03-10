@@ -1,13 +1,12 @@
 // Contact page with support form
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
 
 const Contact = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     subject: "",
     message: "",
@@ -71,7 +70,7 @@ const Contact = () => {
               <Link
                 to="/login"
                 state={{ from: "/contact" }}
-                className="inline-block bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition shadow-lg shadow-emerald-500/20"
+                className="inline-block bg-linear-to-r from-emerald-500 to-teal-500 text-white px-6 py-3 rounded-xl font-semibold hover:from-emerald-600 hover:to-teal-600 transition shadow-lg shadow-emerald-500/20"
               >
                 Log In
               </Link>
