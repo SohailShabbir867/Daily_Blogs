@@ -46,13 +46,26 @@ const Contact = () => {
         <div className="max-w-md w-full text-center">
           <div className="bg-white rounded-2xl shadow-xl p-8">
             <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              <svg
+                className="w-10 h-10 text-emerald-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Sign In Required</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Sign In Required
+            </h2>
             <p className="text-gray-600 mb-6">
-              You need to be logged in to contact us. This ensures we can reply to the right person.
+              You need to be logged in to contact us. This ensures we can reply
+              to the right person.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <Link
@@ -126,7 +139,9 @@ const Contact = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Contact Us</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Contact Us
+          </h1>
           <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
             Have a question or feedback? We'd love to hear from you. Fill out
             the form below and we'll get back to you as soon as possible.

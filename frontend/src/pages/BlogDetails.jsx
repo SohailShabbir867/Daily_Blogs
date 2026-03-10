@@ -647,27 +647,7 @@ const BlogDetails = () => {
             {/* Main Content - Renders HTML from Rich Text Editor */}
             <div
               ref={contentRef}
-              className="blog-content prose prose-lg lg:prose-xl max-w-none w-full
-                prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mb-4 prose-headings:mt-8
-                prose-h1:text-3xl prose-h1:lg:text-4xl
-                prose-h2:text-2xl prose-h2:lg:text-3xl
-                prose-h3:text-xl prose-h3:lg:text-2xl
-                prose-h4:text-lg
-                prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-                prose-a:text-emerald-600 prose-a:underline prose-a:font-medium hover:prose-a:text-emerald-800
-                prose-strong:text-gray-900 prose-strong:font-bold
-                prose-em:italic prose-em:text-gray-800
-                prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6 prose-ul:space-y-2
-                prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6 prose-ol:space-y-2
-                prose-li:text-gray-700 prose-li:text-lg
-                prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:bg-emerald-50 prose-blockquote:rounded-r-lg prose-blockquote:my-6
-                prose-hr:border-gray-300 prose-hr:my-8
-                prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8 prose-img:mx-auto
-                prose-code:bg-gray-100 prose-code:text-red-600 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-                prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-0 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:my-6
-                prose-table:w-full prose-table:border-collapse prose-table:my-6
-                prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-th:bg-gray-100 prose-th:text-left prose-th:font-semibold
-                prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2"
+              className="blog-content w-full"
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
                   blog.content || `<p>${blog.description}</p>`,

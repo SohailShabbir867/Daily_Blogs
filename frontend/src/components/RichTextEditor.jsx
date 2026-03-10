@@ -169,6 +169,7 @@ const RichTextEditor = ({
 
   // Editor state
   const [showPreview, setShowPreview] = useState(false);
+  const [showHtml, setShowHtml] = useState(false);
   const [fontSize, setFontSize] = useState("16px");
   const [editorHeight, setEditorHeight] = useState(400);
   const [isResizing, setIsResizing] = useState(false);
@@ -177,9 +178,9 @@ const RichTextEditor = ({
   const lastValueRef = useRef(value);
   const isUserEditingRef = useRef(false);
 
-  // Initialize editor content and restore when switching from Preview to Edit
+  // Initialize editor content and restore when switching from Preview/HTML to Edit
   useEffect(() => {
-    if (editorRef.current && !showPreview) {
+    if (editorRef.current && !showPreview && !showHtml) {
       const currentContent = editorRef.current.innerHTML;
       const valueChanged = value !== lastValueRef.current;
       const editorIsEmpty =
@@ -190,7 +191,7 @@ const RichTextEditor = ({
         lastValueRef.current = value;
       }
     }
-  }, [value, showPreview]);
+  }, [value, showPreview, showHtml]);
 
   // Handle Escape for fullscreen
   useEffect(() => {
@@ -920,12 +921,15 @@ const RichTextEditor = ({
       >
         {/* Top Bar - Mode Switch, Stats & Controls */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-linear-to-r from-gray-50 to-white">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <button
               type="button"
-              onClick={() => setShowPreview(false)}
+              onClick={() => {
+                setShowPreview(false);
+                setShowHtml(false);
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                !showPreview
+                !showPreview && !showHtml
                   ? "bg-emerald-500 text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100 border border-gray-200"
               }`}
@@ -934,14 +938,32 @@ const RichTextEditor = ({
             </button>
             <button
               type="button"
-              onClick={() => setShowPreview(true)}
+              onClick={() => {
+                setShowPreview(true);
+                setShowHtml(false);
+              }}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                showPreview
+                showPreview && !showHtml
                   ? "bg-emerald-500 text-white shadow-md"
                   : "text-gray-600 hover:bg-gray-100 border border-gray-200"
               }`}
             >
               👁️ Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowHtml(true);
+                setShowPreview(false);
+              }}
+              title="Edit raw HTML source"
+              className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                showHtml
+                  ? "bg-amber-500 text-white shadow-md"
+                  : "text-gray-600 hover:bg-gray-100 border border-gray-200"
+              }`}
+            >
+              &lt;/&gt; HTML
             </button>
           </div>
 
@@ -1012,7 +1034,7 @@ const RichTextEditor = ({
         </div>
 
         {/* Find & Replace Bar */}
-        {showFindReplace && !showPreview && (
+        {showFindReplace && !showPreview && !showHtml && (
           <div className="px-4 py-3 border-b border-gray-200 bg-amber-50">
             <div className="flex flex-wrap items-center gap-2">
               <div className="flex items-center gap-2 flex-1 min-w-50">
@@ -1072,7 +1094,7 @@ const RichTextEditor = ({
         )}
 
         {/* Toolbar Rows - Only show in edit mode */}
-        {!showPreview && (
+        {!showPreview && !showHtml && (
           <div className="p-3 space-y-3">
             {/* Row 1: Undo/Redo, Format Block, Font Size, Text Style, Headings */}
             <div className="flex flex-wrap items-center gap-3">
@@ -1515,27 +1537,47 @@ const RichTextEditor = ({
         ref={containerRef}
         className={`relative ${isFullscreen ? "flex-1 overflow-hidden" : ""}`}
       >
+        {/* ── Raw HTML source editor ── */}
+        {showHtml && (
+          <div
+            className={`border-2 border-t-0 border-amber-300 bg-gray-950 ${isFullscreen ? "h-full flex flex-col rounded-none" : "rounded-b-xl"}`}
+          >
+            <div className="flex items-center justify-between px-4 py-2 bg-gray-900 border-b border-gray-700">
+              <span className="text-amber-400 text-xs font-mono font-semibold">
+                HTML Source Editor — changes apply immediately
+              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (editorRef.current) {
+                    editorRef.current.innerHTML = value || "";
+                  }
+                  setShowHtml(false);
+                }}
+                className="text-xs text-gray-400 hover:text-white px-3 py-1 rounded bg-gray-700 hover:bg-gray-600 transition"
+              >
+                ✓ Done
+              </button>
+            </div>
+            <textarea
+              className="w-full bg-gray-950 text-green-300 font-mono text-sm p-4 outline-none resize-none"
+              style={{ minHeight: isFullscreen ? "100%" : `${editorHeight}px` }}
+              value={value || ""}
+              onChange={(e) => {
+                lastValueRef.current = e.target.value;
+                onChange(e.target.value);
+              }}
+              spellCheck={false}
+              autoComplete="off"
+              autoCorrect="off"
+              placeholder="<!-- Write or paste raw HTML here... -->"
+            />
+          </div>
+        )}
+
         {showPreview ? (
           <div
-            className={`p-8 blog-content prose prose-lg max-w-none overflow-y-auto
-              prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mb-4 prose-headings:mt-8
-              prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-h4:text-lg
-              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-p:text-lg
-              prose-a:text-emerald-600 prose-a:underline prose-a:font-medium hover:prose-a:text-emerald-800
-              prose-strong:text-gray-900 prose-strong:font-bold
-              prose-em:italic prose-em:text-gray-800
-              prose-ul:list-disc prose-ul:pl-6 prose-ul:mb-6 prose-ul:space-y-2
-              prose-ol:list-decimal prose-ol:pl-6 prose-ol:mb-6 prose-ol:space-y-2
-              prose-li:text-gray-700 prose-li:text-lg
-              prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:pl-6 prose-blockquote:py-2 prose-blockquote:italic prose-blockquote:text-gray-600 prose-blockquote:bg-emerald-50 prose-blockquote:rounded-r-lg prose-blockquote:my-6
-              prose-code:bg-gray-100 prose-code:text-red-600 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-0 prose-pre:rounded-lg prose-pre:overflow-x-auto prose-pre:my-6
-              prose-table:w-full prose-table:border-collapse prose-table:my-6
-              prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-th:bg-gray-100 prose-th:text-left prose-th:font-semibold
-              prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2
-              prose-img:rounded-xl prose-img:shadow-lg prose-img:my-8 prose-img:mx-auto
-              prose-hr:border-gray-300 prose-hr:my-8
-              border-2 border-t-0 border-gray-200 bg-white ${isFullscreen ? "h-full rounded-none" : "min-h-125 rounded-b-xl"}`}
+            className={`p-8 blog-content overflow-y-auto border-2 border-t-0 border-gray-200 bg-white ${isFullscreen ? "h-full rounded-none" : "min-h-125 rounded-b-xl"}`}
             dangerouslySetInnerHTML={{
               __html: DOMPurify.sanitize(
                 value ||
@@ -1624,23 +1666,7 @@ const RichTextEditor = ({
             onMouseUp={saveSelection}
             onKeyUp={saveSelection}
             suppressContentEditableWarning={true}
-            className={`p-8 outline-none prose prose-lg max-w-none
-              prose-headings:text-gray-900 prose-headings:font-bold prose-headings:mb-4
-              prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
-              prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-4
-              prose-a:text-emerald-600 prose-a:underline
-              prose-strong:text-gray-900 prose-strong:font-bold
-              prose-em:text-gray-700 prose-em:italic
-              prose-blockquote:border-l-4 prose-blockquote:border-emerald-500 prose-blockquote:pl-4 prose-blockquote:italic
-              prose-code:bg-gray-100 prose-code:text-red-600 prose-code:px-2 prose-code:py-1 prose-code:rounded prose-code:text-sm
-              prose-pre:bg-gray-900 prose-pre:text-gray-100 prose-pre:p-4 prose-pre:rounded-lg
-              prose-ul:list-disc prose-ul:ml-6
-              prose-ol:list-decimal prose-ol:ml-6
-              prose-li:text-gray-700
-              prose-table:w-full prose-table:border-collapse
-              prose-th:border prose-th:border-gray-300 prose-th:px-4 prose-th:py-2 prose-th:bg-gray-100
-              prose-td:border prose-td:border-gray-300 prose-td:px-4 prose-td:py-2
-              focus:ring-2 focus:ring-emerald-500 border-2 border-t-0 border-gray-200 bg-white text-gray-800 ${isFullscreen ? "h-full overflow-y-auto rounded-none" : ""}`}
+            className={`p-8 outline-none blog-content focus:ring-2 focus:ring-emerald-500 border-2 border-t-0 border-gray-200 bg-white text-gray-800 ${isFullscreen ? "h-full overflow-y-auto rounded-none" : ""}`}
             style={{
               minHeight: isFullscreen ? "100%" : `${editorHeight}px`,
               fontSize,
@@ -1649,8 +1675,8 @@ const RichTextEditor = ({
           />
         )}
 
-        {/* Resize Handle - Only in non-fullscreen */}
-        {!showPreview && !isFullscreen && (
+        {/* Resize Handle - Only in non-fullscreen edit mode */}
+        {!showPreview && !showHtml && !isFullscreen && (
           <div
             onMouseDown={handleResizeMouseDown}
             className={`h-3 bg-gray-100 border-2 border-t-0 border-gray-200 rounded-b-xl cursor-ns-resize flex items-center justify-center hover:bg-emerald-100 transition-colors ${isResizing ? "bg-emerald-200" : ""}`}
@@ -1664,7 +1690,7 @@ const RichTextEditor = ({
       </div>
 
       {/* Tips & Shortcuts */}
-      {!showPreview && !value && !isFullscreen && (
+      {!showPreview && !showHtml && !value && !isFullscreen && (
         <div className="text-center py-4 text-sm text-gray-500 bg-gray-50 border-t border-gray-200 space-y-1">
           <p>
             💡 <strong>Tip:</strong> Paste directly from MS Word — formatting is
