@@ -670,6 +670,14 @@ const BlogDetails = () => {
                       "sub",
                       "sup",
                       "mark",
+                      "small",
+                      "abbr",
+                      "cite",
+                      "kbd",
+                      "var",
+                      "samp",
+                      "time",
+                      "address",
                       // Headings
                       "h1",
                       "h2",
@@ -681,24 +689,35 @@ const BlogDetails = () => {
                       "ul",
                       "ol",
                       "li",
+                      "dl",
+                      "dt",
+                      "dd",
                       // Links & Media
                       "a",
                       "img",
+                      "figure",
+                      "figcaption",
+                      "picture",
                       // Block elements
                       "blockquote",
                       "hr",
+                      "details",
+                      "summary",
                       // Code
                       "code",
                       "pre",
                       // Tables
                       "table",
+                      "caption",
+                      "colgroup",
+                      "col",
                       "thead",
                       "tbody",
                       "tfoot",
                       "tr",
                       "th",
                       "td",
-                      // Font styling
+                      // Font styling (from editor)
                       "font",
                       // Interactive (for code copy buttons)
                       "button",
@@ -720,9 +739,12 @@ const BlogDetails = () => {
                       "rowspan",
                       "align",
                       "valign",
-                      // For code blocks
+                      "span",
+                      "title",
+                      "datetime",
+                      // For code blocks (copy button target)
                       "id",
-                      "contenteditable",
+                      // Note: contenteditable intentionally excluded from viewer
                     ],
                     ALLOW_DATA_ATTR: false,
                     ADD_TAGS: ["iframe"],

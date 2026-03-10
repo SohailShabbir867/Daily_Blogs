@@ -166,7 +166,8 @@ const RichTextEditor = ({
   // Editor state
   const [showPreview, setShowPreview] = useState(false);
   const [showHtml, setShowHtml] = useState(false);
-  const [fontSize, setFontSize] = useState("16px");
+  // 18px = 1.125rem — matches .blog-content CSS so the editor looks exactly like the published viewer
+  const [fontSize, setFontSize] = useState("18px");
   const [editorHeight, setEditorHeight] = useState(550);
   const [isResizing, setIsResizing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -441,7 +442,8 @@ const RichTextEditor = ({
   const insertLink = () => {
     if (linkUrl) {
       const displayText = linkText || linkUrl;
-      const linkHtml = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" class="text-emerald-600 underline hover:text-emerald-700">${displayText}</a>`;
+      // Use inline style so the link color is preserved identically in the viewer
+      const linkHtml = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer" style="color: #059669; text-decoration: underline; font-weight: 500;">${displayText}</a>`;
       restoreSelection();
       execCommand("insertHTML", linkHtml);
     }
@@ -516,7 +518,8 @@ const RichTextEditor = ({
             ? "max-width: 100%; height: auto;"
             : `max-width: ${imageSize}%; height: auto;`;
       }
-      const imageHtml = `<div style="text-align: center; margin: 1rem 0;"><img src="${finalImageUrl}" alt="${imageAlt || "Blog image"}" class="rounded-lg shadow-md" style="${sizeStyle} display: inline-block;" /></div>`;
+      // No Tailwind classes — rely purely on inline styles + .blog-content img CSS rules
+      const imageHtml = `<div style="text-align: center; margin: 1.5rem 0;"><img src="${finalImageUrl}" alt="${imageAlt || "Blog image"}" style="${sizeStyle} display: inline-block;" /></div>`;
       restoreSelection();
       execCommand("insertHTML", imageHtml);
     }
@@ -766,27 +769,20 @@ const RichTextEditor = ({
   const insertCode = () => {
     if (!codeContent) return;
     if (isInline) {
-      const codeHtml = `<code class="inline-code bg-gray-100 text-red-600 px-2 py-1 rounded text-sm font-mono">${codeContent}</code>`;
+      // Inline style so it renders identically in the viewer
+      const codeHtml = `<code style="background: #f3f4f6; color: #dc2626; padding: 0.15em 0.4em; border-radius: 0.25rem; font-size: 0.875em; font-family: ui-monospace, monospace;">${codeContent}</code>`;
       execCommand("insertHTML", codeHtml);
     } else {
       const escapedCode = codeContent
+        .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
       const uniqueId = `code-${Date.now()}`;
       const langLabel =
         CODE_LANGUAGES.find((l) => l.value === codeLanguage)?.label ||
         codeLanguage;
-      const codeHtml = `
-        <div class="code-block-wrapper my-4 rounded-lg overflow-hidden border border-gray-700" contenteditable="false">
-          <div class="code-block-header bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-700">
-            <span class="text-gray-400 text-xs font-medium uppercase tracking-wide">${langLabel}</span>
-            <button onclick="navigator.clipboard.writeText(document.getElementById('${uniqueId}').innerText).then(() => { this.innerHTML='✓ Copied!'; setTimeout(() => this.innerHTML='📋 Copy', 2000); })" class="copy-code-btn text-gray-400 hover:text-white text-xs px-2 py-1 rounded hover:bg-gray-700 transition-all flex items-center gap-1">
-              📋 Copy
-            </button>
-          </div>
-          <pre class="code-block bg-gray-900 text-gray-100 p-4 m-0 overflow-x-auto"><code id="${uniqueId}" class="language-${codeLanguage}">${escapedCode}</code></pre>
-        </div>
-      `;
+      // Use inline styles everywhere so this renders correctly in any context (viewer, email, etc.)
+      const codeHtml = `<div class="code-block-wrapper" style="margin: 1.5rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #374151; font-size: 0.9em;"><div class="code-block-header" style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #374151;"><span style="color: #9ca3af; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">${langLabel}</span><button class="copy-code-btn" style="color: #9ca3af; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; background: transparent; border: none;">📋 Copy</button></div><pre style="background: #111827; color: #f3f4f6; padding: 1rem 1.25rem; margin: 0; overflow-x: auto; font-family: ui-monospace, 'Cascadia Code', monospace; line-height: 1.6;"><code id="${uniqueId}" class="language-${codeLanguage}" style="background: none; color: inherit; padding: 0;">${escapedCode}</code></pre></div>`;
       execCommand("insertHTML", codeHtml);
     }
     setShowCodeModal(false);
@@ -801,16 +797,17 @@ const RichTextEditor = ({
   };
 
   const insertTable = () => {
+    // Use inline styles so the table renders identically in the blog viewer
     let tableHtml =
-      '<table class="border-collapse border border-gray-300 w-full my-4"><tbody>';
+      '<table style="border-collapse: collapse; width: 100%; margin: 1.5rem 0;"><tbody>';
     for (let i = 0; i < tableRows; i++) {
       tableHtml += "<tr>";
       for (let j = 0; j < tableCols; j++) {
         if (i === 0) {
           tableHtml +=
-            '<th class="border border-gray-300 px-4 py-2 bg-gray-100 font-semibold">Header</th>';
+            '<th style="border: 1px solid #d1d5db; padding: 0.6rem 1rem; background: #f3f4f6; font-weight: 600; text-align: left; color: #111827;">Header</th>';
         } else {
-          tableHtml += '<td class="border border-gray-300 px-4 py-2">Cell</td>';
+          tableHtml += '<td style="border: 1px solid #d1d5db; padding: 0.6rem 1rem; color: #374151;">Cell</td>';
         }
       }
       tableHtml += "</tr>";
