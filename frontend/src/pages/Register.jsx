@@ -184,7 +184,7 @@ const Register = () => {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                placeholder="John Doe"
+                placeholder="Enter your full name"
                 required
               />
             </div>
@@ -220,7 +220,7 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                placeholder="••••••••"
+                placeholder="Enter password"
                 required
               />
             </div>
@@ -238,7 +238,7 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition"
-                placeholder="••••••••"
+                placeholder="Confirm your password"
                 required
               />
             </div>
