@@ -147,54 +147,78 @@ const generateOTP = () => {
 // Send OTP email for password reset
 const sendPasswordResetOTP = async (email, otp, userName) => {
   const mailOptions = {
-    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
-      }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"}>`,
     to: email,
     subject: "Password Reset OTP - Daily Blogs",
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Password Reset OTP</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .otp-box { background: #fff; border: 2px dashed #667eea; padding: 20px; text-align: center; margin: 20px 0; border-radius: 10px; }
-          .otp-code { font-size: 32px; font-weight: bold; color: #667eea; letter-spacing: 5px; }
-          .warning { color: #e74c3c; font-size: 14px; margin-top: 20px; }
-          .footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; }
+          .email-wrapper { width: 100%; background-color: #f3f4f6; padding: 24px 12px; }
+          .container { max-width: 580px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: white; padding: 32px 28px; text-align: center; }
+          .header h1 { font-size: 24px; font-weight: 700; margin: 0; }
+          .content { padding: 32px 28px; }
+          .content p { margin-bottom: 16px; color: #374151; font-size: 16px; }
+          .otp-box { background: #f0fdf4; border: 2px dashed #059669; padding: 28px 20px; text-align: center; margin: 24px 0; border-radius: 12px; }
+          .otp-label { color: #6b7280; font-size: 14px; margin-bottom: 8px; }
+          .otp-code { font-size: 40px; font-weight: 800; color: #059669; letter-spacing: 10px; font-family: 'Courier New', Courier, monospace; line-height: 1.2; word-spacing: -4px; }
+          .otp-expiry { color: #9ca3af; font-size: 13px; margin-top: 8px; }
+          .warning-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px 16px; border-radius: 4px; margin-top: 24px; color: #b91c1c; font-size: 14px; line-height: 1.5; }
+          .footer { background: #f9fafb; text-align: center; padding: 20px 24px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper { padding: 0; }
+            .container { border-radius: 0; box-shadow: none; }
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 20px; }
+            .content { padding: 24px 16px; }
+            .content p { font-size: 15px; }
+            .otp-code { font-size: 32px; letter-spacing: 6px; }
+            .otp-box { padding: 20px 12px; }
+            .footer { padding: 16px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <h1>🔐 Password Reset</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${userName || "User"}</strong>,</p>
-            <p>We received a request to reset your password. Use the OTP below to proceed:</p>
-            
-            <div class="otp-box">
-              <p style="margin: 0; color: #666;">Your OTP Code</p>
-              <p class="otp-code">${otp}</p>
-              <p style="margin: 0; color: #888; font-size: 14px;">Valid for 10 minutes</p>
+        <div class="email-wrapper">
+          <div class="container">
+            <div class="header">
+              <h1>🔐 Password Reset</h1>
             </div>
-            
-            <p>Enter this code on the password reset page to create a new password.</p>
-            
-            <p class="warning">⚠️ If you didn't request this password reset, please ignore this email or contact support if you're concerned about your account security.</p>
-          </div>
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
-            <p>This is an automated message, please do not reply.</p>
+            <div class="content">
+              <p>Hello <strong>${userName || "User"}</strong>,</p>
+              <p>We received a request to reset your Daily Blogs password. Use the one-time code below to proceed:</p>
+
+              <div class="otp-box">
+                <p class="otp-label">Your OTP Code</p>
+                <p class="otp-code">${otp}</p>
+                <p class="otp-expiry">⏱ Valid for 10 minutes only</p>
+              </div>
+
+              <p>Enter this code on the password reset page to create a new password.</p>
+
+              <div class="warning-box">
+                ⚠️ If you did not request a password reset, please ignore this email. Your account is safe — no changes have been made.
+              </div>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+              <p style="margin-top: 4px;">This is an automated message, please do not reply.</p>
+            </div>
           </div>
         </div>
       </body>
       </html>
     `,
-    text: `Hello ${userName || "User"
-      },\n\nYour password reset OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\n- Daily Blogs Team`,
+    text: `Hello ${userName ||
+      "User"},\n\nYour password reset OTP is: ${otp}\n\nThis code is valid for 10 minutes.\n\nIf you didn't request this, please ignore this email.\n\n- Daily Blogs Team`,
   };
 
   if (!transporter) {
@@ -215,41 +239,70 @@ const sendPasswordResetOTP = async (email, otp, userName) => {
 // Send welcome email
 const sendWelcomeEmail = async (email, userName) => {
   const mailOptions = {
-    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
-      }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"}>`,
     to: email,
     subject: "Welcome to Daily Blogs! 🎉",
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Welcome to Daily Blogs!</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .button { display: inline-block; background: #667eea; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; margin: 20px 0; }
-          .footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; }
+          .email-wrapper { width: 100%; background-color: #f3f4f6; padding: 24px 12px; }
+          .container { max-width: 580px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: white; padding: 36px 28px; text-align: center; }
+          .header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+          .header p { color: rgba(255,255,255,0.85); font-size: 14px; margin-top: 6px; }
+          .content { padding: 32px 28px; }
+          .content p { margin-bottom: 16px; color: #374151; font-size: 16px; }
+          .feature-list { list-style: none; padding: 0; margin: 16px 0 24px; }
+          .feature-list li { padding: 10px 0; font-size: 15px; color: #374151; border-bottom: 1px solid #f3f4f6; }
+          .feature-list li:last-child { border-bottom: none; }
+          .cta-box { text-align: center; margin: 28px 0 8px; }
+          .cta-btn { display: inline-block; background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
+          .footer { background: #f9fafb; text-align: center; padding: 20px 24px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper { padding: 0; }
+            .container { border-radius: 0; box-shadow: none; }
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 22px; }
+            .content { padding: 24px 16px; }
+            .content p { font-size: 15px; }
+            .cta-btn { display: block; padding: 14px 20px; text-align: center; }
+            .footer { padding: 16px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <h1>Welcome to Daily Blogs! 🎉</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${userName}</strong>,</p>
-            <p>Thank you for joining Daily Blogs! We're excited to have you as part of our community.</p>
-            <p>With your new account, you can:</p>
-            <ul>
-              <li>📖 Read amazing blog posts</li>
-              <li>💾 Save your favorite articles</li>
-              <li>💬 Engage with the community</li>
-            </ul>
-            <p>Start exploring now!</p>
-          </div>
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+        <div class="email-wrapper">
+          <div class="container">
+            <div class="header">
+              <h1>Welcome to Daily Blogs! 🎉</h1>
+              <p>Your journey to great reading starts now</p>
+            </div>
+            <div class="content">
+              <p>Hello <strong>${userName}</strong>,</p>
+              <p>Thank you for joining Daily Blogs! We're thrilled to have you as part of our growing community of curious readers and writers.</p>
+              <p>Here's what you can do with your account:</p>
+              <ul class="feature-list">
+                <li>📖 &nbsp;Read amazing blog posts from expert writers</li>
+                <li>💾 &nbsp;Save your favorite articles to read later</li>
+                <li>💬 &nbsp;Comment and engage with the community</li>
+                <li>🔔 &nbsp;Get notified when new stories go live</li>
+              </ul>
+              <div class="cta-box">
+                <a href="${(process.env.CORS_ORIGIN || process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0].trim()}" class="cta-btn">Start Exploring →</a>
+              </div>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+              <p style="margin-top: 4px;">This is an automated message, please do not reply.</p>
+            </div>
           </div>
         </div>
       </body>
@@ -276,37 +329,63 @@ const sendWelcomeEmail = async (email, userName) => {
 // Send contact confirmation email
 const sendContactConfirmation = async (email, name, subject) => {
   const mailOptions = {
-    from: `"Daily Blogs Support" <${process.env.SMTP_USER || "support@dailyblogs.com"
-      }>`,
+    from: `"Daily Blogs Support" <${process.env.SMTP_USER || "support@dailyblogs.com"}>`,
     to: email,
     subject: "We received your message - Daily Blogs",
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Message Received</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-          .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }
-          .content { background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }
-          .footer { text-align: center; color: #888; font-size: 12px; margin-top: 20px; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; }
+          .email-wrapper { width: 100%; background-color: #f3f4f6; padding: 24px 12px; }
+          .container { max-width: 580px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: white; padding: 32px 28px; text-align: center; }
+          .header h1 { font-size: 24px; font-weight: 700; margin: 0; }
+          .content { padding: 32px 28px; }
+          .content p { margin-bottom: 16px; color: #374151; font-size: 16px; }
+          .subject-box { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px 20px; border-radius: 10px; margin: 20px 0; }
+          .subject-box p { margin: 0; color: #065f46; font-weight: 600; font-size: 15px; }
+          .info-box { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 14px 16px; border-radius: 4px; margin-top: 8px; color: #0369a1; font-size: 14px; line-height: 1.5; }
+          .footer { background: #f9fafb; text-align: center; padding: 20px 24px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper { padding: 0; }
+            .container { border-radius: 0; box-shadow: none; }
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 20px; }
+            .content { padding: 24px 16px; }
+            .content p { font-size: 15px; }
+            .footer { padding: 16px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <h1>📬 Message Received</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${name}</strong>,</p>
-            <p>Thank you for contacting Daily Blogs support!</p>
-            <p>We've received your message regarding: <strong>"${subject}"</strong></p>
-            <p>Our team will review your inquiry and get back to you within 24-48 hours.</p>
-            <p>Thank you for your patience!</p>
-            <p>Best regards,<br>Daily Blogs Support Team</p>
-          </div>
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+        <div class="email-wrapper">
+          <div class="container">
+            <div class="header">
+              <h1>📬 Message Received</h1>
+            </div>
+            <div class="content">
+              <p>Hello <strong>${name}</strong>,</p>
+              <p>Thank you for reaching out to Daily Blogs Support! We've received your message and our team will be in touch soon.</p>
+              <div class="subject-box">
+                <p>📋 Subject: "${subject}"</p>
+              </div>
+              <div class="info-box">
+                ⏱️ Our support team typically responds within <strong>24–48 hours</strong> during business days.
+              </div>
+              <p style="margin-top: 20px;">In the meantime, feel free to explore more great content on Daily Blogs!</p>
+              <p>Best regards,<br><strong>Daily Blogs Support Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+              <p style="margin-top: 4px;">This is an automated confirmation, please do not reply to this email.</p>
+            </div>
           </div>
         </div>
       </body>
@@ -356,30 +435,50 @@ const sendNewBlogNotification = async (
     subject: `📝 New Blog: ${blog.title} - Daily Blogs`,
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>New Blog Post</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f3f4f6; }
-          .container { max-width: 600px; margin: 0 auto; background: white; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; }
-          .header h1 { margin: 0; font-size: 24px; }
-          .content { padding: 30px; }
-          .blog-card { background: #f9fafb; border-radius: 12px; overflow: hidden; margin: 20px 0; }
-          .blog-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; }
+          .email-wrapper { width: 100%; background-color: #f3f4f6; padding: 24px 12px; }
+          .container { max-width: 580px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: white; padding: 32px 28px; text-align: center; }
+          .header h1 { font-size: 24px; font-weight: 700; }
+          .content { padding: 28px; }
+          .content > p { margin-bottom: 16px; font-size: 16px; color: #374151; }
+          .blog-card { background: #f9fafb; border-radius: 12px; overflow: hidden; margin: 20px 0; border: 1px solid #e5e7eb; }
+          .blog-image { width: 100%; height: 200px; object-fit: cover; background: linear-gradient(135deg, #059669 0%, #0d9488 100%); display: block; }
           .blog-info { padding: 20px; }
-          .blog-title { font-size: 20px; font-weight: bold; color: #1f2937; margin: 0 0 10px 0; }
+          .blog-title { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0 0 10px 0; }
           .blog-meta { color: #6b7280; font-size: 14px; margin-bottom: 10px; }
-          .blog-description { color: #4b5563; margin-bottom: 15px; }
-          .read-btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; }
-          .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          .blog-description { color: #4b5563; margin-bottom: 16px; font-size: 15px; }
+          .read-btn { display: inline-block; background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: #ffffff !important; padding: 13px 28px; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 15px; }
+          .footer { background: #f9fafb; text-align: center; padding: 20px 24px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
           .unsubscribe { color: #9ca3af; text-decoration: underline; }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper { padding: 0; }
+            .container { border-radius: 0; box-shadow: none; }
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 20px; }
+            .content { padding: 20px 16px; }
+            .blog-info { padding: 16px; }
+            .blog-title { font-size: 18px; }
+            .read-btn { display: block; text-align: center; padding: 14px 20px; }
+            .blog-image { height: 160px; }
+            .footer { padding: 16px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <h1>📝 New Blog Post!</h1>
-          </div>
+        <div class="email-wrapper">
+          <div class="container">
+            <div class="header">
+              <h1>📝 New Blog Post!</h1>
+            </div>
           <div class="content">
             <p>Hello${subscriberName ? ` <strong>${subscriberName}</strong>` : ""
       }!</p>
@@ -407,11 +506,12 @@ const sendNewBlogNotification = async (
           </div>
           <div class="footer">
             <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
-            <p>
+            <p style="margin-top:6px;">
               <a href="${backendUrl}/api/subscribe/unsubscribe/${unsubscribeToken}" class="unsubscribe">
                 Unsubscribe from notifications
               </a>
             </p>
+          </div>
           </div>
         </div>
       </body>
@@ -519,58 +619,83 @@ async function sendEmailVerification(email, userName, verificationToken) {
   const verificationLink = `${clientUrl}/verify-email/${verificationToken}`;
 
   const mailOptions = {
-    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"
-      }>`,
+    from: `"Daily Blogs" <${process.env.SMTP_USER || "noreply@dailyblogs.com"}>`,
     to: email,
     subject: "Verify Your Email - Daily Blogs ✉️",
     html: `
       <!DOCTYPE html>
-      <html>
+      <html lang="en">
       <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Verify Your Email</title>
         <style>
-          body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background: #f3f4f6; }
-          .container { max-width: 600px; margin: 0 auto; background: white; }
-          .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }
-          .header h1 { margin: 0; font-size: 24px; }
-          .content { padding: 30px; background: #f9f9f9; }
-          .verify-box { background: #fff; border: 2px solid #667eea; padding: 25px; text-align: center; margin: 20px 0; border-radius: 10px; }
-          .verify-btn { display: inline-block; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
-          .verify-btn:hover { opacity: 0.9; }
-          .link-text { word-break: break-all; color: #667eea; font-size: 12px; margin-top: 15px; }
-          .warning { color: #e74c3c; font-size: 14px; margin-top: 20px; padding: 15px; background: #fef2f2; border-radius: 8px; }
-          .footer { text-align: center; padding: 20px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          * { box-sizing: border-box; margin: 0; padding: 0; }
+          body { font-family: Arial, Helvetica, sans-serif; line-height: 1.6; color: #374151; background-color: #f3f4f6; }
+          .email-wrapper { width: 100%; background-color: #f3f4f6; padding: 24px 12px; }
+          .container { max-width: 580px; width: 100%; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+          .header { background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: white; padding: 36px 28px; text-align: center; }
+          .header h1 { font-size: 26px; font-weight: 700; margin: 0; }
+          .header p { margin-top: 6px; color: rgba(255,255,255,0.85); font-size: 14px; }
+          .content { padding: 32px 28px; }
+          .content p { margin-bottom: 16px; color: #374151; font-size: 16px; }
+          .verify-box { background: #f0fdf4; border: 2px solid #059669; padding: 28px 20px; text-align: center; margin: 28px 0; border-radius: 12px; }
+          .verify-btn { display: inline-block; background: linear-gradient(135deg, #059669 0%, #0d9488 100%); color: #ffffff !important; text-decoration: none; padding: 16px 40px; border-radius: 10px; font-size: 16px; font-weight: 700; letter-spacing: 0.5px; box-shadow: 0 4px 12px rgba(5,150,105,0.3); }
+          .link-box { margin-top: 16px; padding: 10px; background: #f9fafb; border-radius: 6px; }
+          .link-text { word-break: break-all; color: #059669; font-size: 12px; }
+          .expiry-note { font-size: 14px; color: #6b7280; margin-top: 8px; }
+          .warning-box { background: #fef2f2; border-left: 4px solid #ef4444; padding: 14px 16px; border-radius: 4px; margin-top: 24px; color: #b91c1c; font-size: 14px; line-height: 1.5; }
+          .footer { background: #f9fafb; text-align: center; padding: 20px 24px; color: #9ca3af; font-size: 12px; border-top: 1px solid #e5e7eb; }
+          @media only screen and (max-width: 600px) {
+            .email-wrapper { padding: 0; }
+            .container { border-radius: 0; box-shadow: none; }
+            .header { padding: 24px 16px; }
+            .header h1 { font-size: 22px; }
+            .content { padding: 24px 16px; }
+            .content p { font-size: 15px; }
+            .verify-btn { display: block; padding: 14px 20px; font-size: 15px; text-align: center; }
+            .verify-box { padding: 20px 12px; margin: 20px 0; }
+            .footer { padding: 16px; }
+          }
         </style>
       </head>
       <body>
-        <div class="container">
-          <div class="header">
-            <h1>✉️ Verify Your Email</h1>
-          </div>
-          <div class="content">
-            <p>Hello <strong>${userName || "there"}</strong>!</p>
-            <p>Thank you for registering with Daily Blogs. To complete your registration and start using your account, please verify your email address by clicking the button below:</p>
-            
-            <div class="verify-box">
-              <a href="${verificationLink}" class="verify-btn">Verify My Email</a>
-              <p class="link-text">Or copy and paste this link in your browser:<br>${verificationLink}</p>
+        <div class="email-wrapper">
+          <div class="container">
+            <div class="header">
+              <h1>✉️ Verify Your Email</h1>
+              <p>One step away from your account</p>
             </div>
-            
-            <p><strong>This link will expire in 24 hours.</strong></p>
-            
-            <div class="warning">
-              ⚠️ If you didn't create an account with Daily Blogs, please ignore this email. Someone may have entered your email address by mistake.
+            <div class="content">
+              <p>Hello <strong>${userName || "there"}</strong>!</p>
+              <p>Thank you for joining Daily Blogs. To activate your account and start reading, please verify your email address:</p>
+
+              <div class="verify-box">
+                <a href="${verificationLink}" class="verify-btn">✅ Verify My Email</a>
+                <div class="link-box">
+                  <p style="color:#6b7280; font-size:12px; margin-bottom:4px;">Or copy &amp; paste this link in your browser:</p>
+                  <p class="link-text">${verificationLink}</p>
+                </div>
+                <p class="expiry-note">🕐 This link expires in <strong>24 hours</strong></p>
+              </div>
+
+              <p style="font-size:14px; color:#6b7280;">If you did not create an account, you can safely ignore this email.</p>
+
+              <div class="warning-box">
+                ⚠️ Never share this verification link with anyone. Daily Blogs staff will never ask for this link.
+              </div>
             </div>
-          </div>
-          <div class="footer">
-            <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
-            <p>This is an automated message, please do not reply.</p>
+            <div class="footer">
+              <p>© ${new Date().getFullYear()} Daily Blogs. All rights reserved.</p>
+              <p style="margin-top:4px;">This is an automated message, please do not reply.</p>
+            </div>
           </div>
         </div>
       </body>
       </html>
     `,
-    text: `Hello ${userName || "there"
-      }!\n\nThank you for registering with Daily Blogs.\n\nPlease verify your email by clicking this link:\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.\n\n— Daily Blogs Team`,
+    text: `Hello ${userName || "there"}!\n\nThank you for registering with Daily Blogs.\n\nPlease verify your email by clicking this link:\n${verificationLink}\n\nThis link will expire in 24 hours.\n\nIf you didn't create an account, please ignore this email.\n\n— Daily Blogs Team`,
   };
 
   if (!transporter) {

@@ -224,3 +224,51 @@
   font-style: italic;
   font-weight: 400;
 }
+
+/* ─── Mobile-responsive blog content (< 640px) ─── */
+@media (max-width: 640px) {
+  .blog-content {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .blog-content p,
+  .blog-content li {
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+  .blog-content h1 { font-size: 1.625rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+  .blog-content h2 { font-size: 1.375rem; margin-top: 1.5rem; margin-bottom: 0.75rem; }
+  .blog-content h3 { font-size: 1.2rem; }
+  .blog-content h4 { font-size: 1.1rem; }
+  .blog-content h5,
+  .blog-content h6 { font-size: 1rem; }
+  .blog-content pre {
+    font-size: 0.8em;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+  }
+  .blog-content blockquote {
+    padding: 0.5rem 0.875rem;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+  }
+  .blog-content img {
+    margin: 1rem auto;
+    border-radius: 0.5rem;
+  }
+  .blog-content table {
+    font-size: 0.875rem;
+  }
+  .blog-content th,
+  .blog-content td {
+    padding: 0.4rem 0.6rem;
+  }
+  .blog-content ul,
+  .blog-content ol {
+    padding-left: 1.25rem;
+  }
+}
+
+/* ─── Utility: hide scrollbar while keeping scroll ─── */
+.no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

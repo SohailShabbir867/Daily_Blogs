@@ -417,7 +417,7 @@ const Home = () => {
           </div>
 
           {trendingLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
@@ -431,7 +431,7 @@ const Home = () => {
               ))}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
               {trendingBlogs.slice(0, 3).map((blog) => (
                 <div key={blog._id || blog.id} className="relative">
                   <div className="absolute -top-2 -left-2 z-10">
@@ -456,8 +456,8 @@ const Home = () => {
 
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Category Filters */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        {/* Category Filters — horizontal scroll on mobile, wrap on sm+ */}
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-8 pb-1 sm:flex-wrap">
           {/* Trending Filter */}
           <button
             onClick={() => {
@@ -537,7 +537,7 @@ const Home = () => {
         {/* Blog Grid */}
         {showTrending ? (
           trendingBlogs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {trendingBlogs.map((blog) => (
                 <div key={blog._id || blog.id} className="relative">
                   <div className="absolute -top-2 -left-2 z-10">
@@ -574,7 +574,7 @@ const Home = () => {
             </div>
           )
         ) : filteredBlogs.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {filteredBlogs.map((blog) => (
               <BlogCard key={blog._id || blog.id} blog={blog} />
             ))}

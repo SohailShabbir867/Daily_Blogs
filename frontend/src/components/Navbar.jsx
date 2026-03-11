@@ -105,7 +105,9 @@ const Navbar = () => {
                     {user.name?.charAt(0).toUpperCase() || "U"}
                   </span>
                 </div>
-                <span className="text-gray-700 font-medium">{user.name}</span>
+                <span className="text-gray-700 font-medium truncate max-w-[100px] sm:max-w-[140px]">
+                  {user.name}
+                </span>
 
                 <svg
                   className={`w-4 h-4 text-gray-500 transition-transform duration-200 ${
@@ -406,14 +408,18 @@ const Navbar = () => {
               {user ? (
                 <>
                   <div className="px-4 py-3 flex items-center gap-3">
-                    <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center">
+                    <div className="w-10 h-10 bg-linear-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center shrink-0">
                       <span className="text-white font-medium">
                         {user.name?.charAt(0).toUpperCase() || "U"}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{user.name}</p>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">
+                        {user.name}
+                      </p>
+                      <p className="text-sm text-gray-500 truncate">
+                        {user.email}
+                      </p>
                     </div>
                   </div>
 

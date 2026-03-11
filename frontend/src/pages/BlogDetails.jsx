@@ -463,7 +463,7 @@ const BlogDetails = () => {
         {/* Floating Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="absolute top-6 left-6 z-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm text-gray-700 px-4 py-2 rounded-full font-medium shadow-lg hover:bg-white transition-colors"
+          className="absolute top-4 left-4 sm:top-6 sm:left-6 z-20 flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-sm text-gray-700 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-sm sm:text-base font-medium shadow-lg hover:bg-white transition-colors"
         >
           <svg
             className="w-5 h-5"
@@ -482,7 +482,7 @@ const BlogDetails = () => {
         </button>
 
         {/* Hero Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 md:p-12">
+        <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 md:p-12">
           <div className="w-full">
             {/* Category */}
             <span className="inline-block bg-white/20 backdrop-blur-sm text-white text-sm font-semibold px-4 py-1.5 rounded-full mb-4">
@@ -490,7 +490,7 @@ const BlogDetails = () => {
             </span>
 
             {/* Title */}
-            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight drop-shadow-lg">
+            <h1 className="text-xl sm:text-3xl md:text-5xl font-bold text-white mb-3 sm:mb-4 leading-tight drop-shadow-lg">
               {blog.title}
             </h1>
 
@@ -636,10 +636,10 @@ const BlogDetails = () => {
           </div>
 
           {/* Content */}
-          <div className="p-6 sm:p-8 md:p-12 lg:p-16">
+          <div className="p-4 sm:p-8 md:p-12 lg:p-16">
             {/* Description/Excerpt */}
             {blog.description && (
-              <p className="text-xl text-gray-600 leading-relaxed mb-8 pb-8 border-b border-gray-100 font-light">
+              <p className="text-base sm:text-lg md:text-xl text-gray-600 leading-relaxed mb-6 sm:mb-8 pb-6 sm:pb-8 border-b border-gray-100 font-light">
                 {blog.description}
               </p>
             )}
@@ -778,8 +778,8 @@ const BlogDetails = () => {
             )}
 
             {/* Author Card */}
-            <div className="mt-10 pt-8 border-t border-gray-100">
-              <div className="flex items-start gap-4 p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl">
+            <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-gray-100">
+              <div className="flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl">
                 <div className="w-16 h-16 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white font-bold text-2xl shrink-0 shadow-lg">
                   {authorName.charAt(0).toUpperCase()}
                 </div>
