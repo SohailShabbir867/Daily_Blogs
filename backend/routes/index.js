@@ -11,6 +11,7 @@ const adminRoutes = require("./adminRoutes");
 const contactRoutes = require("./contactRoutes");
 const subscriberRoutes = require("./subscriberRoutes");
 const chatRoutes = require("./chatRoutes");
+const { generateSitemap } = require("../controllers/sitemapController");
 
 // Health check endpoint
 router.get("/health", (req, res) => {
@@ -33,6 +34,9 @@ router.use("/contact", contactRoutes);
 router.use("/subscribe", subscriberRoutes);
 router.use("/chat", chatRoutes);
 
+// Sitemap endpoint
+router.get("/sitemap.xml", generateSitemap);
+
 // API info endpoint
 router.get("/", (req, res) => {
   res.json({
@@ -49,6 +53,7 @@ router.get("/", (req, res) => {
       contact: "/api/contact",
       subscribe: "/api/subscribe",
       chat: "/api/chat",
+      sitemap: "/api/sitemap.xml",
       health: "/api/health",
     },
   });
