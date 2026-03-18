@@ -106,6 +106,10 @@ app.get("/", (req, res) => {
   });
 });
 
+// Avoid 404 errors in logs from crawlers hitting the API URL directly
+app.get("/robots.txt", (req, res) => res.status(200).send("User-agent: *\nDisallow: /"));
+app.get("/favicon.ico", (req, res) => res.status(204).end());
+
 // Initialize and start the server
 const startServer = async () => {
   try {
