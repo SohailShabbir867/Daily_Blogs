@@ -24,8 +24,6 @@ Disallow: /register
 Disallow: /*?sort=
 Disallow: /*?page=
 
-# Crawl-delay (be kind to server)
-Crawl-delay: 1
 
 # Googlebot specific (no crawl-delay needed, Google ignores it)
 User-agent: Googlebot
