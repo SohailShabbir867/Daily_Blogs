@@ -125,32 +125,7 @@ const Home = () => {
     return matchesSearch && matchesCategory;
   });
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        <section className="bg-linear-to-br from-emerald-800 via-teal-700 to-cyan-800 text-white py-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              Welcome to Daily Blogs
-            </h1>
-            <p className="text-xl text-emerald-100">Loading articles...</p>
-          </div>
-        </section>
-        <section className="max-w-7xl mx-auto px-6 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 animate-pulse">
-                <div className="h-40 bg-gray-200 rounded-xl mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
-                <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-              </div>
-            ))}
-          </div>
-        </section>
-      </div>
-    );
-  }
+  // The Hero section should eagerly render. The loading state is handled down in the blog grid.
 
   if (error) {
     return (
@@ -301,9 +276,12 @@ const Home = () => {
                   placeholder="Search articles, topics or keywords..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 sm:pl-14 pr-20 sm:pr-32 py-4 sm:py-5 text-sm sm:text-base text-gray-800 placeholder-gray-400 focus:outline-none"
+                  className="w-full pl-10 sm:pl-14 pr-20 sm:pr-32 py-4 sm:py-5 text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none"
                 />
-                <button className="absolute right-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-medium text-sm sm:text-base hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg">
+                <button 
+                  aria-label="Search"
+                  className="absolute right-2 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-3 sm:px-6 py-2 sm:py-3 rounded-xl font-medium text-sm sm:text-base hover:from-emerald-600 hover:to-teal-600 transition-all shadow-lg"
+                >
                   <span className="hidden sm:inline">Search</span>
                   <svg
                     className="w-4 h-4 sm:hidden"
@@ -534,8 +512,18 @@ const Home = () => {
           </p>
         </div>
 
-        {/* Blog Grid */}
-        {showTrending ? (
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 animate-pulse shadow-sm border border-gray-100">
+                <div className="h-40 bg-gray-200 rounded-xl mb-4"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2"></div>
+                <div className="h-6 bg-gray-200 rounded w-full mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            ))}
+          </div>
+        ) : showTrending ? (
           trendingBlogs.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
               {trendingBlogs.map((blog) => (
@@ -565,10 +553,10 @@ const Home = () => {
               >
                 <path d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
               </svg>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">
                 No trending articles yet
-              </h3>
-              <p className="text-gray-500">
+              </h2>
+              <p className="text-gray-600">
                 Check back later for trending content.
               </p>
             </div>
@@ -594,10 +582,10 @@ const Home = () => {
                 d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
               />
             </svg>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
               No articles found
-            </h3>
-            <p className="text-gray-500">
+            </h2>
+            <p className="text-gray-600">
               Try adjusting your search or filter to find what you're looking
               for.
             </p>
@@ -625,11 +613,13 @@ const Home = () => {
               >
                 <button
                   onClick={() => toggleFaq(index)}
-                  className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-emerald-50/50 transition"
+                  aria-expanded={openFaq === index}
+                  aria-controls={`faq-answer-${index}`}
+                  className="w-full px-6 py-5 flex items-center justify-between text-left bg-white hover:bg-emerald-50/50 transition focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 rounded-t-2xl"
                 >
-                  <span className="font-semibold text-gray-900 pr-4">
+                  <h3 className="font-semibold text-gray-900 pr-4 m-0 p-0 text-base">
                     {faq.question}
-                  </span>
+                  </h3>
                   <svg
                     className={`w-5 h-5 text-emerald-600 shrink-0 transition-transform duration-300 ${
                       openFaq === index ? "rotate-180" : ""
@@ -647,11 +637,12 @@ const Home = () => {
                   </svg>
                 </button>
                 <div
+                  id={`faq-answer-${index}`}
                   className={`overflow-hidden transition-all duration-300 ${
                     openFaq === index ? "max-h-96" : "max-h-0"
                   }`}
                 >
-                  <div className="px-6 pb-5 text-gray-600 leading-relaxed border-t border-gray-100 pt-4">
+                  <div className="px-6 pb-5 text-gray-700 leading-relaxed border-t border-gray-100 pt-4">
                     {faq.answer}
                   </div>
                 </div>
