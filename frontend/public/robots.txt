@@ -1,5 +1,5 @@
 # Daily Blogs - Robots.txt
-# https://dailyblogs.com
+# https://dailyblogs.website
 
 User-agent: *
 Allow: /
@@ -41,4 +41,4 @@ Disallow: /login
 Disallow: /register
 
 # Sitemap location
-Sitemap: https://dailyblogs.com/sitemap.xml
+Sitemap: https://dailyblogs.website/sitemap.xml
