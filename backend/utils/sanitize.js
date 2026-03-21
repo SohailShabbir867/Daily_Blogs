@@ -6,58 +6,35 @@ const sanitizeHtml = require("sanitize-html");
 const blogContentConfig = {
   allowedTags: [
     // Text formatting
-    "p",
-    "br",
-    "b",
-    "i",
-    "u",
-    "strong",
-    "em",
-    "s",
-    "strike",
+    "p", "br", "b", "i", "u", "strong", "em", "s", "strike", "sub", "sup", "del", "mark",
     // Headings
-    "h1",
-    "h2",
-    "h3",
-    "h4",
-    "h5",
-    "h6",
+    "h1", "h2", "h3", "h4", "h5", "h6",
     // Lists
-    "ul",
-    "ol",
-    "li",
+    "ul", "ol", "li", "dl", "dt", "dd",
     // Links (with restrictions)
     "a",
     // Block elements
-    "blockquote",
-    "hr",
-    "div",
-    "span",
-    // Images (with restrictions)
-    "img",
+    "blockquote", "hr", "div", "span", "details", "summary",
+    // Images and Media
+    "img", "figure", "figcaption", "iframe",
     // Code
-    "pre",
-    "code",
+    "pre", "code",
+    // Tables
+    "table", "thead", "tbody", "tfoot", "tr", "th", "td", "caption",
   ],
   allowedAttributes: {
-    a: ["href", "target", "rel"],
-    img: ["src", "alt", "title", "width", "height"],
-    div: ["class"],
-    span: ["class"],
-    p: ["class"],
-    "*": ["style"],
+    a: ["href", "target", "rel", "class", "id"],
+    img: ["src", "alt", "title", "width", "height", "class", "id"],
+    iframe: ["src", "width", "height", "allowfullscreen", "loading", "title", "frameborder", "class", "id"],
+    th: ["colspan", "rowspan", "class", "id"],
+    td: ["colspan", "rowspan", "class", "id"],
+    code: ["class", "id"],
+    pre: ["class", "id"],
+    "*": ["style", "class", "id"],
   },
-  allowedStyles: {
-    "*": {
-      // Allow only safe CSS properties
-      color: [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(\d+,\s*\d+,\s*\d+\)$/],
-      "background-color": [/^#[0-9a-fA-F]{3,6}$/, /^rgb\(\d+,\s*\d+,\s*\d+\)$/],
-      "text-align": [/^(left|right|center|justify)$/],
-      "font-weight": [/^(normal|bold|\d{3})$/],
-      "font-style": [/^(normal|italic)$/],
-      "text-decoration": [/^(none|underline|line-through)$/],
-    },
-  },
+  // By omitting allowedStyles entirely, sanitize-html will NOT filter inline styles
+  // as long as `style` is an allowed attribute (which it is, for all elements above).
+  // This ensures dynamic inline styles (like center alignment and colors) are preserved.
   // Transform links to be safe
   transformTags: {
     a: (tagName, attribs) => {
@@ -83,6 +60,7 @@ const blogContentConfig = {
   allowedSchemes: ["http", "https", "mailto"],
   allowedSchemesByTag: {
     img: ["http", "https", "data"],
+    iframe: ["http", "https"],
   },
   // Prevent protocol-relative URLs
   allowProtocolRelative: false,
