@@ -3,6 +3,7 @@ import { useNavigate, useParams, Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { getBlogById, updateBlog } from "../../services/adminService";
 import RichTextEditor from "../../components/RichTextEditor";
+import { uploadImageToCloudinary } from "../../services/cloudinaryService";
 
 const EditBlog = () => {
   const { id } = useParams();
@@ -20,6 +21,7 @@ const EditBlog = () => {
   const [coverUploadMethod, setCoverUploadMethod] = useState("url");
   const [coverFile, setCoverFile] = useState(null);
   const [coverFilePreview, setCoverFilePreview] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -165,13 +167,18 @@ const EditBlog = () => {
       };
 
       if (coverUploadMethod === "upload" && coverFile) {
-        const reader = new FileReader();
-        const base64 = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(coverFile);
-        });
-        updatedData.image = base64;
+        try {
+          setUploadProgress(0);
+          const cloudinaryUrl = await uploadImageToCloudinary(coverFile, (pct) => {
+            setUploadProgress(pct);
+          });
+          updatedData.image = cloudinaryUrl;
+        } catch (err) {
+          console.error("Error uploading cover image:", err);
+          setError("Error uploading cover image: " + err.message);
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       await updateBlog(blog._id || blog.id, updatedData);

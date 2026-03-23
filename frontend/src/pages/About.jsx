@@ -15,14 +15,14 @@ const About = () => {
       name: "Hassan Mahmood",
       role: "Content Strategist",
       bio: "Expert in crafting engaging technical content that helps developers learn and grow in their careers.",
-      avatar: "A",
+      avatar: "H",
       color: "from-green-500 to-teal-500",
     },
     {
       name: "Mubashir Ali",
       role: "Content Creator",
       bio: "Passionate about writing clear, practical articles on coding, technologies, and career advice for developers at all levels.",
-      avatar: "S",
+      avatar: "M",
       color: "from-pink-500 to-rose-500",
     },
   ];

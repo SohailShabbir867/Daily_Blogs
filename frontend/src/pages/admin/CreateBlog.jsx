@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { createBlog } from "../../services/blogService";
 import RichTextEditor from "../../components/RichTextEditor";
+import { uploadImageToCloudinary } from "../../services/cloudinaryService";
 
 const CreateBlog = () => {
   const { user, isAdmin } = useAuth();
@@ -15,6 +16,7 @@ const CreateBlog = () => {
   const [coverUploadMethod, setCoverUploadMethod] = useState("upload");
   const [coverFile, setCoverFile] = useState(null);
   const [coverFilePreview, setCoverFilePreview] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -109,18 +111,16 @@ const CreateBlog = () => {
 
     // Only add image if it's provided and not empty
     if (coverUploadMethod === "upload" && coverFile) {
-      // Convert uploaded file to base64
+      // Upload file to Cloudinary CDN
       try {
-        const reader = new FileReader();
-        const base64 = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(coverFile);
+        setUploadProgress(0);
+        const cloudinaryUrl = await uploadImageToCloudinary(coverFile, (pct) => {
+          setUploadProgress(pct);
         });
-        newBlog.image = base64;
+        newBlog.image = cloudinaryUrl;
       } catch (err) {
-        console.error("Error processing cover image:", err);
-        setError("Error processing cover image. Please try again.");
+        console.error("Error uploading cover image:", err);
+        setError("Error uploading cover image: " + err.message);
         setIsSubmitting(false);
         return;
       }
@@ -507,6 +507,7 @@ const CreateBlog = () => {
                             };
                             reader.readAsDataURL(file);
                             setImageError("");
+                            setUploadProgress(0);
                           }
                         }}
                         className="hidden"
