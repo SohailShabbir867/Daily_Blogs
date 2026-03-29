@@ -26,14 +26,30 @@ const staticPages = [
 async function fetchBlogs() {
   try {
     console.log(`📡 Fetching blogs from ${API_BASE}/api/blogs...`);
-    const res = await fetch(
-      `${API_BASE}/api/blogs?status=published&limit=500&page=1`
-    );
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    const blogs = data?.data?.blogs || data?.blogs || data?.data || [];
-    console.log(`✅ Fetched ${blogs.length} blog posts`);
-    return blogs;
+
+    const pageSize = 100;
+    let page = 1;
+    let totalPages = 1;
+    const allBlogs = [];
+
+    while (page <= totalPages) {
+      const res = await fetch(
+        `${API_BASE}/api/blogs?limit=${pageSize}&page=${page}&sortBy=publishedAt&sortOrder=desc`,
+      );
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+      const blogs = data?.data?.blogs || data?.blogs || data?.data || [];
+      const pagination = data?.data?.pagination || {};
+
+      allBlogs.push(...blogs);
+      totalPages =
+        pagination.totalPages || (blogs.length === pageSize ? page + 1 : page);
+      page += 1;
+    }
+
+    console.log(`✅ Fetched ${allBlogs.length} blog posts`);
+    return allBlogs;
   } catch (err) {
     console.warn("⚠️  Could not fetch blogs:", err.message);
     console.warn("    Sitemap will only include static pages.");
@@ -51,7 +67,7 @@ function buildXml(blogs) {
     <lastmod>${today}</lastmod>
     <changefreq>${p.changefreq}</changefreq>
     <priority>${p.priority}</priority>
-  </url>`
+  </url>`,
     )
     .join("\n");
 
@@ -100,7 +116,9 @@ async function main() {
   const outPath = resolve(__dirname, "public", "sitemap.xml");
   writeFileSync(outPath, xml, "utf-8");
   console.log(`✅ sitemap.xml written to ${outPath}`);
-  console.log(`   Total URLs: ${staticPages.length + blogs.filter((b) => b.slug).length}`);
+  console.log(
+    `   Total URLs: ${staticPages.length + blogs.filter((b) => b.slug).length}`,
+  );
 }
 
 main().catch((err) => {

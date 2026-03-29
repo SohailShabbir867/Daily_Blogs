@@ -387,6 +387,7 @@ const BlogDetails = () => {
     <div className="min-h-screen bg-gray-50">
       <SEO
         title={blog.title}
+        url={`${typeof window !== "undefined" ? window.location.origin : "https://dailyblogs.website"}/blog/${blog.slug}`}
         description={
           blog.description ||
           `Read ${blog.title} on Daily Blogs - Expert insights and tutorials`
@@ -698,6 +699,7 @@ const BlogDetails = () => {
                       "figure",
                       "figcaption",
                       "picture",
+                      "source",
                       // Block elements
                       "blockquote",
                       "hr",
@@ -727,6 +729,8 @@ const BlogDetails = () => {
                       "target",
                       "rel",
                       "src",
+                      "srcset",
+                      "sizes",
                       "alt",
                       "width",
                       "height",
@@ -747,8 +751,16 @@ const BlogDetails = () => {
                       // Note: contenteditable intentionally excluded from viewer
                     ],
                     ALLOW_DATA_ATTR: false,
+                    ADD_DATA_URI_TAGS: ["img"],
                     ADD_TAGS: ["iframe"],
-                    ADD_ATTR: ["target", "allowfullscreen", "loading"],
+                    ADD_ATTR: [
+                      "target",
+                      "allowfullscreen",
+                      "loading",
+                      "referrerpolicy",
+                      "frameborder",
+                      "allow",
+                    ],
                     FORBID_TAGS: ["script", "object", "embed", "form", "input"],
                     FORBID_ATTR: [
                       "onerror",

@@ -16,7 +16,7 @@ const blogContentConfig = {
     // Block elements
     "blockquote", "hr", "div", "span", "details", "summary",
     // Images and Media
-    "img", "figure", "figcaption", "iframe",
+    "img", "figure", "figcaption", "picture", "source", "iframe",
     // Code
     "pre", "code",
     // Tables
@@ -24,7 +24,9 @@ const blogContentConfig = {
   ],
   allowedAttributes: {
     a: ["href", "target", "rel", "class", "id"],
-    img: ["src", "alt", "title", "width", "height", "class", "id"],
+    img: ["src", "srcset", "sizes", "alt", "title", "width", "height", "class", "id", "loading", "decoding"],
+    picture: ["class", "id"],
+    source: ["srcset", "sizes", "type", "media", "class", "id"],
     iframe: ["src", "width", "height", "allowfullscreen", "loading", "title", "frameborder", "class", "id"],
     th: ["colspan", "rowspan", "class", "id"],
     td: ["colspan", "rowspan", "class", "id"],
@@ -52,9 +54,54 @@ const blogContentConfig = {
       return { tagName, attribs };
     },
   },
-  // Remove empty elements
+  // Remove only tags that are truly empty *and* safe to drop.
+  // IMPORTANT: Do not treat "no text" as empty when the tag may wrap only media
+  // (e.g. <div><img></div>, <p><img></p>) — otherwise sanitize-html drops the
+  // opening tag and truncates the whole subtree, stripping images and embeds.
   exclusiveFilter: (frame) => {
-    return !frame.text.trim() && !["br", "hr", "img"].includes(frame.tag);
+    const keepEvenIfNoText = new Set([
+      "br",
+      "hr",
+      "img",
+      "iframe",
+      "div",
+      "span",
+      "figure",
+      "figcaption",
+      "picture",
+      "source",
+      "p",
+      "a",
+      "td",
+      "th",
+      "tr",
+      "table",
+      "tbody",
+      "thead",
+      "tfoot",
+      "caption",
+      "colgroup",
+      "col",
+      "ul",
+      "ol",
+      "li",
+      "dl",
+      "dt",
+      "dd",
+      "blockquote",
+      "pre",
+      "code",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+      "h5",
+      "h6",
+      "details",
+      "summary",
+    ]);
+    if (keepEvenIfNoText.has(frame.tag)) return false;
+    return !frame.text.trim();
   },
   // Disallow javascript: URLs
   allowedSchemes: ["http", "https", "mailto"],

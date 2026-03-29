@@ -4,6 +4,16 @@
 // MS Word paste support, Image upload, Tables, Keyboard shortcuts
 import { useState, useRef, useCallback, useEffect } from "react";
 import DOMPurify from "dompurify";
+import { uploadImageToCloudinary } from "../services/cloudinaryService";
+
+/** Escape for double-quoted HTML attributes (URLs, alt text). */
+function escapeHtmlAttr(str) {
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
 
 // Toolbar Button Component
 const ToolbarButton = ({
@@ -489,17 +499,23 @@ const RichTextEditor = ({
     if (uploadMethod === "upload" && imageFile) {
       setIsUploading(true);
       try {
-        const reader = new FileReader();
-        finalImageUrl = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result);
-          reader.onerror = reject;
-          reader.readAsDataURL(imageFile);
-        });
+        // Prefer CDN URL for reliable rendering and smaller HTML payloads.
+        finalImageUrl = await uploadImageToCloudinary(imageFile);
       } catch (error) {
-        console.error("Error processing image:", error);
-        alert("Error processing image. Please try again.");
-        setIsUploading(false);
-        return;
+        // Fallback: keep editor usable if CDN upload is temporarily unavailable.
+        try {
+          const reader = new FileReader();
+          finalImageUrl = await new Promise((resolve, reject) => {
+            reader.onloadend = () => resolve(reader.result);
+            reader.onerror = reject;
+            reader.readAsDataURL(imageFile);
+          });
+        } catch (fallbackError) {
+          console.error("Error processing image:", fallbackError || error);
+          alert("Image upload failed. Please try again.");
+          setIsUploading(false);
+          return;
+        }
       }
       setIsUploading(false);
     } else if (uploadMethod === "url" && imageUrl) {
@@ -519,7 +535,9 @@ const RichTextEditor = ({
             : `max-width: ${imageSize}%; height: auto;`;
       }
       // No Tailwind classes — rely purely on inline styles + .blog-content img CSS rules
-      const imageHtml = `<div style="text-align: center; margin: 1.5rem 0;"><img src="${finalImageUrl}" alt="${imageAlt || "Blog image"}" style="${sizeStyle} display: inline-block;" /></div>`;
+      const safeSrc = escapeHtmlAttr(finalImageUrl);
+      const safeAlt = escapeHtmlAttr(imageAlt || "Blog image");
+      const imageHtml = `<div style="text-align: center; margin: 1.5rem 0;"><img src="${safeSrc}" alt="${safeAlt}" style="${sizeStyle} display: inline-block;" loading="lazy" decoding="async" /></div>`;
       restoreSelection();
       execCommand("insertHTML", imageHtml);
     }

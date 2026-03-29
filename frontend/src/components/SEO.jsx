@@ -31,14 +31,38 @@ const SEO = ({
   const defaultImage = `${window.location.origin}/og-image.png`;
   const baseUrl = window.location.origin;
 
+  const toAbsoluteUrl = (value) => {
+    if (!value || typeof value !== "string") return "";
+    if (value.startsWith("data:")) return "";
+    if (/^https?:\/\//i.test(value)) return value;
+    try {
+      return new URL(value, baseUrl).href;
+    } catch {
+      return "";
+    }
+  };
+
+  const getCanonicalUrl = () => {
+    try {
+      const parsed = new URL(url || window.location.href);
+      // Drop tracking params to reduce duplicate canonical URLs.
+      ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "fbclid", "gclid"].forEach((key) => {
+        parsed.searchParams.delete(key);
+      });
+      return parsed.toString();
+    } catch {
+      return window.location.href;
+    }
+  };
+
   // Use provided values or defaults
   const metaTitle = title
     ? `${title} | ${siteTitle}`
     : `${siteTitle} - Tech, Study, Movies, Games, Jobs, Visa & More`;
   const metaDescription = description || defaultDescription;
   const metaKeywords = keywords || defaultKeywords;
-  const metaImage = image || defaultImage;
-  const metaUrl = url || window.location.href;
+  const metaImage = toAbsoluteUrl(image) || defaultImage;
+  const metaUrl = getCanonicalUrl();
 
   // Structured Data for WebSite with SearchAction (enables Google Sitelinks Search)
   const websiteSchema = {
