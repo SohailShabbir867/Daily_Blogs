@@ -323,11 +323,17 @@ router.get("/manage/users/:id", isSuperAdmin, superAdminGetUser);
 router.delete("/manage/users/:id", isSuperAdmin, superAdminDeleteUser);
 router.patch("/manage/users/:id/promote", isSuperAdmin, promoteToAdmin);
 router.patch("/manage/users/:id/demote", isSuperAdmin, demoteToUser);
-router.patch(
-  "/manage/users/:id/toggle-status",
-  isSuperAdmin,
-  superAdminToggleUserStatus
-);
+router.patch("/manage/users/:id/toggle-status", isSuperAdmin, superAdminToggleUserStatus);
+
+// CR role management (Super Admin only)
+const { makeCR, removeCR, grantFileAccess, revokeFileAccess } = require("../controllers/adminController");
+router.patch("/manage/users/:id/make-cr", isSuperAdmin, makeCR);
+router.patch("/manage/users/:id/remove-cr", isSuperAdmin, removeCR);
+
+// File access management (Super Admin OR CR can grant/revoke)
+const { isCR } = require("../middleware/auth");
+router.patch("/manage/users/:id/grant-file-access", isCR, grantFileAccess);
+router.patch("/manage/users/:id/revoke-file-access", isCR, revokeFileAccess);
 
 // Notification Routes (Super Admin only)
 const {

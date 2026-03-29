@@ -15,13 +15,28 @@ const {
   sendEmailVerification,
 } = require("../utils/emailService");
 
+const getSessionCookieOptions = () => {
+  const isProduction = process.env.NODE_ENV === "production";
+  const cookieDomain = (process.env.COOKIE_DOMAIN || "").trim();
+
+  return {
+    path: "/",
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    ...(cookieDomain ? { domain: cookieDomain } : {}),
+  };
+};
+
 // Register a new user
 const register = asyncHandler(async (req, res) => {
   const { name, email, password, acceptTerms } = req.body;
 
   // Validate terms acceptance
   if (!acceptTerms) {
-    throw new BadRequestError("You must accept the Terms and Conditions to register");
+    throw new BadRequestError(
+      "You must accept the Terms and Conditions to register",
+    );
   }
 
   // Check if email already exists
@@ -67,14 +82,16 @@ const register = asyncHandler(async (req, res) => {
       // Real SMTP error (bad credentials, network etc.) — keep the user
       // saved in DB and ask them to use the resend-verification flow.
       // Do NOT delete the user — the account exists, only email delivery failed.
-      console.error("[AUTH] SMTP error during registration — user saved but email not sent");
+      console.error(
+        "[AUTH] SMTP error during registration — user saved but email not sent",
+      );
       emailSent = false;
     }
   }
 
   // Log registration
   console.log(
-    `[AUTH] New user registered${emailSent ? ' (pending verification)' : ' (auto-verified / email failed)'}: ${user.email} (ID: ${user._id})`
+    `[AUTH] New user registered${emailSent ? " (pending verification)" : " (auto-verified / email failed)"}: ${user.email} (ID: ${user._id})`,
   );
 
   const requiresVerification = !user.isEmailVerified;
@@ -93,8 +110,8 @@ const register = asyncHandler(async (req, res) => {
         emailSent,
         autoVerified: !requiresVerification,
       },
-      "User registered"
-    )
+      "User registered",
+    ),
   );
 });
 
@@ -104,7 +121,7 @@ const login = asyncHandler(async (req, res) => {
 
   // Find user with password field (normally excluded)
   const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+password +loginAttempts +lockUntil"
+    "+password +loginAttempts +lockUntil",
   );
 
   // Check if user exists
@@ -116,7 +133,7 @@ const login = asyncHandler(async (req, res) => {
   if (!user.isEmailVerified) {
     throw new UnauthorizedError(
       "Please verify your email before logging in. Check your inbox for the verification link.",
-      { code: "EMAIL_NOT_VERIFIED", email: user.email }
+      { code: "EMAIL_NOT_VERIFIED", email: user.email },
     );
   }
 
@@ -124,14 +141,14 @@ const login = asyncHandler(async (req, res) => {
   if (user.lockUntil && user.lockUntil > Date.now()) {
     const remainingTime = Math.ceil((user.lockUntil - Date.now()) / 60000);
     throw new UnauthorizedError(
-      `Account is temporarily locked. Please try again in ${remainingTime} minutes.`
+      `Account is temporarily locked. Please try again in ${remainingTime} minutes.`,
     );
   }
 
   // Check if account is active
   if (!user.isActive) {
     throw new UnauthorizedError(
-      "Your account has been deactivated. Please contact support."
+      "Your account has been deactivated. Please contact support.",
     );
   }
 
@@ -147,7 +164,7 @@ const login = asyncHandler(async (req, res) => {
       user.lockUntil = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
       await user.save();
       throw new UnauthorizedError(
-        "Too many failed login attempts. Account locked for 15 minutes."
+        "Too many failed login attempts. Account locked for 15 minutes.",
       );
     }
 
@@ -174,40 +191,52 @@ const login = asyncHandler(async (req, res) => {
 
   console.log(`[AUTH] User logged in: ${user.email} (ID: ${user._id})`);
 
-  // Send response
-  res.json(
-    buildSuccessResponse(
-      {
-        user: userData,
-        message: "Login successful! Welcome back.",
-      },
-      "Login successful"
-    )
-  );
+  // Ensure the session is persisted before returning success.
+  req.session.save((err) => {
+    if (err) {
+      console.error("[AUTH] Session save error:", err);
+      return res.status(500).json({
+        success: false,
+        message: "Login failed. Please try again.",
+      });
+    }
+
+    res.json(
+      buildSuccessResponse(
+        {
+          user: userData,
+          message: "Login successful! Welcome back.",
+        },
+        "Login successful",
+      ),
+    );
+  });
 });
 
 // Logout user and destroy session
 // Does NOT require isAuthenticated — logout must always succeed even if the
 // session already expired, so the client cookie is always cleared.
 const logout = asyncHandler(async (req, res) => {
+  const cookieOptions = getSessionCookieOptions();
+
   const clearCookieAndRespond = () => {
-    res.clearCookie(process.env.SESSION_NAME || "dailyblogs_sid", {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    });
+    res.clearCookie(
+      process.env.SESSION_NAME || "dailyblogs_sid",
+      cookieOptions,
+    );
     res.json(
       buildSuccessResponse(
         { message: "Logged out successfully" },
-        "Logout successful"
-      )
+        "Logout successful",
+      ),
     );
   };
 
   // If no session exists (already expired), just clear the cookie and return OK
   if (!req.session || !req.session.userId) {
-    console.log("[AUTH] Logout called with no active session — clearing cookie");
+    console.log(
+      "[AUTH] Logout called with no active session — clearing cookie",
+    );
     return clearCookieAndRespond();
   }
 
@@ -227,6 +256,7 @@ const logout = asyncHandler(async (req, res) => {
 const getCurrentUser = asyncHandler(async (req, res) => {
   // req.user is already attached by isAuthenticated middleware
   const user = await User.findById(req.user._id)
+    .select("_id name email role isSuperAdmin isCR hasFileAccess isChatSupport isActive isEmailVerified avatar bio savedBlogs createdAt lastLogin")
     .populate("savedBlogs", "title slug image publishedAt")
     .lean();
 
@@ -235,7 +265,7 @@ const getCurrentUser = asyncHandler(async (req, res) => {
   }
 
   res.json(
-    buildSuccessResponse({ user }, "User profile retrieved successfully")
+    buildSuccessResponse({ user }, "User profile retrieved successfully"),
   );
 });
 
@@ -248,19 +278,21 @@ const checkSession = asyncHandler(async (req, res) => {
           isAuthenticated: false,
           user: null,
         },
-        "Not authenticated"
-      )
+        "Not authenticated",
+      ),
     );
   }
 
-  // Find user - only fetch fields needed by the frontend
+  // Find user - fetch all fields needed by the frontend (including role flags)
   const user = await User.findById(req.session.userId)
-    .select("_id name email role isSuperAdmin isChatSupport isActive isEmailVerified avatar bio createdAt lastLogin savedBlogs")
+    .select(
+      "_id name email role isSuperAdmin isCR hasFileAccess isChatSupport isActive isEmailVerified avatar bio createdAt lastLogin savedBlogs",
+    )
     .lean();
 
   if (!user || !user.isActive) {
     // Invalid session, destroy it
-    req.session.destroy(() => { });
+    req.session.destroy(() => {});
 
     return res.json(
       buildSuccessResponse(
@@ -268,12 +300,10 @@ const checkSession = asyncHandler(async (req, res) => {
           isAuthenticated: false,
           user: null,
         },
-        "Session invalid"
-      )
+        "Session invalid",
+      ),
     );
   }
-
-
 
   res.json(
     buildSuccessResponse(
@@ -281,8 +311,8 @@ const checkSession = asyncHandler(async (req, res) => {
         isAuthenticated: true,
         user,
       },
-      "Session valid"
-    )
+      "Session valid",
+    ),
   );
 });
 
@@ -316,8 +346,8 @@ const changePassword = asyncHandler(async (req, res) => {
   res.json(
     buildSuccessResponse(
       { message: "Password changed successfully" },
-      "Password updated"
-    )
+      "Password updated",
+    ),
   );
 });
 
@@ -328,8 +358,8 @@ const refreshSession = asyncHandler(async (req, res) => {
   res.json(
     buildSuccessResponse(
       { message: "Session refreshed", expiresAt: req.session.cookie.expires },
-      "Session extended"
-    )
+      "Session extended",
+    ),
   );
 });
 
@@ -348,8 +378,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
     return res.json(
       buildSuccessResponse(
         { message: "If this email exists, you will receive an OTP shortly." },
-        "OTP request processed"
-      )
+        "OTP request processed",
+      ),
     );
   }
 
@@ -373,8 +403,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
   res.json(
     buildSuccessResponse(
       { message: "OTP sent to your email. Valid for 10 minutes." },
-      "OTP sent"
-    )
+      "OTP sent",
+    ),
   );
 });
 
@@ -387,7 +417,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+passwordResetOTP +otpExpires"
+    "+passwordResetOTP +otpExpires",
   );
 
   if (!user) {
@@ -397,7 +427,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
   // Check if OTP exists and hasn't expired
   if (!user.passwordResetOTP || !user.otpExpires) {
     throw new BadRequestError(
-      "No OTP request found. Please request a new OTP."
+      "No OTP request found. Please request a new OTP.",
     );
   }
 
@@ -415,8 +445,8 @@ const verifyOTP = asyncHandler(async (req, res) => {
   res.json(
     buildSuccessResponse(
       { message: "OTP verified successfully", verified: true },
-      "OTP valid"
-    )
+      "OTP valid",
+    ),
   );
 });
 
@@ -433,7 +463,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+passwordResetOTP +otpExpires +password"
+    "+passwordResetOTP +otpExpires +password",
   );
 
   if (!user) {
@@ -461,8 +491,8 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.json(
     buildSuccessResponse(
       { message: "Password reset successful! You can now login." },
-      "Password reset"
-    )
+      "Password reset",
+    ),
   );
 });
 
@@ -487,7 +517,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
     // The user can proceed to login if their email is already verified
     throw new BadRequestError(
       "This verification link has already been used. If you've verified your email, you can now log in.",
-      { code: "ALREADY_VERIFIED" }
+      { code: "ALREADY_VERIFIED" },
     );
   }
 
@@ -505,15 +535,15 @@ const verifyEmail = asyncHandler(async (req, res) => {
           email: user.email,
           alreadyVerified: true,
         },
-        "Email already verified"
-      )
+        "Email already verified",
+      ),
     );
   }
 
   // Check if token has expired
   if (user.emailVerificationExpires < Date.now()) {
     throw new BadRequestError(
-      "Verification link has expired. Please request a new one from the login page."
+      "Verification link has expired. Please request a new one from the login page.",
     );
   }
 
@@ -532,8 +562,8 @@ const verifyEmail = asyncHandler(async (req, res) => {
           "Email verified successfully! You can now log in to your account.",
         email: user.email,
       },
-      "Email verified"
-    )
+      "Email verified",
+    ),
   );
 });
 
@@ -546,20 +576,20 @@ const resendVerification = asyncHandler(async (req, res) => {
   }
 
   const user = await User.findOne({ email: email.toLowerCase() }).select(
-    "+emailVerificationToken +emailVerificationExpires"
+    "+emailVerificationToken +emailVerificationExpires",
   );
 
   if (!user) {
     // Don't reveal if email exists or not for security
     throw new BadRequestError(
-      "If an account exists with this email, a verification link will be sent."
+      "If an account exists with this email, a verification link will be sent.",
     );
   }
 
   // Check if already verified
   if (user.isEmailVerified) {
     throw new BadRequestError(
-      "This email is already verified. You can log in."
+      "This email is already verified. You can log in.",
     );
   }
 
@@ -577,7 +607,7 @@ const resendVerification = asyncHandler(async (req, res) => {
   } catch (emailError) {
     console.error(`[AUTH] Failed to resend verification email:`, emailError);
     throw new BadRequestError(
-      "Failed to send verification email. Please try again later."
+      "Failed to send verification email. Please try again later.",
     );
   }
 
@@ -589,8 +619,8 @@ const resendVerification = asyncHandler(async (req, res) => {
         message: "Verification email sent! Please check your inbox.",
         email: user.email,
       },
-      "Verification email resent"
-    )
+      "Verification email resent",
+    ),
   );
 });
 

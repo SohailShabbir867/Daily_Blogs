@@ -4,7 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import { useState, useEffect, useRef } from "react";
 
 const Navbar = () => {
-  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
+  const { user, logout, isAdmin, isSuperAdmin, hasFileAccess } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -88,6 +88,12 @@ const Navbar = () => {
           {isAdmin && (
             <NavLink to="/admin" className={getLinkClasses}>
               Admin
+            </NavLink>
+          )}
+
+          {hasFileAccess && (
+            <NavLink to="/files" className={getLinkClasses}>
+              📚 Study Files
             </NavLink>
           )}
 
@@ -380,6 +386,17 @@ const Navbar = () => {
                 role="menuitem"
               >
                 Admin Dashboard
+              </Link>
+            )}
+
+            {hasFileAccess && (
+              <Link
+                to="/files"
+                className="px-4 py-3 text-gray-700 hover:bg-emerald-50 rounded-xl transition font-medium flex items-center gap-2"
+                onClick={() => setIsMenuOpen(false)}
+                role="menuitem"
+              >
+                📚 Study Files
               </Link>
             )}
 

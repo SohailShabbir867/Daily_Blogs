@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
+import { makeCR, removeCR, grantFileAccess, revokeFileAccess } from "../../services/fileService";
 
 const UserManagement = () => {
   const { user, isSuperAdmin, loading: authLoading } = useAuth();
@@ -65,6 +66,10 @@ const UserManagement = () => {
       demote: `Demote ${userName} to regular user? They will lose admin privileges.`,
       toggleStatus: `Toggle active status for ${userName}?`,
       toggleChat: `Toggle chat support for ${userName}?`,
+      makeCR: `Assign CR (Class Representative) role to ${userName}? They will be able to upload private study files.`,
+      removeCR: `Remove CR role from ${userName}? They will lose access to file management.`,
+      grantFileAccess: `Grant Study Files access to ${userName}? They will see the Study Files link in the navbar.`,
+      revokeFileAccess: `Revoke Study Files access from ${userName}? They will no longer see the Study Files link.`,
     };
 
     if (!window.confirm(confirmMessages[action])) return;
@@ -86,9 +91,16 @@ const UserManagement = () => {
         await api.patch(`/chat/admin-status/${userId}`, {
           enabled: !targetUser.isChatSupport,
         });
+      } else if (action === "makeCR") {
+        await makeCR(userId);
+      } else if (action === "removeCR") {
+        await removeCR(userId);
+      } else if (action === "grantFileAccess") {
+        await grantFileAccess(userId);
+      } else if (action === "revokeFileAccess") {
+        await revokeFileAccess(userId);
       }
 
-      // Refresh users list
       await fetchUsers();
       await fetchStats();
     } catch (err) {
@@ -106,6 +118,7 @@ const UserManagement = () => {
     const matchesRole =
       filterRole === "all" ||
       (filterRole === "admin" && u.role === "admin") ||
+      (filterRole === "cr" && (u.role === "cr" || u.isCR)) ||
       (filterRole === "user" && u.role === "user") ||
       (filterRole === "superAdmin" && u.isSuperAdmin);
     return matchesSearch && matchesRole;
@@ -228,6 +241,7 @@ const UserManagement = () => {
               <option value="all">All Roles</option>
               <option value="superAdmin">Super Admin</option>
               <option value="admin">Admin</option>
+              <option value="cr">CR (Class Rep)</option>
               <option value="user">User</option>
             </select>
           </div>
@@ -275,7 +289,11 @@ const UserManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       {user.isSuperAdmin ? (
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                          Super Admin
+                          ⭐ Super Admin
+                        </span>
+                      ) : user.role === "cr" || user.isCR ? (
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          📁 CR
                         </span>
                       ) : user.role === "admin" ? (
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -285,6 +303,14 @@ const UserManagement = () => {
                         <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
                           User
                         </span>
+                      )}
+                      {/* Show file access badge for regular users who were granted access */}
+                      {user.hasFileAccess && !user.isCR && user.role !== "cr" && !user.isSuperAdmin && (
+                        <div className="mt-1">
+                          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-teal-100 text-teal-700">
+                            📚 Files Access
+                          </span>
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -303,41 +329,51 @@ const UserManagement = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                       {!user.isSuperAdmin && (
-                        <div className="flex justify-end gap-2">
-                          {user.role === "user" ? (
+                        <div className="flex justify-end gap-2 flex-wrap">
+                          {/* Promote/Demote admin */}
+                          {user.role === "user" && !user.isCR ? (
                             <button
-                              onClick={() =>
-                                handleAction(user._id, "promote", user.name)
-                              }
+                              onClick={() => handleAction(user._id, "promote", user.name)}
                               disabled={actionLoading === `${user._id}-promote`}
-                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition disabled:opacity-50"
+                              className="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition disabled:opacity-50 text-xs"
                             >
-                              {actionLoading === `${user._id}-promote`
-                                ? "..."
-                                : "Promote"}
+                              {actionLoading === `${user._id}-promote` ? "..." : "Make Admin"}
+                            </button>
+                          ) : user.role === "admin" ? (
+                            <button
+                              onClick={() => handleAction(user._id, "demote", user.name)}
+                              disabled={actionLoading === `${user._id}-demote`}
+                              className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition disabled:opacity-50 text-xs"
+                            >
+                              {actionLoading === `${user._id}-demote` ? "..." : "Demote"}
+                            </button>
+                          ) : null}
+
+                          {/* Make CR / Remove CR */}
+                          {!user.isCR && user.role !== "cr" ? (
+                            <button
+                              onClick={() => handleAction(user._id, "makeCR", user.name)}
+                              disabled={actionLoading === `${user._id}-makeCR`}
+                              className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg hover:bg-amber-200 transition disabled:opacity-50 text-xs"
+                            >
+                              {actionLoading === `${user._id}-makeCR` ? "..." : "📁 Make CR"}
                             </button>
                           ) : (
                             <button
-                              onClick={() =>
-                                handleAction(user._id, "demote", user.name)
-                              }
-                              disabled={actionLoading === `${user._id}-demote`}
-                              className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-lg hover:bg-yellow-200 transition disabled:opacity-50"
+                              onClick={() => handleAction(user._id, "removeCR", user.name)}
+                              disabled={actionLoading === `${user._id}-removeCR`}
+                              className="px-3 py-1 bg-orange-100 text-orange-700 rounded-lg hover:bg-orange-200 transition disabled:opacity-50 text-xs"
                             >
-                              {actionLoading === `${user._id}-demote`
-                                ? "..."
-                                : "Demote"}
+                              {actionLoading === `${user._id}-removeCR` ? "..." : "Remove CR"}
                             </button>
                           )}
+
+                          {/* Chat support toggle (admin only) */}
                           {user.role === "admin" && (
                             <button
-                              onClick={() =>
-                                handleAction(user._id, "toggleChat", user.name)
-                              }
-                              disabled={
-                                actionLoading === `${user._id}-toggleChat`
-                              }
-                              className={`px-3 py-1 rounded-lg transition disabled:opacity-50 ${
+                              onClick={() => handleAction(user._id, "toggleChat", user.name)}
+                              disabled={actionLoading === `${user._id}-toggleChat`}
+                              className={`px-3 py-1 rounded-lg transition disabled:opacity-50 text-xs ${
                                 user.isChatSupport
                                   ? "bg-indigo-100 text-indigo-700 hover:bg-indigo-200"
                                   : "bg-gray-200 text-gray-700 hover:bg-gray-300"
@@ -350,14 +386,30 @@ const UserManagement = () => {
                                   : "Enable Chat"}
                             </button>
                           )}
+
+                          {/* Grant / Revoke Study Files access */}
+                          {!user.hasFileAccess && !user.isCR && user.role !== "cr" ? (
+                            <button
+                              onClick={() => handleAction(user._id, "grantFileAccess", user.name)}
+                              disabled={actionLoading === `${user._id}-grantFileAccess`}
+                              className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg hover:bg-emerald-200 transition disabled:opacity-50 text-xs"
+                            >
+                              {actionLoading === `${user._id}-grantFileAccess` ? "..." : "📚 Grant Files"}
+                            </button>
+                          ) : (!user.isCR && user.role !== "cr") ? (
+                            <button
+                              onClick={() => handleAction(user._id, "revokeFileAccess", user.name)}
+                              disabled={actionLoading === `${user._id}-revokeFileAccess`}
+                              className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg hover:bg-rose-200 transition disabled:opacity-50 text-xs"
+                            >
+                              {actionLoading === `${user._id}-revokeFileAccess` ? "..." : "Revoke Files"}
+                            </button>
+                          ) : null}
+
                           <button
-                            onClick={() =>
-                              handleAction(user._id, "toggleStatus", user.name)
-                            }
-                            disabled={
-                              actionLoading === `${user._id}-toggleStatus`
-                            }
-                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50"
+                            onClick={() => handleAction(user._id, "toggleStatus", user.name)}
+                            disabled={actionLoading === `${user._id}-toggleStatus`}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition disabled:opacity-50 text-xs"
                           >
                             {actionLoading === `${user._id}-toggleStatus`
                               ? "..."
@@ -366,15 +418,11 @@ const UserManagement = () => {
                                 : "Activate"}
                           </button>
                           <button
-                            onClick={() =>
-                              handleAction(user._id, "delete", user.name)
-                            }
+                            onClick={() => handleAction(user._id, "delete", user.name)}
                             disabled={actionLoading === `${user._id}-delete`}
-                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition disabled:opacity-50"
+                            className="px-3 py-1 bg-red-100 text-red-700 rounded-lg hover:bg-red-200 transition disabled:opacity-50 text-xs"
                           >
-                            {actionLoading === `${user._id}-delete`
-                              ? "..."
-                              : "Delete"}
+                            {actionLoading === `${user._id}-delete` ? "..." : "Delete"}
                           </button>
                         </div>
                       )}

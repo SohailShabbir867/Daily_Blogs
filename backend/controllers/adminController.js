@@ -236,6 +236,85 @@ const getDashboardStats = asyncHandler(async (req, res) => {
   );
 });
 
+// Assign CR role (super admin only)
+const makeCR = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) throw new NotFoundError("User not found");
+  if (user.isSuperAdmin) throw new ForbiddenError("Cannot change super admin role");
+
+  user.role = "cr";
+  user.isCR = true;
+  await user.save();
+
+  console.log(`[ADMIN] User assigned CR role: ${user.email} by ${req.user.email}`);
+
+  res.json(
+    buildSuccessResponse(
+      { user: user.getSafeProfile(), message: "CR role assigned" },
+      "Role updated"
+    )
+  );
+});
+
+// Remove CR role — revert to regular user (super admin only)
+const removeCR = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id);
+  if (!user) throw new NotFoundError("User not found");
+  if (user.isSuperAdmin) throw new ForbiddenError("Cannot change super admin role");
+
+  user.role = "user";
+  user.isCR = false;
+  await user.save();
+
+  console.log(`[ADMIN] CR role removed from: ${user.email} by ${req.user.email}`);
+
+  res.json(
+    buildSuccessResponse(
+      { user: user.getSafeProfile(), message: "CR role removed" },
+      "Role updated"
+    )
+  );
+});
+
+// Grant file access to a user (Super Admin or CR)
+const grantFileAccess = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { hasFileAccess: true },
+    { new: true, runValidators: false }
+  );
+  if (!user) throw new NotFoundError("User not found");
+
+  console.log(`[FILE-ACCESS] Granted to: ${user.email} by ${req.user.email}`);
+  res.json(
+    buildSuccessResponse(
+      { user: user.getSafeProfile(), message: "File access granted" },
+      "Access updated"
+    )
+  );
+});
+
+// Revoke file access from a user (Super Admin or CR)
+const revokeFileAccess = asyncHandler(async (req, res) => {
+  const target = await User.findById(req.params.id);
+  if (!target) throw new NotFoundError("User not found");
+  if (target.isSuperAdmin) throw new ForbiddenError("Cannot revoke super admin access");
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { hasFileAccess: false },
+    { new: true, runValidators: false }
+  );
+
+  console.log(`[FILE-ACCESS] Revoked from: ${user.email} by ${req.user.email}`);
+  res.json(
+    buildSuccessResponse(
+      { user: user.getSafeProfile(), message: "File access revoked" },
+      "Access updated"
+    )
+  );
+});
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -244,4 +323,8 @@ module.exports = {
   demoteToUser,
   toggleUserStatus,
   getDashboardStats,
+  makeCR,
+  removeCR,
+  grantFileAccess,
+  revokeFileAccess,
 };

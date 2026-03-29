@@ -35,6 +35,10 @@ const ContactsManagement = lazy(
   () => import("./pages/admin/ContactsManagement"),
 );
 const SendNotifications = lazy(() => import("./pages/admin/SendNotifications"));
+const ManageFiles = lazy(() => import("./pages/admin/ManageFiles"));
+
+// Public pages - lazy loaded
+const FilesLibrary = lazy(() => import("./pages/FilesLibrary"));
 
 // Chat widget lazy loaded - not needed for initial render
 const ChatWidget = lazy(() => import("./components/Chat/ChatWidget"));
@@ -111,6 +115,12 @@ function App() {
                         path="/admin/notifications"
                         element={<SendNotifications />}
                       />
+
+                      {/* CR Routes */}
+                      <Route path="/admin/files" element={<ManageFiles />} />
+
+                      {/* Public file library */}
+                      <Route path="/files" element={<FilesLibrary />} />
                     </Routes>
                   </Suspense>
                 </main>

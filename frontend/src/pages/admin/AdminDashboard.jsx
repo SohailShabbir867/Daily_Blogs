@@ -4,7 +4,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getAllBlogs } from "../../services/adminService";
 
 const AdminDashboard = () => {
-  const { user, isAdmin, isSuperAdmin } = useAuth();
+  const { user, isAdmin, isSuperAdmin, isCR } = useAuth();
   const [blogs, setBlogs] = useState([]);
   const [stats, setStats] = useState({ total: 0, published: 0, draft: 0 });
   const [loading, setLoading] = useState(true);
@@ -250,7 +250,41 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Super Admin Actions */}
+        {/* CR Quick Action - Study Files */}
+        {isCR && (
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 mb-8">
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              📁 Class Representative Panel
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                to="/admin/files"
+                className="flex items-center gap-4 p-4 border border-emerald-200 rounded-xl hover:bg-emerald-50 transition group"
+              >
+                <div className="p-3 bg-emerald-100 text-emerald-600 rounded-lg group-hover:bg-emerald-200 transition text-2xl">
+                  📤
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">Upload Study Files</p>
+                  <p className="text-sm text-gray-500">Upload PDFs, notes, slides</p>
+                </div>
+              </Link>
+              <Link
+                to="/files"
+                className="flex items-center gap-4 p-4 border border-teal-200 rounded-xl hover:bg-teal-50 transition group"
+              >
+                <div className="p-3 bg-teal-100 text-teal-600 rounded-lg group-hover:bg-teal-200 transition text-2xl">
+                  📚
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-900">View Files Library</p>
+                  <p className="text-sm text-gray-500">See all uploaded files</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+
         {isSuperAdmin && (
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-10">
             <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
