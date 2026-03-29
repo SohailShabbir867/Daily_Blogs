@@ -499,23 +499,18 @@ const RichTextEditor = ({
     if (uploadMethod === "upload" && imageFile) {
       setIsUploading(true);
       try {
-        // Prefer CDN URL for reliable rendering and smaller HTML payloads.
+        // Upload to Cloudinary CDN — produces a permanent https:// URL that works in the reader
         finalImageUrl = await uploadImageToCloudinary(imageFile);
       } catch (error) {
-        // Fallback: keep editor usable if CDN upload is temporarily unavailable.
-        try {
-          const reader = new FileReader();
-          finalImageUrl = await new Promise((resolve, reject) => {
-            reader.onloadend = () => resolve(reader.result);
-            reader.onerror = reject;
-            reader.readAsDataURL(imageFile);
-          });
-        } catch (fallbackError) {
-          console.error("Error processing image:", fallbackError || error);
-          alert("Image upload failed. Please try again.");
-          setIsUploading(false);
-          return;
-        }
+        // Do NOT fall back to base64 — base64 images are too large for MongoDB
+        // documents (16MB limit) and get stripped by the backend sanitizer,
+        // causing images to silently disappear when the blog is published.
+        console.error("Cloudinary upload failed:", error.message);
+        alert(
+          `Image upload failed: ${error.message}\n\nPlease check your internet connection and try again.\n\nTip: Make sure the image is under 10MB and is a JPG, PNG, GIF, or WebP file.`
+        );
+        setIsUploading(false);
+        return;
       }
       setIsUploading(false);
     } else if (uploadMethod === "url" && imageUrl) {
