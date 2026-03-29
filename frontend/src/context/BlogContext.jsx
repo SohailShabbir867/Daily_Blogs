@@ -64,7 +64,7 @@ export const BlogProvider = ({ children }) => {
         errorMessage = err.message;
       } else if (err.request) {
         errorMessage =
-          "Cannot connect to server. Please make sure the backend is running on http://localhost:5000";
+          "Cannot connect to server. Please check your internet connection and try again.";
       } else if (err.response) {
         errorMessage =
           err.response.data?.message || `Server error: ${err.response.status}`;

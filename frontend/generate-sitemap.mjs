@@ -10,10 +10,10 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = "https://dailyblogs.website";
-// Use VITE_API_URL from Vercel env (production), fallback to Render URL directly
+// Use VITE_API_URL from Vercel env (production), fallback to Azure backend directly
 const API_BASE =
   process.env.VITE_API_URL?.replace("/api", "") ||
-  "https://daily-blogs-api.onrender.com";
+  "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net";
 
 const staticPages = [
   { loc: "/", changefreq: "daily", priority: "1.0" },

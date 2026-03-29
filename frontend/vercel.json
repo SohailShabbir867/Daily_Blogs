@@ -2,11 +2,15 @@
   "rewrites": [
     {
       "source": "/sitemap.xml",
-      "destination": "https://daily-blogs-api.onrender.com/api/sitemap.xml"
+      "destination": "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/sitemap.xml"
     },
     {
       "source": "/api/:path*",
-      "destination": "https://daily-blogs-api.onrender.com/api/:path*"
+      "destination": "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
@@ -32,6 +36,5 @@
         }
       ]
     }
-  ],
-  "routes": [{ "handle": "filesystem" }, { "src": "/(.*)", "dest": "/" }]
+  ]
 }
