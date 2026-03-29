@@ -141,12 +141,19 @@ const plainTextConfig = {
   allowedAttributes: {},
 };
 
+// Protocol-relative URLs fail sanitize-html (allowProtocolRelative: false); normalize for CDN images.
+const normalizeBlogHtml = (html) =>
+  html.replace(
+    /(<img[^>]+src=["'])\/\/([^"']+)(["'])/gi,
+    "$1https://$2$3",
+  );
+
 // Sanitize blog content HTML
 const sanitizeBlogContent = (html) => {
   if (!html || typeof html !== "string") {
     return "";
   }
-  return sanitizeHtml(html, blogContentConfig);
+  return sanitizeHtml(normalizeBlogHtml(html), blogContentConfig);
 };
 
 // Sanitize comment HTML (more restrictive)
