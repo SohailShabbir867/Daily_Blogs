@@ -1,7 +1,7 @@
 // generate-sitemap.mjs
-// This script runs BEFORE `vite build` on Vercel to generate a static sitemap.xml
-// It fetches published blog posts from the backend API and writes sitemap.xml to /public
-// This avoids relying on Render's free tier (which sleeps) at fetch-time by Google's crawler.
+// Runs BEFORE `vite build` on Vercel to generate a static sitemap.xml in /public.
+// Fetches all published blog slugs from the backend API.
+// Falls back to a static-only sitemap if the API is unreachable.
 
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -10,48 +10,61 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const SITE_URL = "https://dailyblogs.website";
-// Use VITE_API_URL from Vercel env (production), fallback to Azure backend directly
-const API_BASE =
-  process.env.VITE_API_URL?.replace("/api", "") ||
-  "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net";
+
+// VITE_API_URL on Vercel is set to https://...azure.net/api
+// Strip /api to get the base host URL for the sitemap fetch
+const RAW_API_URL = process.env.VITE_API_URL || "";
+const API_BASE = RAW_API_URL
+  ? RAW_API_URL.replace(/\/api\/?$/, "")
+  : "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net";
+
+console.log(`🌐 SITE_URL:  ${SITE_URL}`);
+console.log(`📡 API_BASE:  ${API_BASE}`);
 
 const staticPages = [
-  { loc: "/", changefreq: "daily", priority: "1.0" },
-  { loc: "/about", changefreq: "monthly", priority: "0.8" },
+  { loc: "/",        changefreq: "daily",   priority: "1.0" },
+  { loc: "/about",   changefreq: "monthly", priority: "0.8" },
   { loc: "/contact", changefreq: "monthly", priority: "0.7" },
-  { loc: "/privacy", changefreq: "yearly", priority: "0.3" },
-  { loc: "/terms", changefreq: "yearly", priority: "0.3" },
+  { loc: "/privacy", changefreq: "yearly",  priority: "0.3" },
+  { loc: "/terms",   changefreq: "yearly",  priority: "0.3" },
 ];
 
 async function fetchBlogs() {
+  const pageSize = 100;
+  let page = 1;
+  let totalPages = 1;
+  const allBlogs = [];
+
   try {
-    console.log(`📡 Fetching blogs from ${API_BASE}/api/blogs...`);
-
-    const pageSize = 100;
-    let page = 1;
-    let totalPages = 1;
-    const allBlogs = [];
-
     while (page <= totalPages) {
-      const res = await fetch(
-        `${API_BASE}/api/blogs?limit=${pageSize}&page=${page}&sortBy=publishedAt&sortOrder=desc`,
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const url = `${API_BASE}/api/blogs?limit=${pageSize}&page=${page}&sortBy=publishedAt&sortOrder=desc&status=published`;
+      console.log(`   → Fetching page ${page}: ${url}`);
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+      let res;
+      try {
+        res = await fetch(url, { signal: controller.signal });
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
 
       const data = await res.json();
-      const blogs = data?.data?.blogs || data?.blogs || data?.data || [];
+      const blogs    = data?.data?.blogs || data?.blogs || data?.data || [];
       const pagination = data?.data?.pagination || {};
 
       allBlogs.push(...blogs);
-      totalPages =
-        pagination.totalPages || (blogs.length === pageSize ? page + 1 : page);
+      totalPages = pagination.totalPages || (blogs.length === pageSize ? page + 1 : page);
       page += 1;
     }
 
-    console.log(`✅ Fetched ${allBlogs.length} blog posts`);
+    console.log(`✅ Fetched ${allBlogs.length} blog posts from API`);
     return allBlogs;
   } catch (err) {
-    console.warn("⚠️  Could not fetch blogs:", err.message);
+    console.warn(`⚠️  Could not fetch blogs from API: ${err.message}`);
     console.warn("    Sitemap will only include static pages.");
     return [];
   }
@@ -80,7 +93,7 @@ function buildXml(blogs) {
 
       let imageTag = "";
       if (b.image && b.image.startsWith("http")) {
-        const safeUrl = b.image.replace(/&/g, "&amp;");
+        const safeUrl   = b.image.replace(/&/g, "&amp;");
         const safeTitle = (b.title || "Blog post")
           .replace(/&/g, "&amp;")
           .replace(/</g, "&lt;")
@@ -102,7 +115,7 @@ function buildXml(blogs) {
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset 
+<urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${staticUrls}
@@ -111,18 +124,19 @@ ${blogUrls}
 }
 
 async function main() {
-  const blogs = await fetchBlogs();
-  const xml = buildXml(blogs);
+  const blogs  = await fetchBlogs();
+  const xml    = buildXml(blogs);
   const outPath = resolve(__dirname, "public", "sitemap.xml");
   writeFileSync(outPath, xml, "utf-8");
-  console.log(`✅ sitemap.xml written to ${outPath}`);
-  console.log(
-    `   Total URLs: ${staticPages.length + blogs.filter((b) => b.slug).length}`,
-  );
+
+  const totalUrls = staticPages.length + blogs.filter((b) => b.slug).length;
+  console.log(`✅ sitemap.xml written → ${outPath}`);
+  console.log(`   Static pages: ${staticPages.length}`);
+  console.log(`   Blog posts:   ${blogs.filter((b) => b.slug).length}`);
+  console.log(`   Total URLs:   ${totalUrls}`);
 }
 
 main().catch((err) => {
   console.error("❌ Sitemap generation failed:", err);
-  // Don't exit with error — allow build to continue even without sitemap
-  process.exit(0);
+  process.exit(0); // Don't fail the build — sitemap is not critical
 });

@@ -24,9 +24,6 @@ Disallow: /register
 Disallow: /*?sort=
 Disallow: /*?page=
 
-# Crawl delay for bots (optional, Google typically ignores)
-Crawl-delay: 1
-
 # Googlebot specific configuration
 User-agent: Googlebot
 Allow: /
@@ -40,9 +37,5 @@ Disallow: /saved
 Disallow: /login
 Disallow: /register
 
-# Sitemaps - Multiple entries for redundancy
-# Primary sitemap (proxied from backend - contains all blog posts)
+# Sitemap
 Sitemap: https://dailyblogs.website/sitemap.xml
-
-# Backup sitemap directly from backend API
-Sitemap: https://daily-blogs-api.onrender.com/api/sitemap.xml
