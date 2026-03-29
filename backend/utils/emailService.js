@@ -63,58 +63,51 @@ const sendViaBrevoAPI = (mailOptions) => {
 
 // Create transporter/sender — prefers Brevo HTTP API, falls back to SMTP
 const createTransporter = () => {
-  // Brevo HTTP API (recommended for Render) — set BREVO_API_KEY in env vars
+  // Brevo HTTP API (recommended for Azure/cloud) — set BREVO_API_KEY in env vars
   if (process.env.BREVO_API_KEY) {
-    console.log("[EMAIL] BREVO_API_KEY found — using Brevo HTTP API (port 443, works on Render)");
+    console.log("[EMAIL] BREVO_API_KEY found — using Brevo HTTP API (port 443, works on Azure/Render)");
     // Return duck-typed object compatible with all transporter.sendMail() call sites
     return { sendMail: sendViaBrevoAPI, _mode: "brevo-api" };
   }
 
-  // Fall back to SMTP (blocked on Render free tier — provided for local dev)
+  // Fall back to SMTP
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn("⚠️ No email credentials configured. Set BREVO_API_KEY (recommended) or SMTP_USER/PASS. Email disabled.");
+    console.warn("⚠️ [EMAIL] No email credentials configured.");
+    console.warn("   Set BREVO_API_KEY (recommended) OR both SMTP_USER + SMTP_PASS.");
+    console.warn("   Email will be DISABLED until credentials are added to Azure App Settings.");
     return null;
   }
 
   try {
-    // Same config for both environments — always fall back to Gmail defaults
-    const host = process.env.SMTP_HOST || "smtp.gmail.com";
-    const port = parseInt(process.env.SMTP_PORT) || 587;
-    const secure = process.env.SMTP_SECURE === "true"; // false for port 587 (STARTTLS)
-
-    // Trim credentials — prevents invisible whitespace copied into Render env vars
     const smtpUser = process.env.SMTP_USER.trim();
     const smtpPass = process.env.SMTP_PASS.trim();
+    const host     = process.env.SMTP_HOST || "smtp.gmail.com";
+    // Port 465 (SSL) is preferred over 587 (STARTTLS) on Azure — Azure blocks 587 outbound
+    const port     = parseInt(process.env.SMTP_PORT) || 465;
+    const secure   = port === 465 ? true : (process.env.SMTP_SECURE === "true");
 
     const transport = nodemailer.createTransport({
       host,
       port,
-      secure,
-      // requireTLS forces STARTTLS upgrade on port 587 (required for Gmail)
+      secure,          // true for 465 (SSL), false for 587 (STARTTLS)
       requireTLS: !secure,
-      // Force IPv4 DNS resolution — dns.setDefaultResultOrder above handles global
-      // resolution, but this lookup override is belt-and-suspenders for Render.
       lookup: (hostname, options, callback) => {
         dns.resolve4(hostname, (err, addresses) => {
           if (err) return callback(err);
           callback(null, addresses[0], 4);
         });
       },
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-      // Connection timeouts — prevents hanging on Render
+      auth: { user: smtpUser, pass: smtpPass },
       connectionTimeout: 30000,
-      greetingTimeout: 15000,
-      socketTimeout: 30000,
+      greetingTimeout:   15000,
+      socketTimeout:     30000,
       pool: false,
     });
 
-    console.log(`[EMAIL] Transporter created — host: ${host}:${port}, user: ${smtpUser}`);
+    console.log(`[EMAIL] SMTP transporter created — host: ${host}:${port} (${secure ? "SSL" : "STARTTLS"}), user: ${smtpUser}`);
     return transport;
   } catch (error) {
-    console.error("❌ Failed to create email transporter:", error.message);
+    console.error("❌ [EMAIL] Failed to create SMTP transporter:", error.message);
     return null;
   }
 };
