@@ -176,30 +176,53 @@ const FilesLibrary = () => {
       : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-emerald-50/30">
-      {/* Hero Header */}
-      <div className="bg-gradient-to-r from-emerald-500 to-teal-500 text-white py-10 sm:py-14 px-4">
-        <div className="max-w-5xl mx-auto text-center">
-          <div className="text-4xl sm:text-5xl mb-3">📚</div>
-          <h1 className="text-3xl sm:text-5xl font-bold mb-3">Study Files Library</h1>
-          <p className="text-emerald-100 text-base sm:text-lg max-w-xl mx-auto">
-            Access lecture notes, slides, and study materials shared by your
-            class representatives.
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero — matches Home page exactly */}
+      <section className="relative overflow-hidden bg-linear-to-br from-emerald-900 via-teal-800 to-cyan-900 text-white py-16 sm:py-24">
+        {/* Gradient orbs */}
+        <div className="absolute -top-20 -left-20 w-96 h-96 bg-emerald-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute top-40 -right-20 w-72 h-72 bg-cyan-400 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+        <div className="absolute -bottom-20 left-1/3 w-80 h-80 bg-teal-300 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse" />
+
+        {/* Floating dots */}
+        <div className="absolute top-24 left-[15%] w-2 h-2 bg-emerald-300 rounded-full animate-bounce" />
+        <div className="absolute top-48 left-[30%] w-1.5 h-1.5 bg-cyan-300 rounded-full animate-bounce" />
+        <div className="absolute top-36 right-[20%] w-2 h-2 bg-teal-300 rounded-full animate-bounce" />
+        <div className="absolute bottom-16 left-[20%] w-1 h-1 bg-lime-300 rounded-full animate-bounce" />
+        <div className="absolute bottom-10 right-[30%] w-1.5 h-1.5 bg-emerald-200 rounded-full animate-bounce" />
+
+        <div className="relative z-10 max-w-4xl mx-auto text-center px-4">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-5 py-2.5 mb-6">
+            <span className="text-2xl">📚</span>
+            <span className="text-sm font-medium text-white/90">Study Files Library</span>
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 leading-tight">
+            Access.
+            <span className="block text-transparent bg-clip-text bg-linear-to-r from-lime-300 to-emerald-300">
+              Study. Excel.
+            </span>
+          </h1>
+
+          <p className="text-white/70 text-base sm:text-lg max-w-xl mx-auto mb-8">
+            Lecture notes, slides, and study materials shared by your class representatives — all in one place.
           </p>
+
           {isCR && (
             <a
               href="/admin/files"
-              className="inline-block mt-5 px-6 py-3 bg-white text-emerald-600 rounded-xl font-semibold hover:bg-emerald-50 transition shadow-lg text-sm sm:text-base"
+              className="inline-flex items-center gap-2 px-7 py-3 bg-white text-emerald-700 rounded-xl font-semibold hover:bg-emerald-50 transition shadow-xl text-sm sm:text-base"
             >
               📤 Manage My Files
             </a>
           )}
         </div>
-      </div>
+      </section>
 
       <div className="max-w-5xl mx-auto px-4 py-8 sm:py-10">
         {/* Search + Subject Filters */}
-        <div className="bg-white rounded-2xl shadow-sm border border-emerald-100 p-4 sm:p-5 mb-6 sm:mb-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-5 mb-6 sm:mb-8">
           <div className="relative">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
