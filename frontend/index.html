@@ -157,7 +157,113 @@
     </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Pre-rendered static HTML for SEO (replaced by React on load) -->
+      <header style="background:#fff;padding:12px 24px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e5e7eb">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:36px;height:36px;background:#059669;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:18px">D</div>
+          <span style="font-size:20px;font-weight:700;color:#111">Daily Blogs</span>
+        </div>
+        <nav>
+          <a href="/" style="margin:0 12px;color:#059669;text-decoration:none;font-weight:600">Home</a>
+          <a href="/about" style="margin:0 12px;color:#374151;text-decoration:none">About</a>
+          <a href="/contact" style="margin:0 12px;color:#374151;text-decoration:none">Contact</a>
+        </nav>
+      </header>
+
+      <main>
+        <section style="background:linear-gradient(135deg,#064e3b,#059669);color:#fff;text-align:center;padding:80px 24px">
+          <h1 style="font-size:48px;font-weight:800;margin:0 0 16px">Explore. Learn. Grow Daily.</h1>
+          <p style="font-size:20px;max-width:700px;margin:0 auto 24px;opacity:0.9">Your daily source for insightful articles on tech, study materials, movies, games, jobs, visa guides, and much more.</p>
+          <a href="/about" style="display:inline-block;background:#10b981;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px">Start Reading</a>
+        </section>
+
+        <section style="max-width:1200px;margin:48px auto;padding:0 24px">
+          <h2 style="font-size:32px;font-weight:700;color:#111;text-align:center;margin-bottom:32px">Explore Our Topics</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:24px">
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">💻 Technology</h3>
+              <p style="color:#374151;line-height:1.6">Latest trends in web development, programming languages, AI tools, cybersecurity, and software engineering tutorials.</p>
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">📚 Study Materials</h3>
+              <p style="color:#374151;line-height:1.6">Comprehensive guides, university resources, exam preparation tips, data science courses, and educational articles.</p>
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">🎬 Movies & Games</h3>
+              <p style="color:#374151;line-height:1.6">In-depth movie reviews, game guides, upcoming releases, entertainment news, and recommended watchlists.</p>
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">💼 Jobs & Career</h3>
+              <p style="color:#374151;line-height:1.6">Job search tips, resume writing guides, interview preparation, freelancing advice, and earning opportunities online.</p>
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">✈️ Visa & Immigration</h3>
+              <p style="color:#374151;line-height:1.6">Step-by-step visa application guides, study abroad tips, immigration policies, and foreign study resources for 2026.</p>
+            </div>
+            <div style="background:#f0fdf4;border-radius:12px;padding:24px">
+              <h3 style="color:#059669;font-size:20px;margin:0 0 8px">🏛️ Government Schemes</h3>
+              <p style="color:#374151;line-height:1.6">Latest government schemes, scholarships, subsidies, policy updates, and how to apply guides for students and citizens.</p>
+            </div>
+          </div>
+        </section>
+
+        <section style="max-width:1200px;margin:48px auto;padding:0 24px">
+          <h2 style="font-size:32px;font-weight:700;color:#111;text-align:center;margin-bottom:32px">Latest Articles</h2>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:24px">
+            <article style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+              <div style="padding:20px">
+                <h3 style="font-size:18px;color:#111;margin:0 0 8px"><a href="/blog/openclaw-the-ai-automation-tool-changing-everythin" style="color:#111;text-decoration:none">OpenClaw: The AI Automation Tool Changing Everything</a></h3>
+                <p style="color:#6b7280;line-height:1.5;font-size:14px">Discover how OpenClaw is revolutionizing AI automation and what it means for developers and businesses in 2026.</p>
+              </div>
+            </article>
+            <article style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+              <div style="padding:20px">
+                <h3 style="font-size:18px;color:#111;margin:0 0 8px"><a href="/blog/study-visa-application-process-explained-2026" style="color:#111;text-decoration:none">Study Visa Application Process Explained (2026)</a></h3>
+                <p style="color:#6b7280;line-height:1.5;font-size:14px">Complete step-by-step guide to applying for a study visa in 2026, including documents, fees, and interview tips.</p>
+              </div>
+            </article>
+            <article style="border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">
+              <div style="padding:20px">
+                <h3 style="font-size:18px;color:#111;margin:0 0 8px"><a href="/blog/top-free-ai-tools-for-students-in-2026" style="color:#111;text-decoration:none">Top Free AI Tools for Students in 2026</a></h3>
+                <p style="color:#6b7280;line-height:1.5;font-size:14px">Explore the best free AI tools every student should be using for research, writing, coding, and productivity.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+      </main>
+
+      <footer style="background:#111;color:#9ca3af;padding:40px 24px;text-align:center">
+        <p style="font-size:18px;color:#fff;font-weight:600;margin:0 0 8px">Daily Blogs</p>
+        <p style="margin:0 0 16px">Your all-in-one knowledge hub for tech, education, entertainment, careers, and more.</p>
+        <nav style="margin-bottom:16px">
+          <a href="/about" style="color:#10b981;margin:0 12px;text-decoration:none">About</a>
+          <a href="/contact" style="color:#10b981;margin:0 12px;text-decoration:none">Contact</a>
+          <a href="/privacy" style="color:#10b981;margin:0 12px;text-decoration:none">Privacy Policy</a>
+          <a href="/terms" style="color:#10b981;margin:0 12px;text-decoration:none">Terms of Service</a>
+        </nav>
+        <p style="font-size:13px;margin:0">&copy; 2025-2026 Daily Blogs. All rights reserved.</p>
+      </footer>
+    </div>
+
+    <noscript>
+      <div style="max-width:800px;margin:40px auto;padding:20px;font-family:system-ui,sans-serif">
+        <h1>Daily Blogs - Your All-in-One Knowledge Hub</h1>
+        <p>Welcome to Daily Blogs! We publish expert articles on technologies, coding tutorials, study materials, movie reviews, game guides, government schemes, job tips, resume writing, visa &amp; immigration help, Linux tools, cybersecurity, and much more.</p>
+        <h2>Our Topics</h2>
+        <ul>
+          <li><strong>Technology</strong> - Web development, programming, AI tools, cybersecurity</li>
+          <li><strong>Study Materials</strong> - University resources, exam prep, educational guides</li>
+          <li><strong>Movies &amp; Games</strong> - Reviews, guides, entertainment news</li>
+          <li><strong>Jobs &amp; Career</strong> - Job tips, resume writing, freelancing, earning online</li>
+          <li><strong>Visa &amp; Immigration</strong> - Study visa guides, immigration help, foreign study</li>
+          <li><strong>Government Schemes</strong> - Scholarships, policies, how to apply</li>
+        </ul>
+        <p>Please enable JavaScript to use the full features of Daily Blogs.</p>
+        <p><a href="/about">About Us</a> | <a href="/contact">Contact</a> | <a href="/privacy">Privacy Policy</a> | <a href="/terms">Terms of Service</a></p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
