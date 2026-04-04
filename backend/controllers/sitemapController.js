@@ -6,6 +6,7 @@ const { asyncHandler } = require("../utils/helpers");
 // @access  Public
 const generateSitemap = asyncHandler(async (req, res) => {
   const frontendUrl = "https://dailyblogs.website";
+  const today = new Date().toISOString().split('T')[0];
   
   // Get all published blogs
   const blogs = await Blog.find({ status: "published" })
@@ -13,52 +14,35 @@ const generateSitemap = asyncHandler(async (req, res) => {
     .sort({ updatedAt: -1 })
     .lean();
 
-  // Create the XML string
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
-        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
-        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-  <!-- Static Pages -->
-  <url>
-    <loc>${frontendUrl}/</loc>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
-  <url>
-    <loc>${frontendUrl}/about</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${frontendUrl}/contact</loc>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>${frontendUrl}/privacy</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
-  <url>
-    <loc>${frontendUrl}/terms</loc>
-    <changefreq>yearly</changefreq>
-    <priority>0.3</priority>
-  </url>
+  // Build XML parts
+  const staticPages = [
+    { loc: `${frontendUrl}/`, changefreq: 'daily', priority: '1.0', lastmod: today },
+    { loc: `${frontendUrl}/about`, changefreq: 'monthly', priority: '0.8', lastmod: today },
+    { loc: `${frontendUrl}/contact`, changefreq: 'monthly', priority: '0.7', lastmod: today },
+    { loc: `${frontendUrl}/privacy`, changefreq: 'yearly', priority: '0.3', lastmod: today },
+    { loc: `${frontendUrl}/terms`, changefreq: 'yearly', priority: '0.3', lastmod: today },
+  ];
 
-  <!-- Dynamic Blog Posts -->
-${blogs.map((blog) => {
+  const staticXml = staticPages.map(page => `  <url>
+    <loc>${page.loc}</loc>
+    <lastmod>${page.lastmod}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`).join('\n');
+
+  const blogXml = blogs.map((blog) => {
     const date = new Date(blog.updatedAt).toISOString().split('T')[0];
     let imageTag = "";
     
-    // Add image if available (some blogs might not have images or have basic placeholder paths)
     if (blog.image && typeof blog.image === 'string' && blog.image.startsWith('http')) {
-        // Escaping ampersands is required for XML compliance
-        const safeUrl = blog.image.replace(/&/g, '&amp;');
-        const safeTitle = (blog.title || "Blog Image").replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        imageTag = `
+      const safeUrl = blog.image.replace(/&/g, '&amp;');
+      const safeTitle = (blog.title || "Blog Image")
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+      
+      imageTag = `
     <image:image>
       <image:loc>${safeUrl}</image:loc>
       <image:title>${safeTitle}</image:title>
@@ -71,10 +55,17 @@ ${blogs.map((blog) => {
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>${imageTag}
   </url>`;
-  }).join("\n")}
+  }).join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+${staticXml}
+${blogXml}
 </urlset>`;
 
-  res.header("Content-Type", "application/xml");
+  res.header("Content-Type", "application/xml; charset=utf-8");
+  res.header("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
   res.send(xml);
 });
 
