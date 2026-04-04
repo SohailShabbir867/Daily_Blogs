@@ -46,8 +46,8 @@ const userSchema = new mongoose.Schema(
     role: {
       type: String,
       enum: {
-        values: ["user", "admin", "cr"],
-        message: "Role must be user, admin, or cr",
+        values: ["user", "admin"],
+        message: "Role must be either user or admin",
       },
       default: "user",
     },
@@ -58,18 +58,6 @@ const userSchema = new mongoose.Schema(
     },
 
     isChatSupport: {
-      type: Boolean,
-      default: false,
-    },
-
-    // CR (Class Representative) — can upload and manage private files
-    isCR: {
-      type: Boolean,
-      default: false,
-    },
-
-    // Granted by Super Admin or CR — user can see the Study Files navbar link
-    hasFileAccess: {
       type: Boolean,
       default: false,
     },
@@ -277,8 +265,6 @@ userSchema.methods.getSafeProfile = function () {
     bio: this.bio,
     role: this.role,
     isSuperAdmin: this.isSuperAdmin,
-    isCR: this.isCR,
-    hasFileAccess: this.hasFileAccess,
     isChatSupport: this.isChatSupport,
     isActive: this.isActive,
     isEmailVerified: this.isEmailVerified,

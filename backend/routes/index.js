@@ -11,7 +11,6 @@ const adminRoutes = require("./adminRoutes");
 const contactRoutes = require("./contactRoutes");
 const subscriberRoutes = require("./subscriberRoutes");
 const chatRoutes = require("./chatRoutes");
-const fileRoutes = require("./fileRoutes");
 const { generateSitemap } = require("../controllers/sitemapController");
 
 // Health check endpoint
@@ -34,7 +33,6 @@ router.use("/admin", adminRoutes);
 router.use("/contact", contactRoutes);
 router.use("/subscribe", subscriberRoutes);
 router.use("/chat", chatRoutes);
-router.use("/files", fileRoutes);
 
 // Sitemap endpoint
 router.get("/sitemap.xml", generateSitemap);

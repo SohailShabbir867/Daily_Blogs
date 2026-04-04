@@ -13,7 +13,7 @@ const isAuthenticated = asyncHandler(async (req, res, next) => {
 
   // Find user — only select fields needed for auth checks and attaching to req.user
   const user = await User.findById(req.session.userId)
-    .select("_id name email role isSuperAdmin isCR hasFileAccess isChatSupport isActive isEmailVerified avatar bio savedBlogs createdAt")
+    .select("_id name email role isSuperAdmin isChatSupport isActive isEmailVerified avatar bio savedBlogs createdAt")
     .lean();
 
   // Check if user still exists
@@ -111,39 +111,6 @@ const isSuperAdmin = (req, res, next) => {
   next();
 };
 
-// Require CR role (or super admin who inherits all roles)
-const isCR = (req, res, next) => {
-  if (!req.user) {
-    throw new UnauthorizedError("Authentication required");
-  }
-  // CR inherits admin, super admin inherits CR
-  const hasCRAccess =
-    req.user.isCR === true ||
-    req.user.role === "cr" ||
-    req.user.isSuperAdmin === true;
-  if (!hasCRAccess) {
-    throw new ForbiddenError("CR (Class Representative) access required");
-  }
-  next();
-};
-
-// Require admin OR cr (or super admin)
-// Used for file upload routes — CR can upload, admin cannot, super admin can
-const isAdminOrCR = (req, res, next) => {
-  if (!req.user) {
-    throw new UnauthorizedError("Authentication required");
-  }
-  const hasAccess =
-    req.user.role === "admin" ||
-    req.user.role === "cr" ||
-    req.user.isCR === true ||
-    req.user.isSuperAdmin === true;
-  if (!hasAccess) {
-    throw new ForbiddenError("Admin or CR access required");
-  }
-  next();
-};
-
 // Refresh session expiry on each request
 const refreshSession = (req, res, next) => {
   if (req.session && req.session.userId) {
@@ -205,8 +172,6 @@ module.exports = {
   guestOnly,
   isAdmin,
   isSuperAdmin,
-  isCR,
-  isAdminOrCR,
   refreshSession,
   isOwner,
   getSessionInfo,

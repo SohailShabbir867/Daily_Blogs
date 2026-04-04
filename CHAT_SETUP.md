@@ -18,8 +18,8 @@ Since the chat system is now complete, here's how to enable it:
 // In MongoDB Compass or mongosh:
 db.users.updateOne(
   { email: "admin@example.com" },
-  { $set: { isChatSupport: true, isActive: true } },
-);
+  { $set: { isChatSupport: true, isActive: true } }
+)
 ```
 
 ### Option 3: API Call
@@ -35,12 +35,10 @@ Body: { "enabled": true }
 ## 📋 Testing Checklist
 
 ### 1. Enable Chat Support
-
 - [ ] At least one admin has `isChatSupport: true`
 - [ ] Admin is `isActive: true`
 
 ### 2. Test as User
-
 - [ ] Login as regular user
 - [ ] See chat button (bottom-right)
 - [ ] Click chat button
@@ -49,7 +47,6 @@ Body: { "enabled": true }
 - [ ] Chat window opens
 
 ### 3. Send Messages
-
 - [ ] Type message
 - [ ] See character counter (near 2000)
 - [ ] Send message
@@ -57,7 +54,6 @@ Body: { "enabled": true }
 - [ ] Try typing - sees typing indicator
 
 ### 4. Test as Admin
-
 - [ ] Login as admin (who has chat support enabled)
 - [ ] Open chat
 - [ ] See user's conversation (if any)
@@ -65,14 +61,12 @@ Body: { "enabled": true }
 - [ ] User sees message instantly
 
 ### 5. Real-Time Features
-
 - [ ] Typing indicators work
 - [ ] Messages appear without refresh
 - [ ] Unread badge shows correct count
 - [ ] Connection status indicator works
 
 ### 6. Responsive Design
-
 - [ ] Open on mobile device
 - [ ] Chat window resizes correctly
 - [ ] Back button appears on mobile
@@ -86,11 +80,11 @@ Body: { "enabled": true }
 
 ```javascript
 // Check Message indexes
-db.messages.getIndexes();
+db.messages.getIndexes()
 // Should see: { "createdAt": 1 }, { expireAfterSeconds: 604800 }
 
-// Check Conversation indexes
-db.conversations.getIndexes();
+// Check Conversation indexes  
+db.conversations.getIndexes()
 // Should see: { "lastActivityAt": 1 }, { expireAfterSeconds: 604800 }
 ```
 
@@ -102,13 +96,13 @@ db.messages.insertOne({
   conversationId: ObjectId("..."),
   sender: ObjectId("..."),
   content: "Test message",
-  createdAt: new Date("2020-01-01"), // 4+ years ago
-  updatedAt: new Date(),
-});
+  createdAt: new Date("2020-01-01"),  // 4+ years ago
+  updatedAt: new Date()
+})
 
 // Wait 60 seconds, MongoDB will delete it
 // Check after 1 minute:
-db.messages.find({ content: "Test message" });
+db.messages.find({ content: "Test message" })
 // Should return nothing (deleted by TTL)
 ```
 
@@ -132,20 +126,14 @@ To change from 7 days to another duration:
 
 ```javascript
 // backend/models/Message.js
-messageSchema.index(
-  { createdAt: 1 },
-  {
-    expireAfterSeconds: 14 * 24 * 60 * 60, // 14 days
-  },
-);
+messageSchema.index({ createdAt: 1 }, { 
+  expireAfterSeconds: 14 * 24 * 60 * 60  // 14 days
+});
 
 // backend/models/Conversation.js
-conversationSchema.index(
-  { lastActivityAt: 1 },
-  {
-    expireAfterSeconds: 14 * 24 * 60 * 60, // 14 days
-  },
-);
+conversationSchema.index({ lastActivityAt: 1 }, { 
+  expireAfterSeconds: 14 * 24 * 60 * 60  // 14 days
+});
 ```
 
 **Note:** After changing, restart server. MongoDB will apply new TTL on next run.
@@ -155,32 +143,27 @@ conversationSchema.index(
 ## 🐛 Troubleshooting
 
 ### Chat button not showing
-
 - ✅ Check: User is logged in (`user` exists in AuthContext)
 - ✅ Check: Browser console for errors
 - ✅ Check: ChatWidget imported in App.jsx
 
 ### No admins in support list
-
 - ✅ Check: At least one admin has `isChatSupport: true`
 - ✅ Check: Admin is `isActive: true`
 - ✅ Run: `GET /api/chat/support-admins` (should return admins)
 
 ### Messages not sending
-
 - ✅ Check: Socket.IO connected (green dot on chat button)
 - ✅ Check: Backend running on port 5000
 - ✅ Check: CORS configured (`http://localhost:5173`)
 - ✅ Check: Browser console for errors
 
 ### Socket not connecting
-
 - ✅ Check: `VITE_API_URL` in frontend `.env` (should be `http://localhost:5000/api`)
 - ✅ Check: Backend Socket.IO is running
 - ✅ Check: Firewall allows port 5000
 
 ### Messages not deleting after 7 days
-
 - ✅ Check: TTL indexes exist (`db.messages.getIndexes()`)
 - ✅ MongoDB TTL monitor runs every 60 seconds
 - ✅ Documents deleted when `createdAt + 7 days < now`
@@ -215,19 +198,19 @@ Before deploying to production:
 
 ## 🎯 Feature Summary
 
-| Feature               | Status | Notes                  |
-| --------------------- | ------ | ---------------------- |
-| Real-time messaging   | ✅     | Socket.IO              |
-| 7-day auto-deletion   | ✅     | MongoDB TTL            |
-| Responsive design     | ✅     | Mobile + Desktop       |
-| Typing indicators     | ✅     | Real-time              |
-| Unread badges         | ✅     | With animations        |
-| Security (XSS)        | ✅     | Pre-save sanitization  |
-| Character limit       | ✅     | 2000 chars             |
-| Browser notifications | ✅     | With permission        |
-| Error handling        | ✅     | User-friendly messages |
-| Loading states        | ✅     | Spinners               |
-| Connection status     | ✅     | Visual indicator       |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Real-time messaging | ✅ | Socket.IO |
+| 7-day auto-deletion | ✅ | MongoDB TTL |
+| Responsive design | ✅ | Mobile + Desktop |
+| Typing indicators | ✅ | Real-time |
+| Unread badges | ✅ | With animations |
+| Security (XSS) | ✅ | Pre-save sanitization |
+| Character limit | ✅ | 2000 chars |
+| Browser notifications | ✅ | With permission |
+| Error handling | ✅ | User-friendly messages |
+| Loading states | ✅ | Spinners |
+| Connection status | ✅ | Visual indicator |
 
 ---
 

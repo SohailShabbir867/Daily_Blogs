@@ -11,23 +11,16 @@ const createSessionConfig = () => {
 
   if (!process.env.MONGODB_URI) {
     throw new Error(
-      "MONGODB_URI environment variable is required for session store",
+      "MONGODB_URI environment variable is required for session store"
     );
   }
 
   // Check if MongoDB URI contains placeholder password
   if (process.env.MONGODB_URI.includes("<db_password>")) {
-    throw new Error(
-      "MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password in the .env file.",
-    );
+    throw new Error("MONGODB_URI contains placeholder <db_password>. Please replace it with your actual MongoDB Atlas password in the .env file.");
   }
 
   const isProduction = process.env.NODE_ENV === "production";
-  const parsedMaxAge = Number.parseInt(process.env.SESSION_MAX_AGE, 10);
-  const sessionMaxAge = Number.isFinite(parsedMaxAge)
-    ? parsedMaxAge
-    : 7 * 24 * 60 * 60 * 1000;
-  const cookieDomain = (process.env.COOKIE_DOMAIN || "").trim();
 
   const sessionOptions = {
     secret: process.env.SESSION_SECRET,
@@ -37,18 +30,17 @@ const createSessionConfig = () => {
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI,
       collectionName: "sessions",
-      ttl: Math.floor(sessionMaxAge / 1000),
+      ttl: parseInt(process.env.SESSION_MAX_AGE) / 1000 || 7 * 24 * 60 * 60,
       autoRemove: "native",
       touchAfter: 24 * 3600,
     }),
     cookie: {
-      maxAge: sessionMaxAge,
+      maxAge: parseInt(process.env.SESSION_MAX_AGE) || 7 * 24 * 60 * 60 * 1000,
       httpOnly: process.env.COOKIE_HTTP_ONLY !== "false",
       // In production (HTTPS + cross-domain), cookies MUST be secure:true and sameSite:"none"
       secure: isProduction,
       sameSite: isProduction ? "none" : "lax",
       path: "/",
-      ...(cookieDomain ? { domain: cookieDomain } : {}),
     },
     rolling: true,
     proxy: isProduction,
@@ -56,9 +48,7 @@ const createSessionConfig = () => {
 
   console.log("📦 Session store configured with MongoDB");
   console.log(`🍪 Cookie settings:`);
-  console.log(
-    `   - maxAge: ${sessionOptions.cookie.maxAge}ms (${sessionOptions.cookie.maxAge / (1000 * 60 * 60 * 24)} days)`,
-  );
+  console.log(`   - maxAge: ${sessionOptions.cookie.maxAge}ms (${sessionOptions.cookie.maxAge / (1000 * 60 * 60 * 24)} days)`);
   console.log(`   - httpOnly: ${sessionOptions.cookie.httpOnly}`);
   console.log(`   - secure: ${sessionOptions.cookie.secure}`);
   console.log(`   - sameSite: ${sessionOptions.cookie.sameSite}`);

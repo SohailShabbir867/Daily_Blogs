@@ -104,21 +104,8 @@ export const AuthProvider = ({ children }) => {
     setError(null);
   }, []);
 
-  const isAdmin = useMemo(() => user?.role === "admin" || user?.role === "cr" || user?.isSuperAdmin === true, [user]);
+  const isAdmin = useMemo(() => user?.role === "admin", [user]);
   const isSuperAdmin = useMemo(() => user?.isSuperAdmin === true, [user]);
-  const isCR = useMemo(
-    () => user?.role === "cr" || user?.isCR === true || user?.isSuperAdmin === true,
-    [user]
-  );
-  // Can see Study Files navbar link
-  const hasFileAccess = useMemo(
-    () =>
-      user?.hasFileAccess === true ||
-      user?.isCR === true ||
-      user?.role === "cr" ||
-      user?.isSuperAdmin === true,
-    [user]
-  );
 
   const contextValue = useMemo(
     () => ({
@@ -131,11 +118,9 @@ export const AuthProvider = ({ children }) => {
       clearError,
       isAdmin,
       isSuperAdmin,
-      isCR,
-      hasFileAccess,
       isAuthenticated: !!user,
     }),
-    [user, login, logout, register, loading, error, clearError, isAdmin, isSuperAdmin, isCR, hasFileAccess]
+    [user, login, logout, register, loading, error, clearError, isAdmin, isSuperAdmin]
   );
 
   return (

@@ -3,14 +3,10 @@
 const cors = require("cors");
 
 const createCorsConfig = () => {
-  const defaultOrigins =
-    "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174";
+  const defaultOrigins = "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174";
   const allowedOrigins = (process.env.CORS_ORIGIN || defaultOrigins)
     .split(",")
-    .map((origin) => origin.trim())
-    .filter(Boolean);
-  const isProduction = process.env.NODE_ENV === "production";
-  const allowPreviewOrigins = process.env.ALLOW_VERCEL_PREVIEW === "true";
+    .map((origin) => origin.trim());
 
   const corsOptions = {
     origin: (origin, callback) => {
@@ -25,26 +21,20 @@ const createCorsConfig = () => {
           return callback(null, true);
         }
         // Allow local network IPs (192.168.x.x, 10.x.x.x, 172.16-31.x.x)
-        const localNetworkRegex =
-          /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
+        const localNetworkRegex = /^https?:\/\/(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/;
         if (localNetworkRegex.test(origin)) {
           return callback(null, true);
         }
       }
       // Allow ngrok URLs for testing
-      if (
-        !isProduction &&
-        (origin.includes("ngrok") || origin.includes("ngrok-free.app"))
-      ) {
+      if (origin.includes("ngrok") || origin.includes("ngrok-free.app")) {
         return callback(null, true);
       }
       // Allow all Vercel deployments from this project's team.
       // Every preview URL ends with the constant team suffix: sohail-shabbirs-projects-f49a5b68.vercel.app
       if (
-        allowPreviewOrigins &&
         origin.endsWith(".vercel.app") &&
-        (origin.includes("daily-blogs") ||
-          origin.endsWith("-f49a5b68.vercel.app"))
+        (origin.includes("daily-blogs") || origin.endsWith("-f49a5b68.vercel.app"))
       ) {
         return callback(null, true);
       }
