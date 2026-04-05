@@ -435,21 +435,21 @@ const Home = () => {
       {/* Main Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* Category Filters — horizontal scroll on mobile, wrap on sm+ */}
-        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-8 pb-1 sm:flex-wrap">
+        <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-2 mb-8 pb-2 sm:flex-wrap -mx-4 px-4 sm:mx-0 sm:px-0">
           {/* Trending Filter */}
           <button
             onClick={() => {
               setShowTrending(!showTrending);
               if (!showTrending) setSelectedCategory("All");
             }}
-            className={`px-4 py-2 rounded-full font-medium text-sm transition flex items-center gap-1.5 ${
+            className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-full font-medium text-xs sm:text-sm transition flex items-center gap-1.5 ${
               showTrending
                 ? "bg-linear-to-r from-orange-500 to-red-500 text-white shadow-md"
                 : "bg-white text-orange-600 hover:bg-orange-50 border border-orange-200"
             }`}
           >
             <svg
-              className="w-4 h-4"
+              className="w-3.5 h-3.5 sm:w-4 sm:h-4"
               fill={showTrending ? "currentColor" : "none"}
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -473,7 +473,7 @@ const Home = () => {
             )}
           </button>
 
-          <div className="w-px h-8 bg-gray-200 self-center mx-1" />
+          <div className="w-px h-8 bg-gray-200 self-center mx-1 shrink-0" />
 
           {categories.map((category) => (
             <button
@@ -482,7 +482,7 @@ const Home = () => {
                 setSelectedCategory(category);
                 setShowTrending(false);
               }}
-              className={`px-4 py-2 rounded-full font-medium text-sm transition ${
+              className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-full font-medium text-xs sm:text-sm transition ${
                 !showTrending && selectedCategory === category
                   ? "bg-linear-to-r from-emerald-500 to-teal-500 text-white shadow-md"
                   : "bg-white text-gray-600 hover:bg-emerald-50 hover:text-emerald-600 border"

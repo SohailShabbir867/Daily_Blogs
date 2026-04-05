@@ -202,23 +202,23 @@ const BlogCard = memo(({ blog }) => {
           {blog.description}
         </p>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100 gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <div
-              className="w-8 h-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-xs font-bold"
+              className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-linear-to-br from-emerald-500 to-teal-500 flex items-center justify-center text-white text-xs font-bold shrink-0"
               aria-hidden="true"
             >
               {authorName?.charAt(0).toUpperCase() || "A"}
             </div>
-            <span className="text-sm text-gray-600 font-medium">
+            <span className="text-xs sm:text-sm text-gray-600 font-medium truncate">
               {authorName}
             </span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               onClick={handleLike}
-              className={`flex items-center gap-1.5 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 rounded-lg px-2 py-1 -mx-2 ${
+              className={`flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-red-400 rounded-lg px-1.5 sm:px-2 py-1 ${
                 isLiked ? "text-red-500" : "text-gray-500 hover:text-red-500"
               } ${!user ? "opacity-50 cursor-not-allowed" : ""}`}
               disabled={!user}
@@ -228,7 +228,7 @@ const BlogCard = memo(({ blog }) => {
               title={user ? (isLiked ? "Unlike" : "Like") : "Login to like"}
             >
               <svg
-                className="w-5 h-5"
+                className="w-4 h-4 sm:w-5 sm:h-5"
                 fill={isLiked ? "currentColor" : "none"}
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -246,12 +246,12 @@ const BlogCard = memo(({ blog }) => {
 
             <Link
               to={`/blog/${blogSlug}`}
-              className="inline-flex items-center gap-1 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-emerald-600 hover:to-teal-600 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 shadow-sm"
+              className="inline-flex items-center gap-1 bg-linear-to-r from-emerald-500 to-teal-500 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:from-emerald-600 hover:to-teal-600 transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 shadow-sm whitespace-nowrap"
               aria-label={`Read full article: ${blog.title}`}
             >
               Read More
               <svg
-                className="w-4 h-4"
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
