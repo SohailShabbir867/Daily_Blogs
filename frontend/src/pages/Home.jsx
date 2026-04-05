@@ -116,13 +116,23 @@ const Home = () => {
     ...new Set(blogs.map((blog) => blog.category).filter(Boolean)),
   ];
 
+  // Collect trending blog IDs so we can exclude them from the main grid
+  const trendingBlogIds = new Set(
+    trendingBlogs.map((b) => b._id || b.id),
+  );
+
   const filteredBlogs = blogs.filter((blog) => {
     const matchesSearch =
       blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       blog.description?.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       selectedCategory === "All" || blog.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+
+    // When trending section is visible (!showTrending), hide trending blogs from main grid
+    const isDuplicate =
+      !showTrending && trendingBlogIds.has(blog._id || blog.id);
+
+    return matchesSearch && matchesCategory && !isDuplicate;
   });
 
   // The Hero section should eagerly render. The loading state is handled down in the blog grid.
