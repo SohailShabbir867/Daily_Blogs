@@ -128,9 +128,9 @@ const Home = () => {
     const matchesCategory =
       selectedCategory === "All" || blog.category === selectedCategory;
 
-    // When trending section is visible (!showTrending), hide trending blogs from main grid
+    // When trending section is visible (!showTrending and no search), hide trending blogs from main grid
     const isDuplicate =
-      !showTrending && trendingBlogIds.has(blog._id || blog.id);
+      !showTrending && !searchTerm && trendingBlogIds.has(blog._id || blog.id);
 
     return matchesSearch && matchesCategory && !isDuplicate;
   });
@@ -357,7 +357,7 @@ const Home = () => {
       </section>
 
       {/* Trending Blogs Section */}
-      {!showTrending && trendingBlogs.length > 0 && (
+      {!showTrending && !searchTerm && trendingBlogs.length > 0 && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
