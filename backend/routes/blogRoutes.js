@@ -37,6 +37,7 @@ const {
 router.get(
   "/",
   searchLimiter,
+  optionalAuth,
   validateBlogQuery,
   handleValidationErrors,
   getBlogs

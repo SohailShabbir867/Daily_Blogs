@@ -9,8 +9,8 @@ import { toggleLike } from "../services/blogService";
 const BlogCard = memo(({ blog }) => {
   const { user } = useAuth();
   const [likeCount, setLikeCount] = useState(blog.likeCount || 0);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
+  const [isLiked, setIsLiked] = useState(blog.isLikedByUser || false);
+  const [isSaved, setIsSaved] = useState(blog.isSavedByUser || false);
   const [isLiking, setIsLiking] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 

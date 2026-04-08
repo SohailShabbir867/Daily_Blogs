@@ -63,13 +63,36 @@ const getBlogs = asyncHandler(async (req, res) => {
   // Calculate pagination metadata
   const totalPages = Math.ceil(totalCount / limit);
 
+  // If user is authenticated, annotate blogs with like/save status
+  let annotatedBlogs;
+  if (req.user) {
+    const User = require("../models/User");
+    const currentUser = await User.findById(req.user._id).select("savedBlogs").lean();
+    const savedSet = new Set((currentUser?.savedBlogs || []).map((id) => id.toString()));
+    const userId = req.user._id.toString();
+
+    annotatedBlogs = blogs.map(({ likes, ...blog }) => ({
+      ...blog,
+      isLikedByUser: (likes || []).some((id) => id.toString() === userId),
+      isSavedByUser: savedSet.has(blog._id.toString()),
+    }));
+  } else {
+    // Strip likes array for non-authenticated users (privacy)
+    annotatedBlogs = blogs.map(({ likes, ...blog }) => blog);
+  }
+
   // Cache blog list for 60 seconds in browsers / CDN (public, read-only data)
-  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+  // Only cache for non-authenticated requests (personalized data shouldn't be cached)
+  if (!req.user) {
+    res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=120");
+  } else {
+    res.set("Cache-Control", "private, no-cache");
+  }
 
   res.json(
     buildSuccessResponse(
       {
-        blogs,
+        blogs: annotatedBlogs,
         pagination: {
           currentPage: page,
           totalPages,
