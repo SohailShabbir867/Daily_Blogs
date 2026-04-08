@@ -38,10 +38,12 @@ const createCorsConfig = () => {
       ) {
         return callback(null, true);
       }
-      // Allow production custom domain
+      // Allow production custom domains
       if (
         origin === "https://dailyblogs.website" ||
-        origin === "https://www.dailyblogs.website"
+        origin === "https://www.dailyblogs.website" ||
+        origin === "https://dailyblogs.me" ||
+        origin === "https://www.dailyblogs.me"
       ) {
         return callback(null, true);
       }
