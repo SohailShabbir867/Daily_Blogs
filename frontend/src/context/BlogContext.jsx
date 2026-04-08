@@ -76,11 +76,10 @@ export const BlogProvider = ({ children }) => {
     }
   }, []);
 
-  // Initial fetch on mount
+  // Initial fetch on mount — only fetch trending; pages control their own blog fetching
   useEffect(() => {
-    fetchBlogs();
     fetchTrendingBlogs();
-  }, [fetchBlogs]);
+  }, [fetchTrendingBlogs]);
 
   // Fetch trending blogs
   const fetchTrendingBlogs = useCallback(async () => {

@@ -72,19 +72,25 @@ const Home = () => {
     };
   }, [currentText, isDeleting, currentPhraseIndex]);
 
-  // Fetch blogs with pagination whenever page changes
+  // Fetch blogs with pagination whenever page, search, or category changes
   useEffect(() => {
-    fetchBlogs({ page: currentPage, limit: BLOGS_PER_PAGE });
-  }, [currentPage]);
+    const params = { page: currentPage, limit: BLOGS_PER_PAGE };
+    if (searchTerm) params.search = searchTerm;
+    if (selectedCategory !== "All") params.category = selectedCategory;
+    fetchBlogs(params);
+  }, [currentPage, selectedCategory]);
 
-  // Reset to page 1 when search or category changes
+  // Debounced search: reset to page 1 when user searches
   useEffect(() => {
-    if (currentPage !== 1) {
+    const timer = setTimeout(() => {
       setCurrentPage(1);
-    } else {
-      fetchBlogs({ page: 1, limit: BLOGS_PER_PAGE });
-    }
-  }, [selectedCategory]);
+      const params = { page: 1, limit: BLOGS_PER_PAGE };
+      if (searchTerm) params.search = searchTerm;
+      if (selectedCategory !== "All") params.category = selectedCategory;
+      fetchBlogs(params);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
 
   const faqs = [
     {
@@ -133,24 +139,12 @@ const Home = () => {
     ...new Set(blogs.map((blog) => blog.category).filter(Boolean)),
   ];
 
-  // Collect trending blog IDs so we can exclude them from the main grid
-  const trendingBlogIds = new Set(
-    trendingBlogs.map((b) => b._id || b.id),
-  );
+  // Show all blogs from the backend in the main grid (backend handles pagination)
+  // No client-side filtering needed since search/category are sent as API params
+  const filteredBlogs = blogs;
 
-  const filteredBlogs = blogs.filter((blog) => {
-    const matchesSearch =
-      blog.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blog.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "All" || blog.category === selectedCategory;
-
-    // When trending section is visible (!showTrending and no search), hide trending blogs from main grid
-    const isDuplicate =
-      !showTrending && !searchTerm && trendingBlogIds.has(blog._id || blog.id);
-
-    return matchesSearch && matchesCategory && !isDuplicate;
-  });
+  // Only show trending section on page 1 with no search active
+  const showTrendingSection = currentPage === 1 && !showTrending && !searchTerm && trendingBlogs.length > 0;
 
   // The Hero section should eagerly render. The loading state is handled down in the blog grid.
 
@@ -374,7 +368,7 @@ const Home = () => {
       </section>
 
       {/* Trending Blogs Section */}
-      {!showTrending && !searchTerm && trendingBlogs.length > 0 && (
+      {showTrendingSection && (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-12 pb-4">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -508,6 +502,7 @@ const Home = () => {
               onClick={() => {
                 setSelectedCategory(category);
                 setShowTrending(false);
+                setCurrentPage(1);
               }}
               className={`shrink-0 whitespace-nowrap px-3 sm:px-4 py-2 rounded-full font-medium text-xs sm:text-sm transition ${
                 !showTrending && selectedCategory === category
