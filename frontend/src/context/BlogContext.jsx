@@ -76,11 +76,6 @@ export const BlogProvider = ({ children }) => {
     }
   }, []);
 
-  // Initial fetch on mount — only fetch trending; pages control their own blog fetching
-  useEffect(() => {
-    fetchTrendingBlogs();
-  }, [fetchTrendingBlogs]);
-
   // Fetch trending blogs
   const fetchTrendingBlogs = useCallback(async () => {
     try {
@@ -96,6 +91,12 @@ export const BlogProvider = ({ children }) => {
       setTrendingLoading(false);
     }
   }, []);
+
+  // Initial fetch on mount — only fetch trending; pages control their own blog fetching
+  useEffect(() => {
+    fetchTrendingBlogs();
+  }, [fetchTrendingBlogs]);
+
 
   // Get blog by ID or slug
   const getBlogById = async (identifier) => {
