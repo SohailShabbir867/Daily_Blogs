@@ -1,6 +1,6 @@
 {
   "name": "daily-blogs-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Backend API server for Daily Blogs - A MERN Stack Blog Platform",
   "main": "server.js",
   "scripts": {
