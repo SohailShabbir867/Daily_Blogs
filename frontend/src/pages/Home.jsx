@@ -2,14 +2,17 @@ import BlogCard from "../components/BlogCard";
 import NewsletterSubscription from "../components/NewsletterSubscription";
 import SEO from "../components/SEO";
 import { useBlog } from "../context/BlogContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+
+const BLOGS_PER_PAGE = 18;
 
 const Home = () => {
-  const { blogs, trendingBlogs, trendingLoading, loading, error } = useBlog();
+  const { blogs, trendingBlogs, trendingLoading, loading, error, pagination, fetchBlogs } = useBlog();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [showTrending, setShowTrending] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Typewriter effect state
   const [currentPhraseIndex, setCurrentPhraseIndex] = useState(0);
@@ -68,6 +71,20 @@ const Home = () => {
       clearTimeout(pauseTimeout);
     };
   }, [currentText, isDeleting, currentPhraseIndex]);
+
+  // Fetch blogs with pagination whenever page changes
+  useEffect(() => {
+    fetchBlogs({ page: currentPage, limit: BLOGS_PER_PAGE });
+  }, [currentPage]);
+
+  // Reset to page 1 when search or category changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    } else {
+      fetchBlogs({ page: 1, limit: BLOGS_PER_PAGE });
+    }
+  }, [selectedCategory]);
 
   const faqs = [
     {
@@ -572,11 +589,112 @@ const Home = () => {
             </div>
           )
         ) : filteredBlogs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {filteredBlogs.map((blog) => (
-              <BlogCard key={blog._id || blog.id} blog={blog} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {filteredBlogs.map((blog) => (
+                <BlogCard key={blog._id || blog.id} blog={blog} />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination && pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center gap-2 mt-12">
+                {/* Previous Button */}
+                <button
+                  onClick={() => {
+                    setCurrentPage((p) => Math.max(1, p - 1));
+                    window.scrollTo({ top: 400, behavior: "smooth" });
+                  }}
+                  disabled={currentPage <= 1}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                    currentPage <= 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-200 shadow-sm hover:shadow-md"
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="hidden sm:inline">Previous</span>
+                </button>
+
+                {/* Page Numbers */}
+                <div className="flex items-center gap-1">
+                  {(() => {
+                    const totalPages = pagination.totalPages;
+                    const pages = [];
+
+                    // Always show first page
+                    pages.push(1);
+
+                    // Show dots if gap
+                    if (currentPage > 3) pages.push("...");
+
+                    // Pages around current
+                    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+                      pages.push(i);
+                    }
+
+                    // Show dots if gap
+                    if (currentPage < totalPages - 2) pages.push("...");
+
+                    // Always show last page if > 1
+                    if (totalPages > 1) pages.push(totalPages);
+
+                    return pages.map((p, idx) =>
+                      p === "..." ? (
+                        <span key={`dots-${idx}`} className="px-2 py-1 text-gray-400 text-sm select-none">
+                          •••
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => {
+                            setCurrentPage(p);
+                            window.scrollTo({ top: 400, behavior: "smooth" });
+                          }}
+                          className={`min-w-[40px] h-10 rounded-xl font-semibold text-sm transition-all ${
+                            currentPage === p
+                              ? "bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/25"
+                              : "bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-200 shadow-sm hover:shadow-md"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      )
+                    );
+                  })()}
+                </div>
+
+                {/* Next Button */}
+                <button
+                  onClick={() => {
+                    setCurrentPage((p) => Math.min(pagination.totalPages, p + 1));
+                    window.scrollTo({ top: 400, behavior: "smooth" });
+                  }}
+                  disabled={currentPage >= pagination.totalPages}
+                  className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-medium text-sm transition-all ${
+                    currentPage >= pagination.totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white text-gray-700 hover:bg-emerald-50 hover:text-emerald-600 border border-gray-200 shadow-sm hover:shadow-md"
+                  }`}
+                >
+                  <span className="hidden sm:inline">Next</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
+            {/* Page Info */}
+            {pagination && pagination.totalPages > 1 && (
+              <p className="text-center text-sm text-gray-500 mt-4">
+                Page {currentPage} of {pagination.totalPages} — Showing{" "}
+                {Math.min(BLOGS_PER_PAGE, filteredBlogs.length)} of {pagination.totalItems} articles
+              </p>
+            )}
+          </>
         ) : (
           <div className="text-center px-4 sm:px-6">
             <svg
