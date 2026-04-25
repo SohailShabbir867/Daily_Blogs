@@ -773,6 +773,7 @@ const RichTextEditor = ({
 
   // Code block
   const handleCodeClick = () => {
+    saveSelection();
     setCodeContent("");
     setCodeLanguage("javascript");
     setIsInline(false);
@@ -784,6 +785,7 @@ const RichTextEditor = ({
     if (isInline) {
       // Inline style so it renders identically in the viewer
       const codeHtml = `<code style="background: #f3f4f6; color: #dc2626; padding: 0.15em 0.4em; border-radius: 0.25rem; font-size: 0.875em; font-family: ui-monospace, monospace;">${codeContent}</code>`;
+      restoreSelection();
       execCommand("insertHTML", codeHtml);
     } else {
       const escapedCode = codeContent
@@ -796,6 +798,7 @@ const RichTextEditor = ({
         codeLanguage;
       // Use inline styles everywhere so this renders correctly in any context (viewer, email, etc.)
       const codeHtml = `<div class="code-block-wrapper" style="margin: 1.5rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #374151; font-size: 0.9em;"><div class="code-block-header" style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #374151;"><span style="color: #9ca3af; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">${langLabel}</span><button class="copy-code-btn" style="color: #9ca3af; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; background: transparent; border: none;">📋 Copy</button></div><pre style="background: #111827; color: #f3f4f6; padding: 1rem 1.25rem; margin: 0; overflow-x: auto; font-family: ui-monospace, 'Cascadia Code', monospace; line-height: 1.6;"><code id="${uniqueId}" class="language-${codeLanguage}" style="background: none; color: inherit; padding: 0;">${escapedCode}</code></pre></div>`;
+      restoreSelection();
       execCommand("insertHTML", codeHtml);
     }
     setShowCodeModal(false);
@@ -804,6 +807,7 @@ const RichTextEditor = ({
 
   // Table
   const handleTableClick = () => {
+    saveSelection();
     setTableRows(3);
     setTableCols(3);
     setShowTableModal(true);
@@ -827,6 +831,7 @@ const RichTextEditor = ({
       tableHtml += "</tr>";
     }
     tableHtml += "</tbody></table>";
+    restoreSelection();
     execCommand("insertHTML", tableHtml);
     setShowTableModal(false);
   };
