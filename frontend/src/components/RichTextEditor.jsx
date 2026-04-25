@@ -662,20 +662,8 @@ const RichTextEditor = ({
   const handleAlign = (alignment) => execCommand("justify" + alignment);
 
   const fontSizeSteps = [
-    "12px",
-    "14px",
-    "16px",
-    "18px",
-    "20px",
-    "24px",
-    "28px",
-    "32px",
-    "36px",
-    "42px",
-    "48px",
-    "56px",
-    "64px",
-    "72px",
+    "12px", "14px", "16px", "18px", "20px", "24px",
+    "28px", "32px", "36px", "42px", "48px", "56px", "64px", "72px",
   ];
 
   const getSelectedFontSize = () => {
@@ -692,21 +680,42 @@ const RichTextEditor = ({
   };
 
   const applyFontSizeToSelection = (newSize) => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
+    // If nothing is selected, just update the default size for new text
     if (selection.isCollapsed) {
       setFontSize(newSize);
       return;
     }
 
-    execCommand("fontSize", "7");
-    const fontElements = editorRef.current.querySelectorAll('font[size="7"]');
-    fontElements.forEach((element) => {
-      element.removeAttribute("size");
-      element.style.fontSize = newSize;
-    });
+    // Check that the selection is inside the editor
+    if (!editor.contains(selection.anchorNode)) return;
+
+    const range = selection.getRangeAt(0);
+
+    // Extract the selected content
+    const fragment = range.extractContents();
+
+    // Wrap it in a span with the desired font size
+    const wrapper = document.createElement("span");
+    wrapper.style.fontSize = newSize;
+    wrapper.appendChild(fragment);
+
+    // Insert the wrapped content back
+    range.insertNode(wrapper);
+
+    // Re-select the wrapped text
+    selection.removeAllRanges();
+    const newRange = document.createRange();
+    newRange.selectNodeContents(wrapper);
+    selection.addRange(newRange);
+
     setFontSize(newSize);
+    handleInput();
   };
 
   const handleFontSize = (size) => {
@@ -716,7 +725,7 @@ const RichTextEditor = ({
   const increaseFontSize = () => {
     const current = getSelectedFontSize();
     const currentPx = Math.round(parseFloat(current));
-    const next = Math.min(currentPx + 1, 72);
+    const next = Math.min(currentPx + 1, 120);
     applyFontSizeToSelection(next + "px");
   };
 
