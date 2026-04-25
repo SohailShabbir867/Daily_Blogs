@@ -18,18 +18,73 @@ const CreateBlog = () => {
   const [coverFilePreview, setCoverFilePreview] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    content: "",
-    category: "",
-    author: user?.name || "",
-    image: "",
-    readTime: 5,
-    status: "published",
-    visibility: "everyone",
-  });
+  const DRAFT_KEY = "dailyblogs_draft";
+
+  // Load saved draft from localStorage on mount
+  const loadDraft = () => {
+    try {
+      const saved = localStorage.getItem(DRAFT_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          title: parsed.title || "",
+          description: parsed.description || "",
+          content: parsed.content || "",
+          category: parsed.category || "",
+          author: parsed.author || user?.name || "",
+          image: parsed.image || "",
+          readTime: parsed.readTime || 5,
+          status: parsed.status || "published",
+          visibility: parsed.visibility || "everyone",
+        };
+      }
+    } catch (e) {
+      console.warn("Could not load draft:", e);
+    }
+    return {
+      title: "",
+      description: "",
+      content: "",
+      category: "",
+      author: user?.name || "",
+      image: "",
+      readTime: 5,
+      status: "published",
+      visibility: "everyone",
+    };
+  };
+
+  const [formData, setFormData] = useState(loadDraft);
   const [error, setError] = useState("");
+  const [draftSaved, setDraftSaved] = useState(!!localStorage.getItem(DRAFT_KEY));
+
+  // Auto-save draft to localStorage (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const hasContent = formData.title || formData.description || formData.content;
+      if (hasContent) {
+        localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
+        setDraftSaved(true);
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  const clearDraft = () => {
+    localStorage.removeItem(DRAFT_KEY);
+    setDraftSaved(false);
+    setFormData({
+      title: "",
+      description: "",
+      content: "",
+      category: "",
+      author: user?.name || "",
+      image: "",
+      readTime: 5,
+      status: "published",
+      visibility: "everyone",
+    });
+  };
 
   // Auto-calculate read time from content
   const calculateReadTime = useCallback((content) => {
@@ -131,6 +186,7 @@ const CreateBlog = () => {
     try {
       setIsSubmitting(true);
       await createBlog(newBlog);
+      localStorage.removeItem(DRAFT_KEY);
       navigate("/admin/manage");
     } catch (err) {
       console.error("Error creating blog:", err);
@@ -172,10 +228,31 @@ const CreateBlog = () => {
             </svg>
             Back
           </button>
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            Create New Post
-          </h1>
-          <p className="text-gray-500 mt-1">Write and publish a new article</p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Create New Post
+              </h1>
+              <p className="text-gray-500 mt-1">Write and publish a new article</p>
+            </div>
+            {draftSaved && (
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-emerald-600 flex items-center gap-1">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Draft saved
+                </span>
+                <button
+                  type="button"
+                  onClick={clearDraft}
+                  className="text-xs text-red-500 hover:text-red-600 px-2 py-1 rounded hover:bg-red-50 transition"
+                >
+                  Clear Draft
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error Message */}

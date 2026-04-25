@@ -771,38 +771,31 @@ const RichTextEditor = ({
     setFindCount(0);
   };
 
-  // Code block
+  // Code block — instantly wraps selected text into a copyable code block
   const handleCodeClick = () => {
-    saveSelection();
-    setCodeContent("");
-    setCodeLanguage("javascript");
-    setIsInline(false);
-    setShowCodeModal(true);
-  };
+    if (!editorRef.current) return;
 
-  const insertCode = () => {
-    if (!codeContent) return;
-    if (isInline) {
-      // Inline style so it renders identically in the viewer
-      const codeHtml = `<code style="background: #f3f4f6; color: #dc2626; padding: 0.15em 0.4em; border-radius: 0.25rem; font-size: 0.875em; font-family: ui-monospace, monospace;">${codeContent}</code>`;
-      restoreSelection();
-      execCommand("insertHTML", codeHtml);
-    } else {
-      const escapedCode = codeContent
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
+
+    if (selectedText) {
+      // Escape HTML special characters in the selected text
+      const escapedCode = selectedText
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;");
+
       const uniqueId = `code-${Date.now()}`;
-      const langLabel =
-        CODE_LANGUAGES.find((l) => l.value === codeLanguage)?.label ||
-        codeLanguage;
-      // Use inline styles everywhere so this renders correctly in any context (viewer, email, etc.)
-      const codeHtml = `<div class="code-block-wrapper" style="margin: 1.5rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #374151; font-size: 0.9em;"><div class="code-block-header" style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #374151;"><span style="color: #9ca3af; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em;">${langLabel}</span><button class="copy-code-btn" style="color: #9ca3af; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; background: transparent; border: none;">📋 Copy</button></div><pre style="background: #111827; color: #f3f4f6; padding: 1rem 1.25rem; margin: 0; overflow-x: auto; font-family: ui-monospace, 'Cascadia Code', monospace; line-height: 1.6;"><code id="${uniqueId}" class="language-${codeLanguage}" style="background: none; color: inherit; padding: 0;">${escapedCode}</code></pre></div>`;
-      restoreSelection();
+      const codeHtml = `<div class="code-block-wrapper" style="margin: 1.5rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #374151; font-size: 0.9em;"><div class="code-block-header" style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #374151;"><span style="color: #9ca3af; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;">Code</span><button class="copy-code-btn" style="color: #9ca3af; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; background: transparent; border: none;">📋 Copy</button></div><pre style="background: #111827; color: #f3f4f6; padding: 1rem 1.25rem; margin: 0; overflow-x: auto; font-family: ui-monospace, 'Cascadia Code', monospace; line-height: 1.6;"><code id="${uniqueId}" style="background: none; color: inherit; padding: 0;">${escapedCode}</code></pre></div><p><br></p>`;
+
+      execCommand("insertHTML", codeHtml);
+    } else {
+      // No text selected — insert an empty code block placeholder
+      const uniqueId = `code-${Date.now()}`;
+      const codeHtml = `<div class="code-block-wrapper" style="margin: 1.5rem 0; border-radius: 8px; overflow: hidden; border: 1px solid #374151; font-size: 0.9em;"><div class="code-block-header" style="background: #1f2937; padding: 0.5rem 1rem; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #374151;"><span style="color: #9ca3af; font-size: 0.75rem; font-weight: 500; letter-spacing: 0.05em;">Code</span><button class="copy-code-btn" style="color: #9ca3af; font-size: 0.75rem; padding: 0.25rem 0.5rem; border-radius: 4px; cursor: pointer; background: transparent; border: none;">📋 Copy</button></div><pre style="background: #111827; color: #f3f4f6; padding: 1rem 1.25rem; margin: 0; overflow-x: auto; font-family: ui-monospace, 'Cascadia Code', monospace; line-height: 1.6;"><code id="${uniqueId}" style="background: none; color: inherit; padding: 0;">// paste your code here</code></pre></div><p><br></p>`;
+
       execCommand("insertHTML", codeHtml);
     }
-    setShowCodeModal(false);
-    setCodeContent("");
   };
 
   // Table
@@ -2108,86 +2101,6 @@ const RichTextEditor = ({
         </div>
       )}
 
-      {/* Code Modal */}
-      {showCodeModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-60">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-lg mx-4 shadow-xl">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">
-              💻 Insert Code
-            </h3>
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={!isInline}
-                    onChange={() => setIsInline(false)}
-                    className="text-emerald-500"
-                  />
-                  <span className="text-sm">Code Block</span>
-                </label>
-                <label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    checked={isInline}
-                    onChange={() => setIsInline(true)}
-                    className="text-emerald-500"
-                  />
-                  <span className="text-sm">Inline Code</span>
-                </label>
-              </div>
-              {!isInline && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Language
-                  </label>
-                  <select
-                    value={codeLanguage}
-                    onChange={(e) => setCodeLanguage(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
-                  >
-                    {CODE_LANGUAGES.map((lang) => (
-                      <option key={lang.value} value={lang.value}>
-                        {lang.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Code
-                </label>
-                <textarea
-                  value={codeContent}
-                  onChange={(e) => setCodeContent(e.target.value)}
-                  rows={8}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 font-mono text-sm bg-gray-50"
-                  placeholder="Enter your code here..."
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowCodeModal(false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={insertCode}
-                disabled={!codeContent}
-                className="px-4 py-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Insert Code
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Table Modal */}
       {showTableModal && (
