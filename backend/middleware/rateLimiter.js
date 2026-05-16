@@ -3,10 +3,32 @@
 const rateLimit = require("express-rate-limit");
 const { ApiError } = require("../utils/errors");
 
+// Azure App Service proxies sometimes include port in request.ip
+// (e.g. "119.157.188.34:49666") which crashes express-rate-limit.
+// This helper strips the port to return just the IP address.
+const getCleanIp = (req) => {
+  const raw = req.ip || req.connection?.remoteAddress || "unknown";
+  // Handle IPv6-mapped IPv4: "::ffff:1.2.3.4"
+  const cleaned = raw.replace(/^::ffff:/, "");
+  // Strip port if present (e.g. "1.2.3.4:49666" → "1.2.3.4")
+  if (cleaned.includes(":") && !cleaned.includes("[")) {
+    // Could be IPv4:port — split on last colon
+    const lastColon = cleaned.lastIndexOf(":");
+    const possibleIp = cleaned.substring(0, lastColon);
+    const possiblePort = cleaned.substring(lastColon + 1);
+    // If after the colon is purely digits (port), strip it
+    if (/^\d+$/.test(possiblePort) && possiblePort.length <= 5) {
+      return possibleIp;
+    }
+  }
+  return cleaned;
+};
+
 // Default rate limiter: 100 requests per 15 minutes per IP
 const defaultLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // Limit each IP to 100 requests per windowMs
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -49,11 +71,12 @@ const authLimiter = rateLimit({
 
   // Custom key generator - can be based on email for login attempts
   keyGenerator: (req) => {
+    const ip = getCleanIp(req);
     // Use email + IP for login attempts
     if (req.body && req.body.email) {
-      return `${req.ip}-${req.body.email.toLowerCase()}`;
+      return `${ip}-${req.body.email.toLowerCase()}`;
     }
-    return req.ip;
+    return ip;
   },
 
   handler: (req, res, next, options) => {
@@ -70,6 +93,7 @@ const authLimiter = rateLimit({
 const passwordResetLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 3, // Limit each IP to 3 password reset requests per hour
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -90,6 +114,7 @@ const passwordResetLimiter = rateLimit({
 const registrationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 10, // Limit each IP to 10 registrations per hour
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -111,6 +136,7 @@ const registrationLimiter = rateLimit({
 const writeLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 30, // Limit each IP to 30 write operations per minute
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -138,6 +164,7 @@ const writeLimiter = rateLimit({
 const searchLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 20, // Limit each IP to 20 searches per minute
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -253,6 +280,7 @@ const slidingWindowLimiter = (options = {}) => {
 const contactLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
   max: 5,
+  keyGenerator: getCleanIp,
   message: {
     success: false,
     status: "error",
@@ -291,7 +319,7 @@ module.exports = {
     legacyHeaders: false,
     keyGenerator: (req) => {
       // Rate limit per user ID instead of IP
-      return req.user?._id?.toString() || req.ip;
+      return req.user?._id?.toString() || getCleanIp(req);
     },
     handler: (req, res, next, options) => {
       const error = new ApiError(options.message.message, 429);
