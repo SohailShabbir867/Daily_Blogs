@@ -6,6 +6,18 @@ const { asyncHandler } = require("../utils/helpers");
 
 // Check if user is authenticated via session, attaches user to request
 const isAuthenticated = asyncHandler(async (req, res, next) => {
+  // Check if developer API key is provided
+  const apiKey = req.headers['x-api-key'];
+  if (apiKey && process.env.MCP_API_KEY && apiKey === process.env.MCP_API_KEY) {
+    const adminUser = await User.findOne({ role: "admin" })
+      .select("_id name email role isSuperAdmin isChatSupport isActive isEmailVerified avatar bio savedBlogs createdAt")
+      .lean();
+    if (adminUser) {
+      req.user = adminUser;
+      return next();
+    }
+  }
+
   // Check if session exists and has user ID
   if (!req.session || !req.session.userId) {
     throw new UnauthorizedError("Please log in to access this resource");
