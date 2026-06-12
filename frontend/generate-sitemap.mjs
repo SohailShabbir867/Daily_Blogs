@@ -1,5 +1,7 @@
 // generate-sitemap.mjs
 // Runs BEFORE `vite build` on Vercel to generate a static sitemap.xml in /public.
+// This static file acts as a FALLBACK — the live sitemap is served dynamically
+// from the backend at /api/sitemap.xml and proxied via vercel.json.
 // Fetches all published blog slugs from the backend API.
 // Falls back to a static-only sitemap if the API is unreachable.
 
@@ -41,7 +43,7 @@ async function fetchBlogs() {
       console.log(`   → Fetching page ${page}: ${url}`);
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000); // 15s timeout
+      const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
 
       let res;
       try {
@@ -53,11 +55,20 @@ async function fetchBlogs() {
       if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
 
       const data = await res.json();
-      const blogs    = data?.data?.blogs || data?.blogs || data?.data || [];
+      const blogs     = data?.data?.blogs || data?.blogs || data?.data || [];
       const pagination = data?.data?.pagination || {};
 
+      if (!Array.isArray(blogs) || blogs.length === 0) break;
+
       allBlogs.push(...blogs);
-      totalPages = pagination.totalPages || (blogs.length === pageSize ? page + 1 : page);
+
+      const serverTotalPages = pagination.totalPages;
+      if (serverTotalPages) {
+        totalPages = serverTotalPages;
+      } else {
+        // Infer: if we got a full page, there might be more
+        totalPages = blogs.length === pageSize ? page + 1 : page;
+      }
       page += 1;
     }
 
@@ -68,6 +79,16 @@ async function fetchBlogs() {
     console.warn("    Sitemap will only include static pages.");
     return [];
   }
+}
+
+function escapeXml(str) {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
 }
 
 function buildXml(blogs) {
@@ -85,19 +106,16 @@ function buildXml(blogs) {
     .join("\n");
 
   const blogUrls = blogs
-    .filter((b) => b.slug)
+    .filter((b) => b.slug && typeof b.slug === "string")
     .map((b) => {
       const lastmod = b.updatedAt
         ? new Date(b.updatedAt).toISOString().split("T")[0]
         : today;
 
       let imageTag = "";
-      if (b.image && b.image.startsWith("http")) {
-        const safeUrl   = b.image.replace(/&/g, "&amp;");
-        const safeTitle = (b.title || "Blog post")
-          .replace(/&/g, "&amp;")
-          .replace(/</g, "&lt;")
-          .replace(/>/g, "&gt;");
+      if (b.image && typeof b.image === "string" && b.image.startsWith("http")) {
+        const safeUrl   = escapeXml(b.image);
+        const safeTitle = escapeXml(b.title || "Blog post");
         imageTag = `
     <image:image>
       <image:loc>${safeUrl}</image:loc>
@@ -106,7 +124,7 @@ function buildXml(blogs) {
       }
 
       return `  <url>
-    <loc>${SITE_URL}/blog/${b.slug}</loc>
+    <loc>${SITE_URL}/blog/${escapeXml(b.slug)}</loc>
     <lastmod>${lastmod}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>${imageTag}
@@ -115,6 +133,8 @@ function buildXml(blogs) {
     .join("\n");
 
   return `<?xml version="1.0" encoding="UTF-8"?>
+<!-- Daily Blogs sitemap — Generated ${today} -->
+<!-- Live dynamic version available at /sitemap.xml (proxied from backend) -->
 <urlset
   xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">

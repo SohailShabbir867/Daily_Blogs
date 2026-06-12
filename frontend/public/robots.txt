@@ -20,13 +20,16 @@ Disallow: /saved
 Disallow: /login
 Disallow: /register
 
-# Block query parameters that create duplicate content
-Disallow: /*?sort=
-Disallow: /*?page=
+# Block search query URLs (duplicate content)
+Disallow: /*?search=
+
+# Block API endpoints from crawling
+Disallow: /api/
 
 # Googlebot specific configuration
 User-agent: Googlebot
 Allow: /
+Allow: /blog/
 Disallow: /admin/
 Disallow: /admin
 Disallow: /verify-email/
@@ -36,6 +39,8 @@ Disallow: /forgot-password
 Disallow: /saved
 Disallow: /login
 Disallow: /register
+Disallow: /*?search=
+Disallow: /api/
 
 # Sitemap
 Sitemap: https://dailyblogs.website/sitemap.xml

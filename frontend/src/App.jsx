@@ -24,6 +24,7 @@ const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 const VerifyOTP = lazy(() => import("./pages/VerifyOTP"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 // Admin pages - lazy loaded (only needed by admins)
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
@@ -111,6 +112,9 @@ function App() {
                         path="/admin/notifications"
                         element={<SendNotifications />}
                       />
+
+                      {/* 404 catch-all */}
+                      <Route path="*" element={<NotFound />} />
                     </Routes>
                   </Suspense>
                 </main>
