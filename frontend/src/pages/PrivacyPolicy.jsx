@@ -163,10 +163,10 @@ const PrivacyPolicy = () => {
                     </svg>
                   </div>
                   <h3 className="font-semibold text-blue-800">
-                    No Ad Tracking
+                    AdSense Certified
                   </h3>
                   <p className="text-xs text-blue-600 mt-1">
-                    No third-party ads
+                    Compliant Ad Serving
                   </p>
                 </div>
                 <div className="bg-purple-50 rounded-xl p-4 text-center border border-purple-100">
@@ -444,14 +444,24 @@ const PrivacyPolicy = () => {
                     </div>
                     <div className="bg-gray-50 rounded-xl p-5 border border-gray-100">
                       <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                        <span className="text-red-500">❌</span> No Advertising
-                        Cookies
+                        <span className="text-blue-500">📢</span> Advertising &
+                        Third-Party Cookies
                       </h3>
                       <p className="text-sm">
-                        We do not use cookies for advertising or tracking across
-                        other websites.
+                        Google AdSense uses cookies to serve ads based on your previous visits to our website or other websites on the Internet.
                       </p>
                     </div>
+                  </div>
+                  <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-5 space-y-3 text-sm text-gray-700">
+                    <p className="font-semibold text-blue-900 flex items-center gap-2">
+                      <span>💡</span> Google AdSense Compliance Disclosures
+                    </p>
+                    <ul className="list-disc pl-5 space-y-1.5 text-xs md:text-sm">
+                      <li>Google, as a third-party vendor, uses cookies to serve ads on Daily Blogs.</li>
+                      <li>Google's use of the DoubleClick cookie enables it and its partners to serve ads to our users based on their visits to our site and/or other sites on the Internet.</li>
+                      <li>Users may opt out of personalized advertising by visiting the <a href="https://settings.google.com/ads" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">Google Ads Settings</a> page.</li>
+                      <li>Alternatively, you can opt out of a third-party vendor's use of cookies for personalized advertising by visiting the <a href="https://www.aboutads.info" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">aboutads.info</a> portal.</li>
+                    </ul>
                   </div>
                   <p className="text-sm bg-blue-50 text-blue-700 p-4 rounded-lg">
                     💡 Session cookies are automatically deleted when you log
