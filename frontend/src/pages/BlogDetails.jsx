@@ -37,6 +37,28 @@ const BlogDetails = () => {
   const [imageLoaded, setImageLoaded] = useState(false);
   const contentRef = useRef(null);
 
+  // Extract any JSON-LD <script> blocks embedded in the post body (added by
+  // the MCP publishing pipeline's generate_schema step) BEFORE DOMPurify
+  // strips them below. Must be called at top level before any early returns to obey React Rules of Hooks.
+  const rawSchemas = useMemo(() => {
+    if (!blog?.content) return [];
+    const matches = [
+      ...blog.content.matchAll(
+        /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+      ),
+    ];
+    return matches
+      .map((m) => m[1].trim())
+      .filter((json) => {
+        try {
+          JSON.parse(json);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+  }, [blog?.content]);
+
   // Fetch blog data
   useEffect(() => {
     const fetchBlog = async () => {
@@ -382,29 +404,6 @@ const BlogDetails = () => {
   }
 
   const authorName = getAuthorName();
-
-  // Extract any JSON-LD <script> blocks embedded in the post body (added by
-  // the MCP publishing pipeline's generate_schema step) BEFORE DOMPurify
-  // strips them below. These get rendered separately via SEO/Helmet in
-  // <head>, since <script> tags never survive sanitization inside the body.
-  const rawSchemas = useMemo(() => {
-    if (!blog?.content) return [];
-    const matches = [
-      ...blog.content.matchAll(
-        /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
-      ),
-    ];
-    return matches
-      .map((m) => m[1].trim())
-      .filter((json) => {
-        try {
-          JSON.parse(json);
-          return true;
-        } catch {
-          return false;
-        }
-      });
-  }, [blog?.content]);
 
   return (
     <div className="min-h-screen bg-gray-50">
