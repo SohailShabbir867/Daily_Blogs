@@ -139,12 +139,14 @@ const Home = () => {
     ...new Set(blogs.map((blog) => blog.category).filter(Boolean)),
   ];
 
-  // Show all blogs from the backend in the main grid (backend handles pagination)
-  // No client-side filtering needed since search/category are sent as API params
-  const filteredBlogs = blogs;
-
   // Only show trending section on page 1 with no search active
-  const showTrendingSection = currentPage === 1 && !showTrending && !searchTerm && trendingBlogs.length > 0;
+  const showTrendingSection = currentPage === 1 && !showTrending && !searchTerm && selectedCategory === "All" && trendingBlogs.length > 0;
+
+  // Filter out trending articles from main grid when top Trending section is active to prevent duplication
+  const trendingIds = new Set(trendingBlogs.map((b) => b._id || b.id));
+  const filteredBlogs = showTrendingSection
+    ? blogs.filter((b) => !trendingIds.has(b._id || b.id))
+    : blogs;
 
   // The Hero section should eagerly render. The loading state is handled down in the blog grid.
 
@@ -431,7 +433,7 @@ const Home = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-              {trendingBlogs.slice(0, 3).map((blog) => (
+              {trendingBlogs.map((blog) => (
                 <div key={blog._id || blog.id} className="relative">
                   <div className="absolute -top-2 -left-2 z-10">
                     <span className="inline-flex items-center gap-1 bg-linear-to-r from-orange-500 to-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
