@@ -1,5 +1,5 @@
 // Blog details page - displays full article content
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import DOMPurify from "dompurify";
 import SEO from "../components/SEO";
@@ -383,6 +383,29 @@ const BlogDetails = () => {
 
   const authorName = getAuthorName();
 
+  // Extract any JSON-LD <script> blocks embedded in the post body (added by
+  // the MCP publishing pipeline's generate_schema step) BEFORE DOMPurify
+  // strips them below. These get rendered separately via SEO/Helmet in
+  // <head>, since <script> tags never survive sanitization inside the body.
+  const rawSchemas = useMemo(() => {
+    if (!blog?.content) return [];
+    const matches = [
+      ...blog.content.matchAll(
+        /<script[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+      ),
+    ];
+    return matches
+      .map((m) => m[1].trim())
+      .filter((json) => {
+        try {
+          JSON.parse(json);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+  }, [blog?.content]);
+
   return (
     <div className="min-h-screen bg-gray-50">
       <SEO
@@ -432,6 +455,7 @@ const BlogDetails = () => {
             : []),
           { name: blog.title },
         ]}
+        rawSchemas={rawSchemas}
       />
       {/* Hero Section */}
       <div className="relative">

@@ -21,6 +21,7 @@ const SEO = ({
   locale = "en_US",
   breadcrumbs,
   faqItems,
+  rawSchemas,
 }) => {
   // Default values
   const siteTitle = "Daily Blogs";
@@ -291,6 +292,17 @@ const SEO = ({
       {faqSchema && (
         <script type="application/ld+json">{JSON.stringify(faqSchema)}</script>
       )}
+
+      {/* Extra JSON-LD extracted from the post body (e.g. FAQ/BlogPosting
+          schema embedded by the MCP publishing pipeline) — rendered here
+          in <head> instead, since DOMPurify strips <script> tags from the
+          post body before it reaches the DOM. */}
+      {Array.isArray(rawSchemas) &&
+        rawSchemas.map((schemaString, i) => (
+          <script key={`raw-schema-${i}`} type="application/ld+json">
+            {schemaString}
+          </script>
+        ))}
     </Helmet>
   );
 };
@@ -327,6 +339,7 @@ SEO.propTypes = {
       answer: PropTypes.string.isRequired,
     }),
   ),
+  rawSchemas: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default SEO;
