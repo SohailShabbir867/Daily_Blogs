@@ -3,7 +3,7 @@
 //
 // The live sitemap is served DYNAMICALLY from the backend:
 //   GET https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/sitemap.xml
-//   Proxied via Vercel rewrites → https://blog.developersohail.online/sitemap.xml
+//   Proxied via Vercel rewrites → https://blog.deveolpersohail.online/sitemap.xml
 //
 // A static sitemap.xml in /public would OVERRIDE the Vercel proxy rewrite
 // (Vercel serves static files first, before checking rewrites).
@@ -19,7 +19,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FORCE = process.argv.includes("--force");
 
-const SITE_URL = "https://blog.developersohail.online";
+const SITE_URL = "https://blog.deveolpersohail.online";
 const RAW_API_URL = process.env.VITE_API_URL || "";
 const API_BASE = RAW_API_URL
   ? RAW_API_URL.replace(/\/api\/?$/, "")

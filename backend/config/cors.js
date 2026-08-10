@@ -40,9 +40,9 @@ const createCorsConfig = () => {
       }
       // Allow production custom domains
       if (
-        origin === "https://blog.developersohail.online" ||
-        origin === "https://developersohail.online" ||
-        origin === "https://www.developersohail.online" ||
+        origin === "https://blog.deveolpersohail.online" ||
+        origin === "https://deveolpersohail.online" ||
+        origin === "https://www.deveolpersohail.online" ||
         origin === "https://dailyblogs.website" ||
         origin === "https://www.dailyblogs.website"
       ) {
