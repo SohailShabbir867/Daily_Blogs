@@ -7,7 +7,7 @@
 const Blog = require("../models/Blog");
 const { asyncHandler } = require("../utils/helpers");
 
-const SITE_URL = process.env.SITE_URL || "https://dailyblogs.website";
+const SITE_URL = process.env.SITE_URL || "https://www.dailyblogs.website";
 
 const staticPages = [
   { loc: `${SITE_URL}/`,        changefreq: "daily",   priority: "1.0" },
