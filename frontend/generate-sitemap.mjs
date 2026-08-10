@@ -1,16 +1,11 @@
 // generate-sitemap.mjs
-// NOTE: This script is intentionally a no-op in production (Vercel).
+// Generates a static sitemap.xml at build time by fetching live blog data from the backend.
+// This file is written to public/sitemap.xml, which Vercel serves from its CDN.
+// CDN delivery = instant response for Google → no more cold-start timeouts.
 //
-// The live sitemap is served DYNAMICALLY from the backend:
-//   GET https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/sitemap.xml
-//   Proxied via Vercel rewrites → https://blog.deveolpersohail.online/sitemap.xml
-//
-// A static sitemap.xml in /public would OVERRIDE the Vercel proxy rewrite
-// (Vercel serves static files first, before checking rewrites).
-// Therefore we do NOT write a static sitemap.xml file anymore.
-//
-// This script is kept for local dev / manual override usage only.
-// Run with: node generate-sitemap.mjs --force  to generate a local copy.
+// Run automatically on every deployment: `node generate-sitemap.mjs --force`
+// Fallback: if backend is unreachable, only static pages are included.
+// Manual run: node generate-sitemap.mjs --force
 
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -43,7 +38,7 @@ async function fetchBlogs() {
       const url = `${API_BASE}/api/blogs?limit=${pageSize}&page=${page}&sortBy=publishedAt&sortOrder=desc&status=published`;
       console.log(`   → Fetching page ${page}: ${url}`);
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
+      const timeout = setTimeout(() => controller.abort(), 90000); // 90s — Azure cold start can be slow
       let res;
       try {
         res = await fetch(url, { signal: controller.signal });
@@ -96,9 +91,7 @@ function buildXml(blogs) {
 
 async function main() {
   if (!FORCE) {
-    console.log("ℹ️  Skipping static sitemap generation.");
-    console.log("   The live sitemap is served dynamically from /api/sitemap.xml via Vercel proxy.");
-    console.log("   To generate a local static copy, run: node generate-sitemap.mjs --force");
+    console.log("ℹ️  Skipping static sitemap generation (no --force flag).");
     return;
   }
   console.log("🌐 SITE_URL:", SITE_URL);
