@@ -7,6 +7,7 @@ import { BlogProvider } from "./context/BlogContext";
 import { ChatProvider } from "./context/ChatContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import ChatWidget from "./components/Chat/ChatWidget";
 
 // Critical pages - loaded eagerly for fast first paint
 import Home from "./pages/Home";
@@ -36,9 +37,6 @@ const ContactsManagement = lazy(
   () => import("./pages/admin/ContactsManagement"),
 );
 const SendNotifications = lazy(() => import("./pages/admin/SendNotifications"));
-
-// Chat widget lazy loaded - not needed for initial render
-const ChatWidget = lazy(() => import("./components/Chat/ChatWidget"));
 
 // Lightweight loading fallback for route transitions
 const PageLoader = () => (
@@ -122,10 +120,8 @@ function App() {
                 {/* Footer */}
                 <Footer />
 
-                {/* Chat Widget - lazy loaded, available on all pages */}
-                <Suspense fallback={null}>
-                  <ChatWidget />
-                </Suspense>
+                {/* Chat Widget - available on all pages */}
+                <ChatWidget />
               </div>
             </BrowserRouter>
           </ChatProvider>
