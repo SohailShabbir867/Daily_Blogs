@@ -5,10 +5,6 @@
       "destination": "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/:path*"
     },
     {
-      "source": "/sitemap.xml",
-      "destination": "https://daily-blogs-backend-gnfdatd8eud6g2gd.eastasia-01.azurewebsites.net/api/sitemap.xml"
-    },
-    {
       "source": "/((?!api/|robots\\.txt|ads\\.txt|favicon|icon-|logo\\.png|og-image|site\\.webmanifest|assets/).*)",
       "destination": "/index.html"
     }
