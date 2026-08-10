@@ -1,5 +1,5 @@
 # Daily Blogs - Robots.txt
-# https://blog.deveolpersohail.online
+# https://dailyblogs.website
 
 User-agent: *
 Allow: /
@@ -43,4 +43,4 @@ Disallow: /*?search=
 Disallow: /api/
 
 # Sitemap
-Sitemap: https://blog.deveolpersohail.online/sitemap.xml
+Sitemap: https://dailyblogs.website/sitemap.xml

@@ -6,6 +6,7 @@
 // Run automatically on every deployment: `node generate-sitemap.mjs --force`
 // Fallback: if backend is unreachable, only static pages are included.
 // Manual run: node generate-sitemap.mjs --force
+// Primary domain: https://dailyblogs.website
 
 import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
@@ -14,7 +15,7 @@ import { fileURLToPath } from "url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FORCE = process.argv.includes("--force");
 
-const SITE_URL = "https://blog.deveolpersohail.online";
+const SITE_URL = "https://dailyblogs.website";
 const RAW_API_URL = process.env.VITE_API_URL || "";
 const API_BASE = RAW_API_URL
   ? RAW_API_URL.replace(/\/api\/?$/, "")

@@ -2,12 +2,12 @@
 // @desc    Generate a live XML sitemap from all published blog posts in MongoDB
 // @route   GET /api/sitemap.xml
 // @access  Public
-// NOTE: This endpoint is proxied by Vercel → blog.deveolpersohail.online/sitemap.xml
+// NOTE: This endpoint is proxied by Vercel → dailyblogs.website/sitemap.xml
 
 const Blog = require("../models/Blog");
 const { asyncHandler } = require("../utils/helpers");
 
-const SITE_URL = process.env.SITE_URL || "https://blog.deveolpersohail.online";
+const SITE_URL = process.env.SITE_URL || "https://dailyblogs.website";
 
 const staticPages = [
   { loc: `${SITE_URL}/`,        changefreq: "daily",   priority: "1.0" },
