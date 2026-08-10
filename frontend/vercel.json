@@ -1,18 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "blog.deveolpersohail.online" }],
-      "destination": "https://dailyblogs.website/:path*",
-      "permanent": true
-    },
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "www.dailyblogs.website" }],
-      "destination": "https://dailyblogs.website/:path*",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
       "source": "/api/:path*",
